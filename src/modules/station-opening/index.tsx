@@ -33,7 +33,7 @@ import { SOUserManagement } from './components/SOUserManagement';
 import { SONotifications } from './components/SONotifications';
 import { SOStationSelectModal } from './components/SOStationSelectModal';
 import { SOActivityView } from './components/SOActivityView';
-import { Building, LayoutDashboard, ListFilter, PlusCircle, Users, Bell, Activity } from 'lucide-react';
+import { Building, LayoutDashboard, ListFilter, Users, Bell, Activity } from 'lucide-react';
 
 interface Props {
   currentUser: any;
@@ -556,16 +556,6 @@ export const StationOpeningModule: React.FC<Props> = ({ currentUser, stations })
               >
                 <Users className="w-3.5 h-3.5" />
                 <span>{t('so.userDirectory')}</span>
-              </button>
-            )}
-
-            {isHeadOfOp && (
-              <button
-                onClick={handleOpenStationModal}
-                className="px-3.5 py-1.5 bg-gradient-to-r from-sky-600 via-blue-600 to-indigo-600 hover:from-sky-500 hover:to-indigo-500 text-white font-black rounded-xl text-xs shadow-md shadow-sky-600/20 transition-all flex items-center gap-1.5 hover:scale-105 active:scale-95"
-              >
-                <PlusCircle className="w-3.5 h-3.5" />
-                <span>{t('so.newForm')}</span>
               </button>
             )}
           </div>
