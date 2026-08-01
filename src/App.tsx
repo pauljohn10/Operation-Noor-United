@@ -12,6 +12,7 @@ import { AuditListView } from './components/AuditList/AuditListView';
 
 import { NotificationCenter } from './components/ActivityCenter/NotificationCenter';
 import { AdminDashboard } from './components/Admin/AdminDashboard';
+import { SuperAdminModuleSelector } from './components/Navigation/SuperAdminModuleSelector';
 import { StationOpeningModule } from './modules/station-opening';
 import type { StationAudit, Station, AuditNotification, User, AuditLog, SystemSettings } from './types/audit';
 import { ShieldAlert, ArrowLeft } from 'lucide-react';
@@ -73,7 +74,12 @@ function AppContent() {
 
   const getModuleFromHash = (): 'audits' | 'station-openings' => {
     if (isStationOpeningUser) return 'station-openings';
-    if (isSuperAdmin && window.location.hash.startsWith('#station-opening')) return 'station-openings';
+    if (window.location.hash.startsWith('#station-opening')) return 'station-openings';
+    if (isSuperAdmin) {
+      const stored = localStorage.getItem('superadmin_active_module');
+      if (stored === 'station-openings') return 'station-openings';
+      if (stored === 'audits') return 'audits';
+    }
     return 'audits';
   };
 
@@ -107,6 +113,11 @@ function AppContent() {
 
   const switchModule = (mod: 'audits' | 'station-openings', subRoute?: string) => {
     if (!isSuperAdmin) return;
+    try {
+      localStorage.setItem('superadmin_active_module', mod);
+    } catch (e) {
+      console.warn('[App] LocalStorage set error:', e);
+    }
     setActiveModule(mod);
     let newHash = mod === 'station-openings' ? '#station-opening' : '#dashboard';
     if (subRoute) {
@@ -402,6 +413,13 @@ function AppContent() {
 
       {/* MAIN CONTAINER */}
       <main className="flex-1 pb-12 relative z-10">
+        {isSuperAdmin && (
+          <SuperAdminModuleSelector
+            activeModule={activeModule}
+            onSelectModule={(mod) => switchModule(mod)}
+          />
+        )}
+
         {activeModule === 'station-openings' ? (
           <StationOpeningModule currentUser={currentUser} stations={stations} />
         ) : (

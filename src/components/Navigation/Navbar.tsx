@@ -95,25 +95,25 @@ export const Navbar: React.FC<Props> = ({
             <nav className="hidden md:flex items-center gap-1 sm:gap-2">
               {/* ENTERPRISE MODULE SWITCHER SEGMENTED CONTROL (SUPER ADMIN ONLY) */}
               {isSuperAdmin && (
-                <div className="flex items-center p-1 bg-slate-100/90 border border-slate-200/90 rounded-2xl shadow-inner me-2">
+                <div className="flex items-center p-1 bg-white/80 backdrop-blur-xl border border-sky-100 rounded-2xl shadow-inner me-2">
                   <button
                     onClick={() => onSelectModule?.('audits')}
                     className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-black transition-all ${
                       activeModule === 'audits'
-                        ? 'bg-sky-600 text-white shadow-md shadow-sky-600/20'
-                        : 'text-slate-600 hover:text-slate-900'
+                        ? 'bg-gradient-to-r from-sky-600 to-blue-600 text-white shadow-md shadow-sky-600/25 ring-1 ring-sky-400/30'
+                        : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100/60'
                     }`}
                   >
                     <FileText className="w-3.5 h-3.5" />
-                    <span>Station Audit</span>
+                    <span>Station Audit System</span>
                   </button>
 
                   <button
                     onClick={() => onSelectModule?.('station-openings')}
                     className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-black transition-all ${
                       activeModule === 'station-openings'
-                        ? 'bg-amber-600 text-white shadow-md shadow-amber-600/20'
-                        : 'text-slate-600 hover:text-slate-900'
+                        ? 'bg-gradient-to-r from-amber-600 to-orange-600 text-white shadow-md shadow-amber-600/25 ring-1 ring-amber-400/30'
+                        : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100/60'
                     }`}
                   >
                     <Building className="w-3.5 h-3.5" />
