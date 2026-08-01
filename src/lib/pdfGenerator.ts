@@ -25,7 +25,8 @@ async function preloadImagesInClone(clone: HTMLElement): Promise<void> {
  * 1. Forces exact A4 paper dimensions (794px width) and optimized compact PDF print padding.
  * 2. Replaces interactive input/select elements with clean inline text spans.
  * 3. Hides non-printable interactive toolbar controls (.no-print).
- * 4. Ensures all 3 fuel sections (Petrol 91, Petrol 95, Diesel) and signature cards fit on 1 A4 page.
+ * 4. Completely strips all horizontal & vertical scrollbars to guarantee clean PDF rendering.
+ * 5. Ensures all 3 fuel sections (Petrol 91, Petrol 95, Diesel) and signature cards fit cleanly on A4.
  */
 function prepareElementForPdfExport(element: HTMLElement): { clone: HTMLElement; cleanup: () => void } {
   const wrapper = document.createElement('div');
@@ -50,6 +51,18 @@ function prepareElementForPdfExport(element: HTMLElement): { clone: HTMLElement;
   clone.style.color = '#000000';
   clone.style.boxSizing = 'border-box';
   clone.style.boxShadow = 'none';
+  clone.style.overflow = 'visible';
+  clone.style.overflowX = 'visible';
+  clone.style.overflowY = 'visible';
+
+  // Completely strip all scrollbars from all child elements in the clone
+  const allNodes = clone.querySelectorAll('*') as NodeListOf<HTMLElement>;
+  allNodes.forEach((node) => {
+    node.style.overflow = 'visible';
+    node.style.overflowX = 'visible';
+    node.style.overflowY = 'visible';
+    node.style.maxHeight = 'none';
+  });
 
   // Hide non-printable interactive elements
   const noPrintElements = clone.querySelectorAll('.no-print');
@@ -69,10 +82,31 @@ function prepareElementForPdfExport(element: HTMLElement): { clone: HTMLElement;
     logo.style.maxHeight = '38px';
   }
 
-  // Make fuel sections ultra-compact
+  // Make fuel sections and wrappers ultra-compact without scrollbars
+  const tableWrappers = clone.querySelectorAll('.paper-table-wrapper') as NodeListOf<HTMLElement>;
+  tableWrappers.forEach((tw) => {
+    tw.style.overflow = 'visible';
+    tw.style.overflowX = 'visible';
+    tw.style.overflowY = 'visible';
+    tw.style.width = '100%';
+    tw.style.margin = '0 0 4px 0';
+  });
+
   const fuelSections = clone.querySelectorAll('.paper-fuel-section');
   fuelSections.forEach((sec) => {
-    (sec as HTMLElement).style.marginBottom = '4px';
+    const htmlSec = sec as HTMLElement;
+    htmlSec.style.marginBottom = '4px';
+    htmlSec.style.overflow = 'visible';
+    htmlSec.style.overflowX = 'visible';
+    htmlSec.style.overflowY = 'visible';
+  });
+
+  const tables = clone.querySelectorAll('.paper-table') as NodeListOf<HTMLElement>;
+  tables.forEach((tbl) => {
+    tbl.style.width = '100%';
+    tbl.style.maxWidth = '100%';
+    tbl.style.minWidth = '0';
+    tbl.style.overflow = 'visible';
   });
 
   // Make table padding ultra-compact so all 3 tables fit on 1 single A4 page
@@ -82,6 +116,7 @@ function prepareElementForPdfExport(element: HTMLElement): { clone: HTMLElement;
     htmlCell.style.padding = '1px 2px';
     htmlCell.style.fontSize = '8.5px';
     htmlCell.style.lineHeight = '1.05';
+    htmlCell.style.overflow = 'visible';
   });
 
   // Make signature block ultra-compact
@@ -89,6 +124,7 @@ function prepareElementForPdfExport(element: HTMLElement): { clone: HTMLElement;
   if (sigBlock) {
     sigBlock.style.marginTop = '4px';
     sigBlock.style.paddingTop = '2px';
+    sigBlock.style.overflow = 'visible';
   }
 
   const sigCards = clone.querySelectorAll('.paper-signatory-section > div > div');
@@ -96,6 +132,7 @@ function prepareElementForPdfExport(element: HTMLElement): { clone: HTMLElement;
     const htmlCard = card as HTMLElement;
     htmlCard.style.minHeight = '48px';
     htmlCard.style.padding = '2px';
+    htmlCard.style.overflow = 'visible';
   });
 
   const sigImgs = clone.querySelectorAll('.paper-signatory-section img');

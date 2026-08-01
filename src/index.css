@@ -223,6 +223,18 @@
   min-width: 580px;
 }
 
+/* Strip all scrollbars during PDF export & print mode */
+@media print {
+  *,
+  .paper-table-wrapper,
+  .paper-fuel-section,
+  .paper-table {
+    overflow: visible !important;
+    overflow-x: visible !important;
+    overflow-y: visible !important;
+  }
+}
+
 @media screen and (max-width: 767px) {
   #paper-form-document,
   .paper-form {
