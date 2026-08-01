@@ -143,17 +143,7 @@ export async function exportStationOpeningToPdf(
     // 2. Preload all images (official company logo & handwritten signatures)
     await preloadImagesInClone(prepared.clone);
 
-    // 3. Render to high-res canvas (2x pixel ratio for crisp text and lines)
-    const canvas = await toCanvas(prepared.clone, {
-      pixelRatio: 2,
-      backgroundColor: '#ffffff',
-      cacheBust: true,
-      width: 794,
-    });
-
-    const imgData = canvas.toDataURL('image/jpeg', 0.98);
-
-    // 4. Setup A4 PDF document (210mm x 297mm) with 8mm equal page margins
+    // 3. Setup A4 PDF document (210mm x 297mm) with 8mm equal page margins
     const pdf = new jsPDF({
       orientation: 'portrait',
       unit: 'mm',
@@ -167,24 +157,57 @@ export async function exportStationOpeningToPdf(
     const printableWidth = pdfWidth - margin * 2; // 194mm
     const printableHeight = pdfHeight - margin * 2; // 281mm
 
-    const naturalImgWidth = printableWidth;
-    let naturalImgHeight = (canvas.height * naturalImgWidth) / canvas.width;
+    const pageNodes = Array.from(prepared.clone.querySelectorAll('.pdf-page')) as HTMLElement[];
 
-    const xPos = margin + (printableWidth - naturalImgWidth) / 2;
+    if (pageNodes.length > 0) {
+      // --- MULTI-PAGE SECTION-BASED RENDER (EXACT A4 PERFECTION) ---
+      for (let i = 0; i < pageNodes.length; i++) {
+        const pageEl = pageNodes[i];
+        await preloadImagesInClone(pageEl);
 
-    if (naturalImgHeight <= printableHeight * 1.15) {
-      // --- PERFECT SINGLE PAGE A4 OUTPUT ---
-      const finalImgHeight = Math.min(printableHeight, naturalImgHeight);
-      pdf.addImage(imgData, 'JPEG', xPos, margin, naturalImgWidth, finalImgHeight);
+        const canvas = await toCanvas(pageEl, {
+          pixelRatio: 2,
+          backgroundColor: '#ffffff',
+          cacheBust: true,
+          width: 794,
+        });
+
+        const imgData = canvas.toDataURL('image/jpeg', 0.98);
+        const imgHeightMm = (canvas.height * printableWidth) / canvas.width;
+        const finalImgHeight = Math.min(printableHeight, imgHeightMm);
+
+        if (i > 0) {
+          pdf.addPage();
+        }
+
+        pdf.addImage(imgData, 'JPEG', margin, margin, printableWidth, finalImgHeight);
+      }
     } else {
-      // --- MULTI-PAGE SLICING OUTPUT ---
-      let pageIndex = 0;
-      while (true) {
-        const yOffset = margin - pageIndex * printableHeight;
-        if (pageIndex > 0) pdf.addPage();
-        pdf.addImage(imgData, 'JPEG', xPos, yOffset, naturalImgWidth, naturalImgHeight);
-        pageIndex++;
-        if (pageIndex * printableHeight >= naturalImgHeight) break;
+      // --- SINGLE CANVAS FALLBACK ---
+      const canvas = await toCanvas(prepared.clone, {
+        pixelRatio: 2,
+        backgroundColor: '#ffffff',
+        cacheBust: true,
+        width: 794,
+      });
+
+      const imgData = canvas.toDataURL('image/jpeg', 0.98);
+      const naturalImgWidth = printableWidth;
+      let naturalImgHeight = (canvas.height * naturalImgWidth) / canvas.width;
+      const xPos = margin + (printableWidth - naturalImgWidth) / 2;
+
+      if (naturalImgHeight <= printableHeight * 1.15) {
+        const finalImgHeight = Math.min(printableHeight, naturalImgHeight);
+        pdf.addImage(imgData, 'JPEG', xPos, margin, naturalImgWidth, finalImgHeight);
+      } else {
+        let pageIndex = 0;
+        while (true) {
+          const yOffset = margin - pageIndex * printableHeight;
+          if (pageIndex > 0) pdf.addPage();
+          pdf.addImage(imgData, 'JPEG', xPos, yOffset, naturalImgWidth, naturalImgHeight);
+          pageIndex++;
+          if (pageIndex * printableHeight >= naturalImgHeight) break;
+        }
       }
     }
 
