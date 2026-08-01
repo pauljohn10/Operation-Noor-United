@@ -22,11 +22,11 @@ async function preloadImagesInClone(clone: HTMLElement): Promise<void> {
 
 /**
  * Pre-processes a cloned DOM node for PDF generation to ensure 100% WYSIWYG A4 print perfection:
- * 1. Forces exact A4 paper dimensions (794px width) and optimized compact PDF print padding.
- * 2. Replaces interactive input/select elements with clean inline text spans.
- * 3. Hides non-printable interactive toolbar controls (.no-print).
- * 4. Completely strips all horizontal & vertical scrollbars to guarantee clean PDF rendering.
- * 5. Ensures all 3 fuel sections (Petrol 91, Petrol 95, Diesel) and signature cards fit cleanly on A4.
+ * 1. Forces exact A4 paper dimensions (794px width) and edge-to-edge print padding.
+ * 2. Completely removes web card UI styling (drop shadows, box shadows, rounded corners, outer margins).
+ * 3. Replaces interactive input/select elements with clean inline text spans.
+ * 4. Hides non-printable interactive toolbar controls (.no-print).
+ * 5. Strips all scrollbars to ensure a clean, professional printed executive report.
  */
 function prepareElementForPdfExport(element: HTMLElement): { clone: HTMLElement; cleanup: () => void } {
   const wrapper = document.createElement('div');
@@ -39,25 +39,30 @@ function prepareElementForPdfExport(element: HTMLElement): { clone: HTMLElement;
 
   const clone = element.cloneNode(true) as HTMLElement;
 
-  // Enforce exact A4 document dimensions and ultra-compact print padding
+  // 1. Remove all Web UI Card styling (drop shadow, box shadow, rounded corners, outer borders)
   clone.style.display = 'block';
-  clone.classList.remove('hidden');
+  clone.classList.remove('hidden', 'shadow-2xl', 'shadow-xl', 'shadow-lg', 'shadow-md', 'shadow-sm', 'shadow', 'rounded-2xl', 'rounded-xl', 'rounded-lg', 'rounded');
   clone.style.width = '794px';
   clone.style.maxWidth = '794px';
   clone.style.minWidth = '794px';
   clone.style.margin = '0';
-  clone.style.padding = '8px 16px';
+  clone.style.padding = '4px 8px';
   clone.style.backgroundColor = '#ffffff';
   clone.style.color = '#000000';
   clone.style.boxSizing = 'border-box';
   clone.style.boxShadow = 'none';
+  clone.style.borderRadius = '0';
+  clone.style.border = 'none';
+  clone.style.outline = 'none';
   clone.style.overflow = 'visible';
   clone.style.overflowX = 'visible';
   clone.style.overflowY = 'visible';
 
-  // Completely strip all scrollbars from all child elements in the clone
+  // 2. Strip boxShadow, borderRadius, and scrollbars from all child elements in the clone
   const allNodes = clone.querySelectorAll('*') as NodeListOf<HTMLElement>;
   allNodes.forEach((node) => {
+    node.style.boxShadow = 'none';
+    node.style.borderRadius = '0';
     node.style.overflow = 'visible';
     node.style.overflowX = 'visible';
     node.style.overflowY = 'visible';
@@ -70,11 +75,13 @@ function prepareElementForPdfExport(element: HTMLElement): { clone: HTMLElement;
     (el as HTMLElement).style.display = 'none';
   });
 
-  // Make header & margins ultra-compact for PDF rendering
+  // Make header & margins ultra-compact for full A4 printable area
   const header = clone.querySelector('.paper-header') as HTMLElement;
   if (header) {
     header.style.paddingBottom = '2px';
     header.style.marginBottom = '4px';
+    header.style.boxShadow = 'none';
+    header.style.borderRadius = '0';
   }
 
   const logo = clone.querySelector('.paper-header img') as HTMLElement;
@@ -82,7 +89,7 @@ function prepareElementForPdfExport(element: HTMLElement): { clone: HTMLElement;
     logo.style.maxHeight = '38px';
   }
 
-  // Make fuel sections and wrappers ultra-compact without scrollbars
+  // Make fuel sections and wrappers ultra-compact without card margins or shadows
   const tableWrappers = clone.querySelectorAll('.paper-table-wrapper') as NodeListOf<HTMLElement>;
   tableWrappers.forEach((tw) => {
     tw.style.overflow = 'visible';
@@ -90,6 +97,8 @@ function prepareElementForPdfExport(element: HTMLElement): { clone: HTMLElement;
     tw.style.overflowY = 'visible';
     tw.style.width = '100%';
     tw.style.margin = '0 0 4px 0';
+    tw.style.boxShadow = 'none';
+    tw.style.borderRadius = '0';
   });
 
   const fuelSections = clone.querySelectorAll('.paper-fuel-section');
@@ -99,6 +108,8 @@ function prepareElementForPdfExport(element: HTMLElement): { clone: HTMLElement;
     htmlSec.style.overflow = 'visible';
     htmlSec.style.overflowX = 'visible';
     htmlSec.style.overflowY = 'visible';
+    htmlSec.style.boxShadow = 'none';
+    htmlSec.style.borderRadius = '0';
   });
 
   const tables = clone.querySelectorAll('.paper-table') as NodeListOf<HTMLElement>;
@@ -107,6 +118,8 @@ function prepareElementForPdfExport(element: HTMLElement): { clone: HTMLElement;
     tbl.style.maxWidth = '100%';
     tbl.style.minWidth = '0';
     tbl.style.overflow = 'visible';
+    tbl.style.boxShadow = 'none';
+    tbl.style.borderRadius = '0';
   });
 
   // Make table padding ultra-compact so all 3 tables fit on 1 single A4 page
@@ -117,14 +130,18 @@ function prepareElementForPdfExport(element: HTMLElement): { clone: HTMLElement;
     htmlCell.style.fontSize = '8.5px';
     htmlCell.style.lineHeight = '1.05';
     htmlCell.style.overflow = 'visible';
+    htmlCell.style.boxShadow = 'none';
+    htmlCell.style.borderRadius = '0';
   });
 
-  // Make signature block ultra-compact
+  // Make signature block ultra-compact without card shadows
   const sigBlock = clone.querySelector('.paper-signatory-section') as HTMLElement;
   if (sigBlock) {
     sigBlock.style.marginTop = '4px';
     sigBlock.style.paddingTop = '2px';
     sigBlock.style.overflow = 'visible';
+    sigBlock.style.boxShadow = 'none';
+    sigBlock.style.borderRadius = '0';
   }
 
   const sigCards = clone.querySelectorAll('.paper-signatory-section > div > div');
@@ -133,6 +150,8 @@ function prepareElementForPdfExport(element: HTMLElement): { clone: HTMLElement;
     htmlCard.style.minHeight = '48px';
     htmlCard.style.padding = '2px';
     htmlCard.style.overflow = 'visible';
+    htmlCard.style.boxShadow = 'none';
+    htmlCard.style.borderRadius = '0';
   });
 
   const sigImgs = clone.querySelectorAll('.paper-signatory-section img');
@@ -186,7 +205,7 @@ function prepareElementForPdfExport(element: HTMLElement): { clone: HTMLElement;
 
 /**
  * Exports the station audit paper form to a high-resolution single-page A4 PDF document
- * with 100% WYSIWYG layout, official logo, and compact signature block.
+ * with 100% WYSIWYG layout, official logo, and clean edge-to-edge printable format (no web card UI styling).
  */
 export async function exportAuditToPdf(
   auditNumber: string,
@@ -203,7 +222,7 @@ export async function exportAuditToPdf(
   let prepared: { clone: HTMLElement; cleanup: () => void } | null = null;
 
   try {
-    // 1. Prepare clone with exact single-page A4 styling, logo & text replacement
+    // 1. Prepare clone with exact single-page A4 styling, logo & text replacement (no card shadows or margins)
     prepared = prepareElementForPdfExport(element);
 
     // 2. Preload all images (logo & handwritten signatures) in clone
@@ -219,7 +238,7 @@ export async function exportAuditToPdf(
 
     const imgData = canvas.toDataURL('image/jpeg', 0.98);
 
-    // 4. Setup A4 PDF document (210mm x 297mm) with 8mm equal page margins
+    // 4. Setup A4 PDF document (210mm x 297mm) with 5mm equal standard printable margins
     const pdf = new jsPDF({
       orientation: 'portrait',
       unit: 'mm',
@@ -228,10 +247,10 @@ export async function exportAuditToPdf(
 
     const pdfWidth = 210; // A4 width in mm
     const pdfHeight = 297; // A4 height in mm
-    const margin = 8; // 8mm margins on all sides
+    const margin = 5; // 5mm standard printable margin
 
-    const printableWidth = pdfWidth - margin * 2; // 194mm
-    const printableHeight = pdfHeight - margin * 2; // 281mm
+    const printableWidth = pdfWidth - margin * 2; // 200mm
+    const printableHeight = pdfHeight - margin * 2; // 287mm
 
     const naturalImgWidth = printableWidth;
     let naturalImgHeight = (canvas.height * naturalImgWidth) / canvas.width;
