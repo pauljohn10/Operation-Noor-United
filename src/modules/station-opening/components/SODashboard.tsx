@@ -27,7 +27,7 @@ export const SODashboard: React.FC<Props> = ({
   onOpenForm,
 }) => {
   const { t } = useLanguage();
-  const isHeadOfOperation = currentUser?.role === 'Head of Operation' || currentUser?.role === 'Super Admin';
+  const isHeadOfOperation = currentUser?.role === 'Head of Operation';
 
   // KPI Counts
   const totalCount = forms.length;

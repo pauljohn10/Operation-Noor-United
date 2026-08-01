@@ -44,6 +44,13 @@ export const StationOpeningModule: React.FC<Props> = ({ currentUser, stations })
   const { t } = useLanguage();
   const getTabFromHash = (): 'dashboard' | 'repository' | 'form' | 'users' | 'notifications' | 'activity' => {
     const hash = window.location.hash;
+    if (hash === '#station-opening/new') {
+      if (currentUser.role !== 'Head of Operation') {
+        window.location.hash = '#station-opening';
+        return 'dashboard';
+      }
+      return 'form';
+    }
     if (hash === '#station-opening/forms') return 'repository';
     if (hash === '#station-opening/users') return 'users';
     if (hash === '#station-opening/notifications') return 'notifications';
@@ -61,9 +68,13 @@ export const StationOpeningModule: React.FC<Props> = ({ currentUser, stations })
   const [isStationModalOpen, setIsStationModalOpen] = useState(false);
 
   const isSuperAdmin = currentUser.role === 'Super Admin';
-  const isHeadOfOp = currentUser.role === 'Head of Operation' || isSuperAdmin;
+  const isHeadOfOp = currentUser.role === 'Head of Operation';
 
   const changeTab = (tab: 'dashboard' | 'repository' | 'form' | 'users' | 'notifications' | 'activity') => {
+    if (tab === 'form' && !currentFormId && currentUser.role !== 'Head of Operation') {
+      alert('Access Denied: Only the Head of Operation can create new Station Opening Forms.');
+      return;
+    }
     setActiveTab(tab);
     let newHash = '#station-opening';
     if (tab === 'repository') newHash = '#station-opening/forms';
@@ -110,10 +121,18 @@ export const StationOpeningModule: React.FC<Props> = ({ currentUser, stations })
 
   // Handlers
   const handleOpenStationModal = () => {
+    if (currentUser.role !== 'Head of Operation') {
+      alert('Access Denied: Only the Head of Operation can create new Station Opening Forms.');
+      return;
+    }
     setIsStationModalOpen(true);
   };
 
   const handleStationSelected = async (selectedStation: Station) => {
+    if (currentUser.role !== 'Head of Operation') {
+      alert('Access Denied: Only the Head of Operation can create new Station Opening Forms.');
+      return;
+    }
     setIsStationModalOpen(false);
 
     // Create a clean blank form with ONLY station information loaded
@@ -127,7 +146,7 @@ export const StationOpeningModule: React.FC<Props> = ({ currentUser, stations })
       currentUser.role
     );
 
-    const saved = await saveStationOpeningForm(newForm);
+    const saved = await saveStationOpeningForm(newForm, currentUser.role);
     setForms((prev) => [saved, ...prev]);
     setCurrentFormId(saved.id);
 

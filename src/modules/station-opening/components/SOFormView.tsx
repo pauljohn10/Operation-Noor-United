@@ -60,7 +60,7 @@ export const SOFormView: React.FC<Props> = ({
   const [isHeadOfOpSignatureModalOpen, setIsHeadOfOpSignatureModalOpen] = useState(false);
   const [isApprovalPanelOpen, setIsApprovalPanelOpen] = useState(false);
 
-  const isHeadOfOperation = currentUser?.role === 'Head of Operation' || currentUser?.role === 'Super Admin';
+  const isHeadOfOperation = currentUser?.role === 'Head of Operation';
   const isDraftOrReturned = isHeadOfOperation && (form.current_status === 'draft' || form.current_status === 'returned');
 
   const activeStageRole = form.current_approver_role;

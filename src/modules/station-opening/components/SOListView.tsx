@@ -27,7 +27,7 @@ export const SOListView: React.FC<Props> = ({ forms, currentUser, onOpenForm, on
   const [selectedStatus, setSelectedStatus] = useState('ALL');
   const [selectedStation, setSelectedStation] = useState('ALL');
 
-  const isHeadOfOp = currentUser?.role === 'Head of Operation' || currentUser?.role === 'Super Admin';
+  const isHeadOfOp = currentUser?.role === 'Head of Operation';
   const isSuperAdmin = currentUser?.role === 'Super Admin';
 
   const uniqueStations = Array.from(new Set(forms.map((f) => f.station_name)));

@@ -86,7 +86,7 @@ export async function fetchStationOpeningForms(userId?: string, userRole?: strin
   return localForms;
 }
 
-export async function saveStationOpeningForm(form: StationOpeningForm): Promise<StationOpeningForm> {
+export async function saveStationOpeningForm(form: StationOpeningForm, userRole?: string): Promise<StationOpeningForm> {
   const updatedForm: StationOpeningForm = {
     ...form,
     updated_at: new Date().toISOString(),
@@ -95,6 +95,12 @@ export async function saveStationOpeningForm(form: StationOpeningForm): Promise<
   // 1. Always update local storage cache immediately
   const localForms = getLocalCache<StationOpeningForm[]>(STORAGE_KEYS.FORMS, []);
   const idx = localForms.findIndex((f) => f.id === updatedForm.id);
+
+  // Security check: Only Head of Operation can create brand new forms
+  if (idx < 0 && userRole && userRole !== 'Head of Operation') {
+    console.error('[StationOpening] Security Violation: Non-Head of Operation role attempted to create a form:', userRole);
+    throw new Error('Access Denied: Only Head of Operation can create a Station Opening Form.');
+  }
   let updatedList: StationOpeningForm[];
   if (idx >= 0) {
     localForms[idx] = updatedForm;
