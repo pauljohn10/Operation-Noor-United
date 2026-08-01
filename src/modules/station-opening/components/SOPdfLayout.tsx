@@ -26,36 +26,53 @@ export const SOPdfLayout: React.FC<Props> = ({ form }) => {
   // Total nozzles count calculation
   const totalNozzles = form.nozzle_details?.reduce((acc, n) => acc + (n.quantity || 0), 0) || 0;
 
-  // Helper for Checkbox rendering
-  const renderCheck = (checked: boolean | undefined) => (
-    <span
-      style={{
-        display: 'inline-block',
-        width: '11px',
-        height: '11px',
-        border: '1px solid #000000',
-        backgroundColor: checked ? '#000000' : '#ffffff',
-        color: '#ffffff',
-        textAlign: 'center',
-        lineHeight: '9px',
-        fontSize: '8px',
-        fontWeight: 'bold',
-        marginLeft: '4px',
-        marginRight: '4px',
-        verticalAlign: 'middle',
-      }}
-    >
-      {checked ? '✓' : ''}
-    </span>
-  );
+  // Status Badge Component for PDF
+  const renderStatusBadge = (val: boolean | undefined, trueText = 'Available', falseText = 'Not Available') => {
+    const isTrue = val === true;
+    return (
+      <span
+        style={{
+          display: 'inline-flex',
+          alignItems: 'center',
+          gap: '3px',
+          padding: '2px 6px',
+          borderRadius: '4px',
+          fontSize: '7.5px',
+          fontWeight: 'bold',
+          backgroundColor: isTrue ? '#ECFDF5' : '#F1F5F9',
+          color: isTrue ? '#047857' : '#475569',
+          border: `1px solid ${isTrue ? '#A7F3D0' : '#CBD5E1'}`,
+        }}
+      >
+        <span>{isTrue ? '✓' : '✕'}</span>
+        <span>{isTrue ? trueText : falseText}</span>
+      </span>
+    );
+  };
 
-  const renderYesNo = (val: boolean | undefined) => (
-    <span style={{ fontSize: '8px', fontWeight: 'bold' }}>
-      {renderCheck(val === true)} Yes {renderCheck(val === false)} No
-    </span>
-  );
+  const renderPassFailBadge = (val: boolean | undefined) => {
+    const isPass = val === true;
+    return (
+      <span
+        style={{
+          display: 'inline-flex',
+          alignItems: 'center',
+          gap: '3px',
+          padding: '2px 6px',
+          borderRadius: '4px',
+          fontSize: '7.5px',
+          fontWeight: 'bold',
+          backgroundColor: isPass ? '#ECFDF5' : '#FEF2F2',
+          color: isPass ? '#047857' : '#B91C1C',
+          border: `1px solid ${isPass ? '#A7F3D0' : '#FECACA'}`,
+        }}
+      >
+        <span>{isPass ? '✓ PASS' : '✕ PENDING'}</span>
+      </span>
+    );
+  };
 
-  const defaultExtinguishers: (typeof form.safety_equipment.extinguishers[0])[] = [
+  const defaultExtinguishers = [
     { id: '1', name: 'Automatic Dry Powder', weight_volume: '6 Kg', quantity: 0, is_available: false },
     { id: '2', name: 'Automatic Foam', weight_volume: '6 Liters', quantity: 0, is_available: false },
     { id: '3', name: 'Dry Powder', weight_volume: '6 Kg', quantity: 0, is_available: false },
@@ -72,6 +89,22 @@ export const SOPdfLayout: React.FC<Props> = ({ form }) => {
       ? form.safety_equipment.extinguishers
       : defaultExtinguishers;
 
+  const getFormStatusLabel = (status: string) => {
+    switch (status) {
+      case 'draft': return { label: 'DRAFT FORM', bg: '#F1F5F9', color: '#475569', border: '#CBD5E1' };
+      case 'pending_safety_quality': return { label: 'PENDING SAFETY & QUALITY', bg: '#FEF3C7', color: '#92400E', border: '#FDE68A' };
+      case 'pending_document_controller': return { label: 'PENDING DOC CONTROLLER', bg: '#FEF3C7', color: '#92400E', border: '#FDE68A' };
+      case 'pending_engineering': return { label: 'PENDING ENGINEERING', bg: '#FEF3C7', color: '#92400E', border: '#FDE68A' };
+      case 'pending_management': return { label: 'PENDING FINAL MANAGEMENT', bg: '#FEF3C7', color: '#92400E', border: '#FDE68A' };
+      case 'approved': return { label: 'OFFICIALLY APPROVED', bg: '#D1FAE5', color: '#065F46', border: '#6EE7B7' };
+      case 'rejected': return { label: 'REJECTED', bg: '#FEE2E2', color: '#991B1B', border: '#FCA5A5' };
+      case 'returned_for_correction': return { label: 'RETURNED FOR REVISION', bg: '#FFEDD5', color: '#9A3412', border: '#FDBA74' };
+      default: return { label: status.toUpperCase().replace(/_/g, ' '), bg: '#F1F5F9', color: '#475569', border: '#CBD5E1' };
+    }
+  };
+
+  const statusBadge = getFormStatusLabel(form.current_status || 'draft');
+
   return (
     <div
       id="station-opening-pdf-document"
@@ -80,374 +113,650 @@ export const SOPdfLayout: React.FC<Props> = ({ form }) => {
         minWidth: '794px',
         maxWidth: '794px',
         boxSizing: 'border-box',
-        backgroundColor: '#ffffff',
-        color: '#000000',
-        fontFamily: 'Arial, Helvetica, sans-serif',
-        padding: '10px 14px',
-        fontSize: '8px',
-        lineHeight: '1.15',
-        border: '1px solid #000000',
+        backgroundColor: '#FFFFFF',
+        color: '#0F172A',
+        fontFamily: 'system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif',
+        padding: '16px 20px',
+        fontSize: '8.5px',
+        lineHeight: '1.3',
         margin: '0 auto',
       }}
     >
-      {/* 1. TOP HEADER WITH OFFICIAL COMPANY LOGO */}
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '6px' }}>
+      {/* 1. EXECUTIVE REPORT COVER HEADER */}
+      <div
+        style={{
+          borderRadius: '8px',
+          backgroundColor: '#0F172A',
+          color: '#FFFFFF',
+          padding: '12px 16px',
+          marginBottom: '12px',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          borderBottom: '3px solid #0284C7',
+          boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
+        }}
+      >
         {/* LOGO */}
-        <div style={{ width: '150px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
           <img
             src="/logo_transparent.png"
-            alt="Al Noor United Fuel Est. Logo"
-            style={{ maxHeight: '42px', width: 'auto', objectFit: 'contain' }}
+            alt="Al Noor Logo"
+            style={{ maxHeight: '44px', width: 'auto', objectFit: 'contain' }}
             onError={(e) => {
               (e.target as HTMLElement).style.display = 'none';
             }}
           />
+          <div>
+            <div style={{ fontSize: '13px', fontWeight: '900', letterSpacing: '0.5px', color: '#FFFFFF' }}>
+              AL NOOR UNITED FUEL EST.
+            </div>
+            <div style={{ fontSize: '9px', fontWeight: '700', color: '#38BDF8' }}>
+              مؤسسة النور المتحدة للوقود — Executive Technical Report
+            </div>
+          </div>
         </div>
 
-        {/* TITLE */}
-        <div style={{ flex: 1, textAlign: 'center' }}>
-          <h1 style={{ fontSize: '13px', fontWeight: '900', margin: 0, color: '#000000', letterSpacing: '0.5px' }}>
-            AL NOOR UNITED FUEL EST.
-          </h1>
-          <div style={{ fontSize: '11px', fontWeight: 'bold', textDecoration: 'underline', marginTop: '2px', color: '#0369a1' }}>
+        {/* REPORT TITLE & METADATA */}
+        <div style={{ textAlign: 'right' }}>
+          <div style={{ fontSize: '14px', fontWeight: '900', color: '#FFFFFF' }}>
             STATION OPENING FORM
           </div>
-        </div>
-
-        {/* METADATA */}
-        <div style={{ width: '150px', textAlign: 'right', fontSize: '8px', fontWeight: 'bold' }}>
-          <div>Form #: <span style={{ fontFamily: 'monospace' }}>{form.form_number}</span></div>
-          <div>Date: {form.date_started}</div>
-        </div>
-      </div>
-
-      <div style={{ borderBottom: '2px dashed #000000', marginBottom: '6px' }} />
-
-      {/* 2. STATION BASIC INFORMATION GRID */}
-      <div style={{ border: '1px solid #000000', marginBottom: '6px', padding: '4px 8px' }}>
-        <div style={{ fontWeight: 'bold', fontSize: '8.5px', marginBottom: '3px', textTransform: 'uppercase', color: '#0f172a' }}>
-          1. Station Basic Information
-        </div>
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '3px 12px', fontSize: '7.5px' }}>
-          <div>Name of Station: <strong>{form.station_name}</strong></div>
-          <div>Station Number: <strong>{form.station_no}</strong></div>
-          <div>Date Started: <strong>{form.date_started}</strong></div>
-
-          <div style={{ gridColumn: 'span 2' }}>Address: <strong>{form.address}</strong></div>
-          <div>Electric Meter #: <strong>{form.electric_meter_number || 'N/A'}</strong></div>
-
-          <div>ATM Machine: <strong>{form.atm_machine || 'Available'}</strong></div>
-          <div>Noor Khoy Machine: <strong>{form.noor_khoy_machine || 'Installed'}</strong></div>
-          <div>Staff House: <strong>{form.staff_house || 'Available'}</strong></div>
-
-          <div style={{ gridColumn: 'span 3', borderTop: '1px solid #e2e8f0', paddingTop: '2px', marginTop: '1px' }}>
-            Head of Operation: <strong>{form.head_of_operation_name || form.created_by_name}</strong>
+          <div style={{ fontSize: '8px', color: '#94A3B8', marginTop: '2px', fontWeight: 'bold' }}>
+            FORM NO: <span style={{ color: '#38BDF8', fontFamily: 'monospace' }}>{form.form_number}</span>
+          </div>
+          <div style={{ marginTop: '4px' }}>
+            <span
+              style={{
+                padding: '2px 8px',
+                borderRadius: '4px',
+                fontSize: '7.5px',
+                fontWeight: '900',
+                backgroundColor: statusBadge.bg,
+                color: statusBadge.color,
+                border: `1px solid ${statusBadge.border}`,
+              }}
+            >
+              {statusBadge.label}
+            </span>
           </div>
         </div>
       </div>
 
-      {/* 3. FUEL PUMPS & PRODUCT TANKS SPECIFICATIONS */}
-      <div style={{ border: '1px solid #000000', marginBottom: '6px' }}>
-        <div style={{ backgroundColor: '#e2e8f0', borderBottom: '1px solid #000000', textAlign: 'center', fontWeight: 'bold', padding: '3px', fontSize: '8.5px' }}>
-          2. FUEL PUMPS & PRODUCT TANKS SPECIFICATIONS
+      {/* 2. SECTION 1: STATION BASIC INFORMATION */}
+      <div style={{ marginBottom: '10px', borderRadius: '6px', border: '1px solid #E2E8F0', overflow: 'hidden' }}>
+        <div
+          style={{
+            backgroundColor: '#0F172A',
+            color: '#FFFFFF',
+            padding: '5px 10px',
+            fontSize: '8.5px',
+            fontWeight: '900',
+            letterSpacing: '0.5px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+          }}
+        >
+          <span>1. STATION BASIC INFORMATION</span>
+          <span style={{ fontSize: '7.5px', color: '#38BDF8', fontWeight: 'bold' }}>Section 01 of 06</span>
         </div>
 
-        {/* Table Header Bar */}
-        <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr 1fr 0.8fr', backgroundColor: '#f1f5f9', borderBottom: '1px solid #000000', textAlign: 'center', fontWeight: 'bold', fontSize: '8px', padding: '2px' }}>
-          <div>PUMP DETAILS</div>
-          <div>PRODUCT TYPE</div>
-          <div>TANK CAPACITY</div>
-          <div>NO. OF TANKS</div>
-        </div>
-
-        {/* Table Body Rows */}
-        <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr 1fr 0.8fr', fontSize: '7.5px' }}>
-          {/* Col 1: Pump Metadata */}
-          <div style={{ borderRight: '1px solid #000000', padding: '4px', display: 'flex', flexDirection: 'column', gap: '2px' }}>
-            <div>Brand of Fuel Pump: <strong>{form.brand_of_fuel_pump || 'N/A'}</strong></div>
-            <div>No. of Fuel Pump: <strong>{form.no_of_fuel_pump || 0}</strong></div>
-            <div>Automation: {renderYesNo(form.automation_enabled)}</div>
-            <div style={{ borderTop: '1px solid #ccc', paddingTop: '2px', marginTop: '1px' }}>
-              Total No. of Nozzles: <strong>{totalNozzles}</strong>
+        <div style={{ padding: '8px 12px', backgroundColor: '#F8FAFC' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr 1fr', gap: '8px 12px' }}>
+            <div>
+              <div style={{ fontSize: '7px', fontWeight: 'bold', color: '#64748B', textTransform: 'uppercase' }}>Station Name</div>
+              <div style={{ fontSize: '9px', fontWeight: '800', color: '#0F172A' }}>{form.station_name || 'N/A'}</div>
             </div>
-          </div>
-
-          {/* Col 2: Product Types Checkboxes */}
-          <div style={{ borderRight: '1px solid #000000', padding: '4px', display: 'flex', flexDirection: 'column', gap: '3px' }}>
-            <div style={{ color: '#15803d', fontWeight: 'bold' }}>
-              PETROL 91 {renderCheck(getTank('PETROL_91')?.is_available)}
+            <div>
+              <div style={{ fontSize: '7px', fontWeight: 'bold', color: '#64748B', textTransform: 'uppercase' }}>Station Code</div>
+              <div style={{ fontSize: '9px', fontWeight: '800', color: '#0F172A' }}>{form.station_no || 'N/A'}</div>
             </div>
-            <div style={{ color: '#b91c1c', fontWeight: 'bold' }}>
-              PETROL 95 {renderCheck(getTank('PETROL_95')?.is_available)}
+            <div>
+              <div style={{ fontSize: '7px', fontWeight: 'bold', color: '#64748B', textTransform: 'uppercase' }}>Date Started</div>
+              <div style={{ fontSize: '9px', fontWeight: '800', color: '#0F172A' }}>{form.date_started || 'N/A'}</div>
             </div>
-            <div style={{ color: '#b45309', fontWeight: 'bold' }}>
-              DIESEL {renderCheck(getTank('DIESEL')?.is_available)}
+            <div>
+              <div style={{ fontSize: '7px', fontWeight: 'bold', color: '#64748B', textTransform: 'uppercase' }}>Electric Meter #</div>
+              <div style={{ fontSize: '9px', fontWeight: '800', color: '#0F172A', fontFamily: 'monospace' }}>
+                {form.electric_meter_number || 'N/A'}
+              </div>
             </div>
-            <div style={{ color: '#475569', fontWeight: 'bold' }}>
-              KEROSENE {renderCheck(getTank('KEROSENE')?.is_available)}
-            </div>
-          </div>
 
-          {/* Col 3: Tank Capacities */}
-          <div style={{ borderRight: '1px solid #000000', padding: '4px', display: 'flex', flexDirection: 'column', gap: '3px' }}>
-            <div>P91: <strong>{getTank('PETROL_91')?.tank_capacity || '0'} L</strong></div>
-            <div>P95: <strong>{getTank('PETROL_95')?.tank_capacity || '0'} L</strong></div>
-            <div>Diesel: <strong>{getTank('DIESEL')?.tank_capacity || '0'} L</strong></div>
-            <div>Kerosene: <strong>{getTank('KEROSENE')?.tank_capacity || '0'} L</strong></div>
-          </div>
-
-          {/* Col 4: No. of Tanks */}
-          <div style={{ padding: '4px', display: 'flex', flexDirection: 'column', gap: '3px' }}>
-            <div>Tanks: <strong>{getTank('PETROL_91')?.no_of_tanks || 0}</strong></div>
-            <div>Tanks: <strong>{getTank('PETROL_95')?.no_of_tanks || 0}</strong></div>
-            <div>Tanks: <strong>{getTank('DIESEL')?.no_of_tanks || 0}</strong></div>
-            <div>Tanks: <strong>{getTank('KEROSENE')?.no_of_tanks || 0}</strong></div>
-          </div>
-        </div>
-
-        {/* Sub-Table for Nozzles & Piping Checks */}
-        <div style={{ borderTop: '1px solid #000000', display: 'grid', gridTemplateColumns: '1.2fr 1.8fr', fontSize: '7.5px' }}>
-          {/* Nozzles Breakdown Table */}
-          <div style={{ borderRight: '1px solid #000000', padding: '4px' }}>
-            <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '7.5px' }}>
-              <thead>
-                <tr style={{ borderBottom: '1px solid #000000', backgroundColor: '#f1f5f9', fontWeight: 'bold' }}>
-                  <th style={{ textAlign: 'left', padding: '2px' }}>No. of nozzles</th>
-                  <th style={{ textAlign: 'center', padding: '2px' }}>Quantity</th>
-                  <th style={{ textAlign: 'right', padding: '2px' }}>No. of Pump</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr style={{ borderBottom: '1px solid #e2e8f0' }}>
-                  <td style={{ textAlign: 'left', color: '#15803d', fontWeight: 'bold' }}>Petrol 91</td>
-                  <td style={{ textAlign: 'center', fontWeight: 'bold' }}>{getNozzle('PETROL_91')?.quantity || 0}</td>
-                  <td style={{ textAlign: 'right', fontWeight: 'bold' }}>{getNozzle('PETROL_91')?.no_of_pumps || 0}</td>
-                </tr>
-                <tr style={{ borderBottom: '1px solid #e2e8f0' }}>
-                  <td style={{ textAlign: 'left', color: '#b91c1c', fontWeight: 'bold' }}>Petrol 95</td>
-                  <td style={{ textAlign: 'center', fontWeight: 'bold' }}>{getNozzle('PETROL_95')?.quantity || 0}</td>
-                  <td style={{ textAlign: 'right', fontWeight: 'bold' }}>{getNozzle('PETROL_95')?.no_of_pumps || 0}</td>
-                </tr>
-                <tr style={{ borderBottom: '1px solid #e2e8f0' }}>
-                  <td style={{ textAlign: 'left', color: '#b45309', fontWeight: 'bold' }}>Diesel</td>
-                  <td style={{ textAlign: 'center', fontWeight: 'bold' }}>{getNozzle('DIESEL')?.quantity || 0}</td>
-                  <td style={{ textAlign: 'right', fontWeight: 'bold' }}>{getNozzle('DIESEL')?.no_of_pumps || 0}</td>
-                </tr>
-                <tr style={{ borderBottom: '1px solid #e2e8f0' }}>
-                  <td style={{ textAlign: 'left', color: '#0f172a', fontWeight: 'bold' }}>Combined Petrol & Diesel</td>
-                  <td style={{ textAlign: 'center', fontWeight: 'bold' }}>{getNozzle('COMBINED')?.quantity || 0}</td>
-                  <td style={{ textAlign: 'right', fontWeight: 'bold' }}>{getNozzle('COMBINED')?.no_of_pumps || 0}</td>
-                </tr>
-                <tr>
-                  <td style={{ textAlign: 'left', color: '#475569', fontWeight: 'bold' }}>Kerosene</td>
-                  <td style={{ textAlign: 'center', fontWeight: 'bold' }}>{getNozzle('KEROSENE')?.quantity || 0}</td>
-                  <td style={{ textAlign: 'right', fontWeight: 'bold' }}>{getNozzle('KEROSENE')?.no_of_pumps || 0}</td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-
-          {/* Tank Accessories & Piping Safety Checklist */}
-          <div style={{ padding: '4px', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '3px 8px' }}>
-            <div style={{ gridColumn: 'span 2', fontWeight: 'bold', fontSize: '8px', borderBottom: '1px solid #e2e8f0', paddingBottom: '2px' }}>
-              TANK & PIPING SAFETY CHECKLIST
-            </div>
-            <div>Earthing Cable: {renderYesNo(form.safety_equipment?.earthing_cable)}</div>
-            <div>Hose & Couplings: {renderYesNo(form.safety_equipment?.hose_couplings)}</div>
-            <div>Vent Air Pipes: {renderYesNo(form.safety_equipment?.vent_air_pipes)}</div>
-            <div>Color Coding G-R-B-K: {renderYesNo(form.safety_equipment?.color_coding)}</div>
             <div style={{ gridColumn: 'span 2' }}>
-              Tank with Sand Backfill: {renderYesNo(form.safety_equipment?.sand_backfill)}
+              <div style={{ fontSize: '7px', fontWeight: 'bold', color: '#64748B', textTransform: 'uppercase' }}>Location / Address</div>
+              <div style={{ fontSize: '8.5px', fontWeight: '700', color: '#0F172A' }}>{form.address || 'Saudi Arabia'}</div>
+            </div>
+            <div style={{ gridColumn: 'span 2' }}>
+              <div style={{ fontSize: '7px', fontWeight: 'bold', color: '#64748B', textTransform: 'uppercase' }}>Head of Operation (Creator)</div>
+              <div style={{ fontSize: '8.5px', fontWeight: '800', color: '#0369A1' }}>
+                {form.head_of_operation_name || form.created_by_name || 'N/A'}
+              </div>
+            </div>
+          </div>
+
+          <div
+            style={{
+              marginTop: '8px',
+              paddingTop: '6px',
+              borderTop: '1px solid #E2E8F0',
+              display: 'grid',
+              gridTemplateColumns: '1fr 1fr 1fr',
+              gap: '8px',
+            }}
+          >
+            <div>
+              <span style={{ color: '#64748B', fontWeight: 'bold' }}>ATM Machine: </span>
+              {renderStatusBadge(form.atm_machine === 'Available', 'Available', 'Not Available')}
+            </div>
+            <div>
+              <span style={{ color: '#64748B', fontWeight: 'bold' }}>Noor Khoy Machine: </span>
+              {renderStatusBadge(form.noor_khoy_machine === 'Installed', 'Installed', 'Not Installed')}
+            </div>
+            <div>
+              <span style={{ color: '#64748B', fontWeight: 'bold' }}>Staff House: </span>
+              {renderStatusBadge(form.staff_house === 'Available', 'Available', 'Not Available')}
             </div>
           </div>
         </div>
       </div>
 
-      {/* 4. SAFETY EQUIPMENT SECTION */}
-      <div style={{ border: '1px solid #000000', marginBottom: '6px' }}>
-        <div style={{ backgroundColor: '#e2e8f0', borderBottom: '1px solid #000000', textAlign: 'center', fontWeight: 'bold', padding: '3px', fontSize: '8.5px' }}>
-          3. SAFETY EQUIPMENT & EXTINGUISHERS INSPECTION
+      {/* 3. SECTION 2: FUEL PUMPS & PRODUCT TANKS SPECIFICATIONS */}
+      <div style={{ marginBottom: '10px', borderRadius: '6px', border: '1px solid #E2E8F0', overflow: 'hidden' }}>
+        <div
+          style={{
+            backgroundColor: '#0F172A',
+            color: '#FFFFFF',
+            padding: '5px 10px',
+            fontSize: '8.5px',
+            fontWeight: '900',
+            letterSpacing: '0.5px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+          }}
+        >
+          <span>2. FUEL PUMPS & PRODUCT TANKS SPECIFICATIONS</span>
+          <span style={{ fontSize: '7.5px', color: '#38BDF8', fontWeight: 'bold' }}>Section 02 of 06</span>
         </div>
 
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1.4fr', fontSize: '7.5px' }}>
-          {/* Left: Fire Pump & Hose Cabinet Locations */}
-          <div style={{ borderRight: '1px solid #000000', padding: '4px', display: 'flex', flexDirection: 'column', gap: '3px' }}>
-            <div>Fire Pump: {renderYesNo(form.safety_equipment?.fire_pump)}</div>
-            <div>Water Tanks: {renderYesNo(form.safety_equipment?.water_tanks)}</div>
-            <div>Battery for Fire Pump: {renderYesNo(form.safety_equipment?.battery_for_fire_pump)}</div>
+        <div style={{ padding: '8px 12px' }}>
+          {/* Executive Overview Summary Bar */}
+          <div
+            style={{
+              display: 'grid',
+              gridTemplateColumns: '1fr 1fr 1fr 1fr',
+              gap: '8px',
+              backgroundColor: '#F0F9FF',
+              border: '1px solid #BAE6FD',
+              borderRadius: '6px',
+              padding: '6px 10px',
+              marginBottom: '8px',
+            }}
+          >
+            <div>
+              <div style={{ fontSize: '7px', color: '#0369A1', fontWeight: 'bold' }}>Brand of Fuel Pump</div>
+              <div style={{ fontSize: '9px', fontWeight: '900', color: '#0C4A6E' }}>{form.brand_of_fuel_pump || 'N/A'}</div>
+            </div>
+            <div>
+              <div style={{ fontSize: '7px', color: '#0369A1', fontWeight: 'bold' }}>No. of Fuel Pumps</div>
+              <div style={{ fontSize: '9px', fontWeight: '900', color: '#0C4A6E' }}>{form.no_of_fuel_pump || 0}</div>
+            </div>
+            <div>
+              <div style={{ fontSize: '7px', color: '#0369A1', fontWeight: 'bold' }}>Total Nozzles Count</div>
+              <div style={{ fontSize: '9px', fontWeight: '900', color: '#0C4A6E' }}>{totalNozzles} Nozzles</div>
+            </div>
+            <div>
+              <div style={{ fontSize: '7px', color: '#0369A1', fontWeight: 'bold' }}>Automation Enabled</div>
+              <div>{renderStatusBadge(form.automation_enabled, 'Yes (Automated)', 'No (Manual)')}</div>
+            </div>
+          </div>
 
-            <div style={{ borderTop: '1px solid #ccc', paddingTop: '3px', marginTop: '2px' }}>
-              <div style={{ fontWeight: 'bold', textAlign: 'center', marginBottom: '3px' }}>
-                Fire Hose Cabinet Locations (1 to 12)
+          {/* Tanks & Fuel Specification Table */}
+          <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '8px', marginBottom: '8px' }}>
+            <thead>
+              <tr style={{ backgroundColor: '#1E293B', color: '#FFFFFF', textAlign: 'left' }}>
+                <th style={{ padding: '5px 8px', borderRadius: '4px 0 0 0' }}>Fuel Product Type</th>
+                <th style={{ padding: '5px 8px', textAlign: 'center' }}>Status</th>
+                <th style={{ padding: '5px 8px', textAlign: 'center' }}>Tank Capacity (Liters)</th>
+                <th style={{ padding: '5px 8px', textAlign: 'center', borderRadius: '0 4px 0 0' }}>No. of Tanks</th>
+              </tr>
+            </thead>
+            <tbody>
+              {[
+                { key: 'PETROL_91', name: 'Petrol 91 (Octane 91)', color: '#047857' },
+                { key: 'PETROL_95', name: 'Petrol 95 (Octane 95)', color: '#B91C1C' },
+                { key: 'DIESEL', name: 'Diesel Fuel', color: '#B45309' },
+                { key: 'KEROSENE', name: 'Kerosene Fuel', color: '#475569' },
+              ].map((fuel, idx) => {
+                const tank = getTank(fuel.key);
+                const isAvail = Boolean(tank?.is_available);
+                return (
+                  <tr key={fuel.key} style={{ backgroundColor: idx % 2 === 0 ? '#F8FAFC' : '#FFFFFF', borderBottom: '1px solid #E2E8F0' }}>
+                    <td style={{ padding: '4px 8px', fontWeight: '800', color: fuel.color }}>{fuel.name}</td>
+                    <td style={{ padding: '4px 8px', textAlign: 'center' }}>
+                      {renderStatusBadge(isAvail, 'Available', 'Not Available')}
+                    </td>
+                    <td style={{ padding: '4px 8px', textAlign: 'center', fontWeight: '800', fontFamily: 'monospace' }}>
+                      {tank?.tank_capacity ? `${tank.tank_capacity.toLocaleString()} L` : '0 L'}
+                    </td>
+                    <td style={{ padding: '4px 8px', textAlign: 'center', fontWeight: '800' }}>
+                      {tank?.no_of_tanks || 0}
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+
+          {/* Nozzle Details Breakdown Sub-Table */}
+          <div style={{ fontSize: '8px', fontWeight: '800', color: '#0F172A', marginBottom: '4px' }}>
+            NOZZLE DISTRIBUTION & PUMP ASSIGNMENTS:
+          </div>
+          <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '7.5px' }}>
+            <thead>
+              <tr style={{ backgroundColor: '#E2E8F0', color: '#0F172A', fontWeight: '800' }}>
+                <th style={{ padding: '4px 8px', textAlign: 'left' }}>Fuel Line Breakdown</th>
+                <th style={{ padding: '4px 8px', textAlign: 'center' }}>Total Nozzles</th>
+                <th style={{ padding: '4px 8px', textAlign: 'center' }}>No. of Dedicated Pumps</th>
+              </tr>
+            </thead>
+            <tbody>
+              {[
+                { key: 'PETROL_91', name: 'Petrol 91', color: '#047857' },
+                { key: 'PETROL_95', name: 'Petrol 95', color: '#B91C1C' },
+                { key: 'DIESEL', name: 'Diesel', color: '#B45309' },
+                { key: 'COMBINED', name: 'Combined Petrol & Diesel', color: '#0F172A' },
+                { key: 'KEROSENE', name: 'Kerosene', color: '#475569' },
+              ].map((nItem) => {
+                const noz = getNozzle(nItem.key);
+                return (
+                  <tr key={nItem.key} style={{ borderBottom: '1px solid #F1F5F9' }}>
+                    <td style={{ padding: '3px 8px', fontWeight: '700', color: nItem.color }}>{nItem.name}</td>
+                    <td style={{ padding: '3px 8px', textAlign: 'center', fontWeight: '800', fontFamily: 'monospace' }}>
+                      {noz?.quantity || 0}
+                    </td>
+                    <td style={{ padding: '3px 8px', textAlign: 'center', fontWeight: '800' }}>
+                      {noz?.no_of_pumps || 0}
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      {/* 4. SECTION 3: SAFETY EQUIPMENT & INSPECTION */}
+      <div style={{ marginBottom: '10px', borderRadius: '6px', border: '1px solid #E2E8F0', overflow: 'hidden' }}>
+        <div
+          style={{
+            backgroundColor: '#0F172A',
+            color: '#FFFFFF',
+            padding: '5px 10px',
+            fontSize: '8.5px',
+            fontWeight: '900',
+            letterSpacing: '0.5px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+          }}
+        >
+          <span>3. SAFETY EQUIPMENT & TANK SAFETY INSPECTION</span>
+          <span style={{ fontSize: '7.5px', color: '#38BDF8', fontWeight: 'bold' }}>Section 03 of 06</span>
+        </div>
+
+        <div style={{ padding: '8px 12px', display: 'grid', gridTemplateColumns: '1.2fr 1fr', gap: '12px' }}>
+          {/* Left: Primary Safety & Tank Checklist */}
+          <div>
+            <div style={{ fontSize: '8px', fontWeight: '800', color: '#0F172A', marginBottom: '4px' }}>
+              PRIMARY FIRE SUPPRESSION & PIPING SYSTEMS:
+            </div>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '6px' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '3px 6px', backgroundColor: '#F8FAFC', borderRadius: '4px' }}>
+                <span style={{ fontWeight: 'bold' }}>Fire Pump</span>
+                {renderPassFailBadge(form.safety_equipment?.fire_pump)}
               </div>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1px 8px', fontSize: '7px' }}>
-                <div>1: <strong>{form.safety_equipment?.fire_hose_cabinet_locations?.[0] || '___'}</strong></div>
-                <div>7: <strong>{form.safety_equipment?.fire_hose_cabinet_locations?.[6] || '___'}</strong></div>
-                <div>2: <strong>{form.safety_equipment?.fire_hose_cabinet_locations?.[1] || '___'}</strong></div>
-                <div>8: <strong>{form.safety_equipment?.fire_hose_cabinet_locations?.[7] || '___'}</strong></div>
-                <div>3: <strong>{form.safety_equipment?.fire_hose_cabinet_locations?.[2] || '___'}</strong></div>
-                <div>9: <strong>{form.safety_equipment?.fire_hose_cabinet_locations?.[8] || '___'}</strong></div>
-                <div>4: <strong>{form.safety_equipment?.fire_hose_cabinet_locations?.[3] || '___'}</strong></div>
-                <div>10: <strong>{form.safety_equipment?.fire_hose_cabinet_locations?.[9] || '___'}</strong></div>
-                <div>5: <strong>{form.safety_equipment?.fire_hose_cabinet_locations?.[4] || '___'}</strong></div>
-                <div>11: <strong>{form.safety_equipment?.fire_hose_cabinet_locations?.[10] || '___'}</strong></div>
-                <div>6: <strong>{form.safety_equipment?.fire_hose_cabinet_locations?.[5] || '___'}</strong></div>
-                <div>12: <strong>{form.safety_equipment?.fire_hose_cabinet_locations?.[11] || '___'}</strong></div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '3px 6px', backgroundColor: '#F8FAFC', borderRadius: '4px' }}>
+                <span style={{ fontWeight: 'bold' }}>Water Tanks</span>
+                {renderPassFailBadge(form.safety_equipment?.water_tanks)}
+              </div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '3px 6px', backgroundColor: '#F8FAFC', borderRadius: '4px', gridColumn: 'span 2' }}>
+                <span style={{ fontWeight: 'bold' }}>Fire Pump Backup Battery</span>
+                {renderPassFailBadge(form.safety_equipment?.battery_for_fire_pump)}
+              </div>
+            </div>
+
+            <div style={{ fontSize: '8px', fontWeight: '800', color: '#0F172A', marginTop: '8px', marginBottom: '4px' }}>
+              TANK ACCESSORIES & PIPING SAFETY:
+            </div>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '4px' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <span>Earthing Cable:</span>
+                {renderPassFailBadge(form.safety_equipment?.earthing_cable)}
+              </div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <span>Hose & Couplings:</span>
+                {renderPassFailBadge(form.safety_equipment?.hose_couplings)}
+              </div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <span>Vent Air Pipes:</span>
+                {renderPassFailBadge(form.safety_equipment?.vent_air_pipes)}
+              </div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <span>Color Coding (G-R-B-K):</span>
+                {renderPassFailBadge(form.safety_equipment?.color_coding)}
+              </div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gridColumn: 'span 2' }}>
+                <span>Tank with Sand Backfill:</span>
+                {renderPassFailBadge(form.safety_equipment?.sand_backfill)}
               </div>
             </div>
           </div>
 
-          {/* Right: Fire Extinguishers Table */}
-          <div style={{ padding: '4px' }}>
-            <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'center', fontSize: '7px' }}>
-              <thead>
-                <tr style={{ borderBottom: '1px solid #000000', backgroundColor: '#f1f5f9', fontWeight: 'bold' }}>
-                  <th style={{ textAlign: 'left', padding: '2px' }}>Equipment Item</th>
-                  <th style={{ padding: '2px' }}>Weight / Volume</th>
-                  <th style={{ padding: '2px' }}>Quantity / Available</th>
-                </tr>
-              </thead>
-              <tbody>
-                {extinguishersList.map((ext) => {
-                  const isYesNoItem = ['6', '7', '8', '9'].includes(ext.id) || ['Sand Bucket', 'Traffic Cone', 'Waste Bin', 'CCTV 24/7 Monitoring'].some(n => ext.name.includes(n));
-                  const isAvailable = (ext.quantity > 0) || Boolean(ext.is_available);
-                  const displayQty = isYesNoItem ? (isAvailable ? 'Yes' : 'No') : (ext.quantity ?? 0);
-
-                  return (
-                    <tr key={ext.id} style={{ borderBottom: '1px solid #e2e8f0' }}>
-                      <td style={{ textAlign: 'left', padding: '1.5px 2px', fontWeight: 'bold' }}>{ext.name}</td>
-                      <td style={{ padding: '1.5px 2px' }}>{ext.weight_volume || '-'}</td>
-                      <td style={{ padding: '1.5px 2px', fontWeight: 'bold' }}>{displayQty}</td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
+          {/* Right: Fire Hose Cabinet Locations */}
+          <div style={{ backgroundColor: '#F8FAFC', padding: '6px 8px', borderRadius: '6px', border: '1px solid #E2E8F0' }}>
+            <div style={{ fontSize: '8px', fontWeight: '800', color: '#0F172A', marginBottom: '4px', textAlign: 'center' }}>
+              FIRE HOSE CABINET LOCATIONS (1 - 12)
+            </div>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '3px 8px', fontSize: '7.5px' }}>
+              {Array.from({ length: 12 }).map((_, i) => (
+                <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '4px', backgroundColor: '#FFFFFF', padding: '2px 4px', borderRadius: '4px', border: '1px solid #E2E8F0' }}>
+                  <span style={{ fontWeight: '900', color: '#0369A1', width: '16px' }}>{i + 1}.</span>
+                  <span style={{ fontWeight: '700', color: '#0F172A' }}>
+                    {form.safety_equipment?.fire_hose_cabinet_locations?.[i] || '—'}
+                  </span>
+                </div>
+              ))}
+            </div>
           </div>
         </div>
       </div>
 
-      {/* 5. OPERATIONAL AMENITIES SECTION (22 ITEMS) */}
-      <div style={{ border: '1px solid #000000', marginBottom: '6px' }}>
-        <div style={{ backgroundColor: '#e2e8f0', borderBottom: '1px solid #000000', textAlign: 'center', fontWeight: 'bold', padding: '3px', fontSize: '8.5px' }}>
-          4. OPERATIONAL AMENITIES CHECKLIST (22 ITEMS)
+      {/* 5. SECTION 4: FIRE EXTINGUISHERS & SAFETY ITEMS */}
+      <div style={{ marginBottom: '10px', borderRadius: '6px', border: '1px solid #E2E8F0', overflow: 'hidden' }}>
+        <div
+          style={{
+            backgroundColor: '#0F172A',
+            color: '#FFFFFF',
+            padding: '5px 10px',
+            fontSize: '8.5px',
+            fontWeight: '900',
+            letterSpacing: '0.5px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+          }}
+        >
+          <span>4. FIRE EXTINGUISHERS & SAFETY ITEMS</span>
+          <span style={{ fontSize: '7.5px', color: '#38BDF8', fontWeight: 'bold' }}>Section 04 of 06</span>
         </div>
 
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2px 10px', padding: '4px', fontSize: '7px' }}>
-          <div>Noor Cladding: {renderYesNo(form.amenities?.noor_cladding)}</div>
-          <div>Supermarket: {renderYesNo(form.amenities?.supermarket)}</div>
+        <div style={{ padding: '8px 12px' }}>
+          <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '8px' }}>
+            <thead>
+              <tr style={{ backgroundColor: '#1E293B', color: '#FFFFFF', textAlign: 'left' }}>
+                <th style={{ padding: '4px 8px' }}>Equipment / Item Description</th>
+                <th style={{ padding: '4px 8px', textAlign: 'center' }}>Weight / Volume</th>
+                <th style={{ padding: '4px 8px', textAlign: 'center' }}>Status / Quantity</th>
+              </tr>
+            </thead>
+            <tbody>
+              {extinguishersList.map((ext, idx) => {
+                const isYesNoItem = ['6', '7', '8', '9'].includes(ext.id) || ['Sand Bucket', 'Traffic Cone', 'Waste Bin', 'CCTV 24/7 Monitoring'].some(n => ext.name.includes(n));
+                const isAvailable = (ext.quantity > 0) || Boolean(ext.is_available);
 
-          <div>Price Board & LED Price: {renderYesNo(form.amenities?.price_board_led)}</div>
-          <div>Restaurant: {renderYesNo(form.amenities?.restaurant)}</div>
+                return (
+                  <tr key={ext.id} style={{ backgroundColor: idx % 2 === 0 ? '#F8FAFC' : '#FFFFFF', borderBottom: '1px solid #E2E8F0' }}>
+                    <td style={{ padding: '3.5px 8px', fontWeight: '800', color: '#0F172A' }}>{ext.name}</td>
+                    <td style={{ padding: '3.5px 8px', textAlign: 'center', fontWeight: '700', color: '#475569' }}>
+                      {ext.weight_volume || 'Standard'}
+                    </td>
+                    <td style={{ padding: '3.5px 8px', textAlign: 'center' }}>
+                      {isYesNoItem ? (
+                        renderStatusBadge(isAvailable, 'Available', 'Not Available')
+                      ) : (
+                        <span style={{ fontWeight: '900', fontFamily: 'monospace', color: '#0F172A' }}>
+                          {ext.quantity} Units
+                        </span>
+                      )}
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
+      </div>
 
-          <div>Wash Room for Men/Women: {renderYesNo(form.amenities?.washrooms)}</div>
-          <div>Buffia: {renderYesNo(form.amenities?.buffia)}</div>
+      {/* 6. SECTION 5: OPERATIONAL AMENITIES CHECKLIST */}
+      <div style={{ marginBottom: '10px', borderRadius: '6px', border: '1px solid #E2E8F0', overflow: 'hidden' }}>
+        <div
+          style={{
+            backgroundColor: '#0F172A',
+            color: '#FFFFFF',
+            padding: '5px 10px',
+            fontSize: '8.5px',
+            fontWeight: '900',
+            letterSpacing: '0.5px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+          }}
+        >
+          <span>5. OPERATIONAL AMENITIES CHECKLIST (22 ITEMS)</span>
+          <span style={{ fontSize: '7.5px', color: '#38BDF8', fontWeight: 'bold' }}>Section 05 of 06</span>
+        </div>
 
-          <div>PWD Ramp & Parking: {renderYesNo(form.amenities?.pwd_ramp_parking)}</div>
-          <div>Mosque Men/Women: {renderYesNo(form.amenities?.mosque)}</div>
-
-          <div>Entrance & Exit Signage: {renderYesNo(form.amenities?.entrance_exit_signage)}</div>
-          <div>Bank Machine: {renderYesNo(form.amenities?.bank_machine)}</div>
-
-          <div>Station Office: {renderYesNo(form.amenities?.station_office)}</div>
-          <div>Car Wash: {renderYesNo(form.amenities?.car_wash)}</div>
-
-          <div>Emergency Switch: {renderYesNo(form.amenities?.emergency_switch)}</div>
-          <div>Automatic Car Wash: {renderYesNo(form.amenities?.auto_car_wash)}</div>
-
-          <div>Assembly Point: {renderYesNo(form.amenities?.assembly_point)}</div>
-          <div>Buncher Shop: {renderYesNo(form.amenities?.buncher_shop)}</div>
-
-          <div>Back Up Generator: {renderYesNo(form.amenities?.backup_generator)}</div>
-          <div>Oil Change Shop: {renderYesNo(form.amenities?.oil_change_shop)}</div>
-
-          <div>Diesel area for trucks: {renderYesNo(form.amenities?.diesel_truck_area)}</div>
-          <div>Electric Vehicle Charger: {renderYesNo(form.amenities?.ev_charger)}</div>
-
-          <div style={{ gridColumn: 'span 2' }}>
-            Diesel inside Noor canopy (small car): {renderYesNo(form.amenities?.diesel_canopy_small_car)}
+        <div style={{ padding: '8px 12px' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '5px 10px', fontSize: '7.5px' }}>
+            {[
+              { label: 'Noor Cladding', val: form.amenities?.noor_cladding },
+              { label: 'Price Board & LED', val: form.amenities?.price_board_led },
+              { label: 'Washrooms (Men/Women)', val: form.amenities?.washrooms },
+              { label: 'PWD Ramp & Parking', val: form.amenities?.pwd_ramp_parking },
+              { label: 'Entrance & Exit Signage', val: form.amenities?.entrance_exit_signage },
+              { label: 'Station Office', val: form.amenities?.station_office },
+              { label: 'Emergency Switch', val: form.amenities?.emergency_switch },
+              { label: 'Assembly Point', val: form.amenities?.assembly_point },
+              { label: 'Back Up Generator', val: form.amenities?.backup_generator },
+              { label: 'Diesel Area (Trucks)', val: form.amenities?.diesel_truck_area },
+              { label: 'Diesel Canopy (Cars)', val: form.amenities?.diesel_canopy_small_car },
+              { label: 'Supermarket', val: form.amenities?.supermarket },
+              { label: 'Restaurant', val: form.amenities?.restaurant },
+              { label: 'Buffia', val: form.amenities?.buffia },
+              { label: 'Mosque (Men/Women)', val: form.amenities?.mosque },
+              { label: 'Bank Machine (ATM)', val: form.amenities?.bank_machine },
+              { label: 'Car Wash', val: form.amenities?.car_wash },
+              { label: 'Automatic Car Wash', val: form.amenities?.auto_car_wash },
+              { label: 'Buncher Shop', val: form.amenities?.buncher_shop },
+              { label: 'Oil Change Shop', val: form.amenities?.oil_change_shop },
+              { label: 'Electric Vehicle Charger', val: form.amenities?.ev_charger },
+            ].map((amenity, i) => (
+              <div
+                key={i}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  padding: '3px 6px',
+                  backgroundColor: '#F8FAFC',
+                  borderRadius: '4px',
+                  border: '1px solid #E2E8F0',
+                }}
+              >
+                <span style={{ fontWeight: '700', color: '#0F172A' }}>{amenity.label}</span>
+                {renderStatusBadge(amenity.val, 'Available', 'N/A')}
+              </div>
+            ))}
           </div>
+
           {form.amenities?.others_text && (
-            <div style={{ gridColumn: 'span 2', fontWeight: 'bold', borderTop: '1px solid #e2e8f0', paddingTop: '2px' }}>
-              Others: <span style={{ fontWeight: 'normal' }}>{form.amenities.others_text}</span>
+            <div style={{ marginTop: '6px', paddingTop: '4px', borderTop: '1px solid #E2E8F0', fontSize: '7.5px' }}>
+              <strong>Other Amenities Notes: </strong>
+              <span style={{ color: '#475569' }}>{form.amenities.others_text}</span>
             </div>
           )}
         </div>
       </div>
 
-      {/* 6. MANAGEMENT APPROVAL SECTION (6 SIGNATURE BOXES) */}
-      <div style={{ border: '1px solid #000000' }}>
-        <div style={{ backgroundColor: '#e2e8f0', borderBottom: '1px solid #000000', textAlign: 'center', fontWeight: 'bold', padding: '3px', fontSize: '8.5px' }}>
-          5. MANAGEMENT APPROVAL & SIGNATURES
+      {/* 7. SECTION 6: MANAGEMENT APPROVAL MATRIX & SIGNATURES */}
+      <div style={{ borderRadius: '6px', border: '1px solid #E2E8F0', overflow: 'hidden' }}>
+        <div
+          style={{
+            backgroundColor: '#0F172A',
+            color: '#FFFFFF',
+            padding: '5px 10px',
+            fontSize: '8.5px',
+            fontWeight: '900',
+            letterSpacing: '0.5px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+          }}
+        >
+          <span>6. MANAGEMENT APPROVAL MATRIX & OFFICIAL SIGN-OFF</span>
+          <span style={{ fontSize: '7.5px', color: '#38BDF8', fontWeight: 'bold' }}>Section 06 of 06</span>
         </div>
 
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '0', fontSize: '7px', textAlign: 'center' }}>
-          {/* Box 1: Station Supervisor */}
-          <div style={{ borderRight: '1px solid #000000', borderBottom: '1px solid #000000', padding: '4px', minHeight: '44px' }}>
-            <div style={{ fontWeight: 'bold', color: '#0f172a' }}>Station Supervisor</div>
-            <div style={{ fontSize: '6.5px', color: '#64748b' }}>On-Site Physical Inspection</div>
-            <div style={{ fontWeight: 'bold', marginTop: '2px' }}>{form.station_supervisor_name || 'N/A'}</div>
-            {form.station_supervisor_signature_url ? (
-              <img src={form.station_supervisor_signature_url} alt="Supervisor Signature" style={{ maxHeight: '22px', margin: '2px auto 0 auto', objectFit: 'contain' }} />
-            ) : (
-              <div style={{ color: '#94a3b8', fontStyle: 'italic', marginTop: '4px' }}>Signature Line</div>
-            )}
+        <div style={{ padding: '8px 12px' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '8px' }}>
+            {/* Box 1: Station Supervisor */}
+            <div style={{ border: '1px solid #E2E8F0', borderRadius: '6px', padding: '6px', backgroundColor: '#F8FAFC' }}>
+              <div style={{ fontSize: '7px', fontWeight: '800', color: '#64748B', textTransform: 'uppercase' }}>Station Supervisor</div>
+              <div style={{ fontSize: '8.5px', fontWeight: '800', color: '#0F172A', marginTop: '2px' }}>
+                {form.station_supervisor_name || 'N/A'}
+              </div>
+              <div style={{ fontSize: '6.5px', color: '#047857', fontWeight: 'bold', marginTop: '1px' }}>
+                ✓ On-Site Physical Inspection
+              </div>
+              <div style={{ marginTop: '6px', height: '26px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                {form.station_supervisor_signature_url ? (
+                  <img src={form.station_supervisor_signature_url} alt="Supervisor Sig" style={{ maxHeight: '24px', maxWidth: '100%', objectFit: 'contain' }} />
+                ) : (
+                  <span style={{ fontSize: '7px', color: '#94A3B8', fontStyle: 'italic' }}>Signed on Paper</span>
+                )}
+              </div>
+            </div>
+
+            {/* Box 2: Head of Operation */}
+            <div style={{ border: '1px solid #E2E8F0', borderRadius: '6px', padding: '6px', backgroundColor: '#F8FAFC' }}>
+              <div style={{ fontSize: '7px', fontWeight: '800', color: '#64748B', textTransform: 'uppercase' }}>Head of Operation</div>
+              <div style={{ fontSize: '8.5px', fontWeight: '800', color: '#0F172A', marginTop: '2px' }}>
+                {form.head_of_operation_name || form.created_by_name || 'N/A'}
+              </div>
+              <div style={{ fontSize: '6.5px', color: '#047857', fontWeight: 'bold', marginTop: '1px' }}>
+                ✓ Form Creator & Submitter
+              </div>
+              <div style={{ marginTop: '6px', height: '26px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                {form.head_of_operation_signature_url ? (
+                  <img src={form.head_of_operation_signature_url} alt="Head of Op Sig" style={{ maxHeight: '24px', maxWidth: '100%', objectFit: 'contain' }} />
+                ) : (
+                  <span style={{ fontSize: '7px', color: '#94A3B8', fontStyle: 'italic' }}>Signed on Submission</span>
+                )}
+              </div>
+            </div>
+
+            {/* Box 3: Safety & Quality Control */}
+            <div style={{ border: '1px solid #E2E8F0', borderRadius: '6px', padding: '6px', backgroundColor: '#F8FAFC' }}>
+              <div style={{ fontSize: '7px', fontWeight: '800', color: '#64748B', textTransform: 'uppercase' }}>Safety & Quality Control</div>
+              <div style={{ fontSize: '8.5px', fontWeight: '800', color: '#0F172A', marginTop: '2px' }}>
+                {safetyQualityApp?.approver_name || 'Pending Approver'}
+              </div>
+              <div style={{ fontSize: '6.5px', color: safetyQualityApp?.status === 'approved' ? '#047857' : '#D97706', fontWeight: 'bold', marginTop: '1px' }}>
+                {safetyQualityApp?.status === 'approved' ? '✓ Stage Approved' : '⏳ Pending Stage'}
+              </div>
+              <div style={{ marginTop: '6px', height: '26px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                {safetyQualityApp?.signature_url ? (
+                  <img src={safetyQualityApp.signature_url} alt="Safety Sig" style={{ maxHeight: '24px', maxWidth: '100%', objectFit: 'contain' }} />
+                ) : (
+                  <span style={{ fontSize: '7px', color: '#94A3B8', fontStyle: 'italic' }}>
+                    {safetyQualityApp?.status === 'approved' ? 'Approved' : 'Pending Signature'}
+                  </span>
+                )}
+              </div>
+            </div>
+
+            {/* Box 4: Document Controller */}
+            <div style={{ border: '1px solid #E2E8F0', borderRadius: '6px', padding: '6px', backgroundColor: '#F8FAFC' }}>
+              <div style={{ fontSize: '7px', fontWeight: '800', color: '#64748B', textTransform: 'uppercase' }}>Document Controller</div>
+              <div style={{ fontSize: '8.5px', fontWeight: '800', color: '#0F172A', marginTop: '2px' }}>
+                {docControllerApp?.approver_name || 'Pending Approver'}
+              </div>
+              <div style={{ fontSize: '6.5px', color: docControllerApp?.status === 'approved' ? '#047857' : '#D97706', fontWeight: 'bold', marginTop: '1px' }}>
+                {docControllerApp?.status === 'approved' ? '✓ Stage Approved' : '⏳ Pending Stage'}
+              </div>
+              <div style={{ marginTop: '6px', height: '26px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                {docControllerApp?.signature_url ? (
+                  <img src={docControllerApp.signature_url} alt="Doc Sig" style={{ maxHeight: '24px', maxWidth: '100%', objectFit: 'contain' }} />
+                ) : (
+                  <span style={{ fontSize: '7px', color: '#94A3B8', fontStyle: 'italic' }}>
+                    {docControllerApp?.status === 'approved' ? 'Approved' : 'Pending Signature'}
+                  </span>
+                )}
+              </div>
+            </div>
+
+            {/* Box 5: Engineering Department */}
+            <div style={{ border: '1px solid #E2E8F0', borderRadius: '6px', padding: '6px', backgroundColor: '#F8FAFC' }}>
+              <div style={{ fontSize: '7px', fontWeight: '800', color: '#64748B', textTransform: 'uppercase' }}>Engineering Department</div>
+              <div style={{ fontSize: '8.5px', fontWeight: '800', color: '#0F172A', marginTop: '2px' }}>
+                {engineeringApp?.approver_name || 'Pending Approver'}
+              </div>
+              <div style={{ fontSize: '6.5px', color: engineeringApp?.status === 'approved' ? '#047857' : '#D97706', fontWeight: 'bold', marginTop: '1px' }}>
+                {engineeringApp?.status === 'approved' ? '✓ Stage Approved' : '⏳ Pending Stage'}
+              </div>
+              <div style={{ marginTop: '6px', height: '26px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                {engineeringApp?.signature_url ? (
+                  <img src={engineeringApp.signature_url} alt="Engineering Sig" style={{ maxHeight: '24px', maxWidth: '100%', objectFit: 'contain' }} />
+                ) : (
+                  <span style={{ fontSize: '7px', color: '#94A3B8', fontStyle: 'italic' }}>
+                    {engineeringApp?.status === 'approved' ? 'Approved' : 'Pending Signature'}
+                  </span>
+                )}
+              </div>
+            </div>
+
+            {/* Box 6: Al Noor United Management */}
+            <div style={{ border: '1px solid #E2E8F0', borderRadius: '6px', padding: '6px', backgroundColor: '#F8FAFC' }}>
+              <div style={{ fontSize: '7px', fontWeight: '800', color: '#64748B', textTransform: 'uppercase' }}>Al Noor United Management</div>
+              <div style={{ fontSize: '8.5px', fontWeight: '800', color: '#0F172A', marginTop: '2px' }}>
+                {managementApp?.approver_name || 'Pending Approver'}
+              </div>
+              <div style={{ fontSize: '6.5px', color: managementApp?.status === 'approved' ? '#047857' : '#D97706', fontWeight: 'bold', marginTop: '1px' }}>
+                {managementApp?.status === 'approved' ? '✓ Final Approval Granted' : '⏳ Pending Final Approval'}
+              </div>
+              <div style={{ marginTop: '6px', height: '26px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                {managementApp?.signature_url ? (
+                  <img src={managementApp.signature_url} alt="Management Sig" style={{ maxHeight: '24px', maxWidth: '100%', objectFit: 'contain' }} />
+                ) : (
+                  <span style={{ fontSize: '7px', color: '#94A3B8', fontStyle: 'italic' }}>
+                    {managementApp?.status === 'approved' ? 'Approved' : 'Pending Signature'}
+                  </span>
+                )}
+              </div>
+            </div>
           </div>
 
-          {/* Box 2: Head of Operation */}
-          <div style={{ borderRight: '1px solid #000000', borderBottom: '1px solid #000000', padding: '4px', minHeight: '44px' }}>
-            <div style={{ fontWeight: 'bold', color: '#0f172a' }}>Head of Operation</div>
-            <div style={{ fontSize: '6.5px', color: '#64748b' }}>Form Creator & Submitter</div>
-            <div style={{ fontWeight: 'bold', marginTop: '2px' }}>{form.head_of_operation_name || form.created_by_name}</div>
-            {form.head_of_operation_signature_url ? (
-              <img src={form.head_of_operation_signature_url} alt="Head of Op Signature" style={{ maxHeight: '22px', margin: '2px auto 0 auto', objectFit: 'contain' }} />
-            ) : (
-              <div style={{ color: '#94a3b8', fontStyle: 'italic', marginTop: '4px' }}>Signed on Submission</div>
-            )}
-          </div>
-
-          {/* Box 3: Safety & Quality Control */}
-          <div style={{ borderBottom: '1px solid #000000', padding: '4px', minHeight: '44px' }}>
-            <div style={{ fontWeight: 'bold', color: '#0f172a' }}>Safety & Quality Control</div>
-            <div style={{ fontSize: '6.5px', color: '#64748b' }}>Approver: {safetyQualityApp?.approver_name || 'Pending'}</div>
-            {safetyQualityApp?.signature_url ? (
-              <img src={safetyQualityApp.signature_url} alt="Safety Sig" style={{ maxHeight: '22px', margin: '2px auto 0 auto', objectFit: 'contain' }} />
-            ) : (
-              <div style={{ color: '#94a3b8', fontStyle: 'italic', marginTop: '4px' }}>{safetyQualityApp?.status === 'approved' ? 'Approved' : 'Pending Approval'}</div>
-            )}
-          </div>
-
-          {/* Box 4: Document Controller */}
-          <div style={{ borderRight: '1px solid #000000', padding: '4px', minHeight: '44px' }}>
-            <div style={{ fontWeight: 'bold', color: '#0f172a' }}>Document Controller</div>
-            <div style={{ fontSize: '6.5px', color: '#64748b' }}>Approver: {docControllerApp?.approver_name || 'Pending'}</div>
-            {docControllerApp?.signature_url ? (
-              <img src={docControllerApp.signature_url} alt="Doc Controller Sig" style={{ maxHeight: '22px', margin: '2px auto 0 auto', objectFit: 'contain' }} />
-            ) : (
-              <div style={{ color: '#94a3b8', fontStyle: 'italic', marginTop: '4px' }}>{docControllerApp?.status === 'approved' ? 'Approved' : 'Pending Approval'}</div>
-            )}
-          </div>
-
-          {/* Box 5: Engineering Department */}
-          <div style={{ borderRight: '1px solid #000000', padding: '4px', minHeight: '44px' }}>
-            <div style={{ fontWeight: 'bold', color: '#0f172a' }}>Engineering Department</div>
-            <div style={{ fontSize: '6.5px', color: '#64748b' }}>Approver: {engineeringApp?.approver_name || 'Pending'}</div>
-            {engineeringApp?.signature_url ? (
-              <img src={engineeringApp.signature_url} alt="Engineering Sig" style={{ maxHeight: '22px', margin: '2px auto 0 auto', objectFit: 'contain' }} />
-            ) : (
-              <div style={{ color: '#94a3b8', fontStyle: 'italic', marginTop: '4px' }}>{engineeringApp?.status === 'approved' ? 'Approved' : 'Pending Approval'}</div>
-            )}
-          </div>
-
-          {/* Box 6: Al Noor United Management */}
-          <div style={{ padding: '4px', minHeight: '44px' }}>
-            <div style={{ fontWeight: 'bold', color: '#0f172a' }}>Al Noor United Management</div>
-            <div style={{ fontSize: '6.5px', color: '#64748b' }}>Approver: {managementApp?.approver_name || 'Pending'}</div>
-            {managementApp?.signature_url ? (
-              <img src={managementApp.signature_url} alt="Management Sig" style={{ maxHeight: '22px', margin: '2px auto 0 auto', objectFit: 'contain' }} />
-            ) : (
-              <div style={{ color: '#94a3b8', fontStyle: 'italic', marginTop: '4px' }}>{managementApp?.status === 'approved' ? 'Approved' : 'Pending Final Approval'}</div>
-            )}
+          {/* Official Document Footer Notice */}
+          <div
+            style={{
+              marginTop: '10px',
+              paddingTop: '6px',
+              borderTop: '1px solid #E2E8F0',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              fontSize: '7px',
+              color: '#64748B',
+            }}
+          >
+            <div>
+              © 2026 Al Noor United Fuel Est. (مؤسسة النور المتحدة للوقود) — Official Executive Report
+            </div>
+            <div>
+              Generated on: <span style={{ fontWeight: 'bold', color: '#0F172A' }}>{new Date().toISOString().split('T')[0]}</span>
+            </div>
           </div>
         </div>
       </div>
