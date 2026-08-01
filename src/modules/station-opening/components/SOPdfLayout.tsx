@@ -497,29 +497,30 @@ export const SOPdfLayout: React.FC<Props> = ({ form }) => {
             <thead>
               <tr style={{ backgroundColor: '#1E293B', color: '#FFFFFF', textAlign: 'left' }}>
                 <th style={{ padding: '4px 8px' }}>Equipment / Item Description</th>
-                <th style={{ padding: '4px 8px', textAlign: 'center' }}>Weight / Volume</th>
-                <th style={{ padding: '4px 8px', textAlign: 'center' }}>Status / Quantity</th>
+                <th style={{ padding: '4px 8px', textAlign: 'center' }}>Weight / Volume / Availability</th>
+                <th style={{ padding: '4px 8px', textAlign: 'center' }}>Quantity</th>
               </tr>
             </thead>
             <tbody>
               {extinguishersList.map((ext, idx) => {
                 const isYesNoItem = ['6', '7', '8', '9'].includes(ext.id) || ['Sand Bucket', 'Traffic Cone', 'Waste Bin', 'CCTV 24/7 Monitoring'].some(n => ext.name.includes(n));
-                const isAvailable = (ext.quantity > 0) || Boolean(ext.is_available);
+                const isLiterItem = ['2', '4'].includes(ext.id) || ext.name.includes('Foam');
+                const isAvailable = Boolean(ext.is_available);
 
                 return (
                   <tr key={ext.id} style={{ backgroundColor: idx % 2 === 0 ? '#F8FAFC' : '#FFFFFF', borderBottom: '1px solid #E2E8F0' }}>
                     <td style={{ padding: '3.5px 8px', fontWeight: '800', color: '#0F172A' }}>{ext.name}</td>
                     <td style={{ padding: '3.5px 8px', textAlign: 'center', fontWeight: '700', color: '#475569' }}>
-                      {ext.weight_volume || 'Standard'}
-                    </td>
-                    <td style={{ padding: '3.5px 8px', textAlign: 'center' }}>
                       {isYesNoItem ? (
                         renderStatusBadge(isAvailable, 'Available', 'Not Available')
                       ) : (
-                        <span style={{ fontWeight: '900', fontFamily: 'monospace', color: '#0F172A' }}>
-                          {ext.quantity} Units
-                        </span>
+                        ext.weight_volume || (isLiterItem ? '1 Liter' : '1 Kg')
                       )}
+                    </td>
+                    <td style={{ padding: '3.5px 8px', textAlign: 'center' }}>
+                      <span style={{ fontWeight: '900', fontFamily: 'monospace', color: '#0F172A' }}>
+                        {isYesNoItem && !isAvailable ? 0 : ext.quantity} Units
+                      </span>
                     </td>
                   </tr>
                 );

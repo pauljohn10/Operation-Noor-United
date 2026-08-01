@@ -850,40 +850,12 @@ export const SOFormView: React.FC<Props> = ({
 
                     const kgList = Array.from({ length: 20 }, (_, i) => `${i + 1} Kg`);
                     const literList = Array.from({ length: 20 }, (_, i) => `${i + 1} ${i === 0 ? 'Liter' : 'Liters'}`);
-                    if (!literList.includes('6 Liter')) literList.push('6 Liter');
 
-                    const isAvailable = (ext.quantity > 0) || Boolean(ext.is_available);
+                    const isAvailable = Boolean(ext.is_available);
 
                     return (
                       <tr key={ext.id} className="hover:bg-sky-50/50">
                         <td className="p-2 text-start font-black text-slate-900">{ext.name}</td>
-                        <td className="p-2">
-                          {isYesNoItem ? (
-                            <span className="inline-block px-2.5 py-1 bg-slate-100 text-slate-700 rounded-lg text-xs font-bold border border-slate-200">
-                              {ext.weight_volume || 'Standard'}
-                            </span>
-                          ) : !isDraftOrReturned ? (
-                            <span className="inline-block px-3 py-1 bg-slate-100/90 text-slate-800 rounded-lg text-xs font-extrabold border border-slate-200/90 shadow-sm">
-                              {ext.weight_volume || (isLiterItem ? '6 Liters' : '6 Kg')}
-                            </span>
-                          ) : (
-                            <select
-                              value={ext.weight_volume || (isLiterItem ? '6 Liters' : '6 Kg')}
-                              onChange={(e) => {
-                                const copy = [...(form.safety_equipment?.extinguishers || [])];
-                                copy[idx].weight_volume = e.target.value;
-                                updateSafetyField('extinguishers', copy);
-                              }}
-                              className="bg-white border border-sky-200/80 rounded-lg px-2 py-1 text-center font-bold text-xs focus:ring-2 focus:ring-sky-500 shadow-sm cursor-pointer"
-                            >
-                              {(isLiterItem ? literList : kgList).map((opt) => (
-                                <option key={opt} value={opt}>
-                                  {opt}
-                                </option>
-                              ))}
-                            </select>
-                          )}
-                        </td>
                         <td className="p-2">
                           {isYesNoItem ? (
                             !isDraftOrReturned ? (
@@ -901,7 +873,11 @@ export const SOFormView: React.FC<Props> = ({
                                   const yes = e.target.value === 'Yes';
                                   const copy = [...(form.safety_equipment?.extinguishers || [])];
                                   copy[idx].is_available = yes;
-                                  copy[idx].quantity = yes ? 1 : 0;
+                                  if (!yes) {
+                                    copy[idx].quantity = 0;
+                                  } else if ((copy[idx].quantity || 0) === 0) {
+                                    copy[idx].quantity = 1;
+                                  }
                                   updateSafetyField('extinguishers', copy);
                                 }}
                                 className={`rounded-lg px-2.5 py-1 text-center font-black text-xs border shadow-sm cursor-pointer ${
@@ -915,20 +891,48 @@ export const SOFormView: React.FC<Props> = ({
                               </select>
                             )
                           ) : !isDraftOrReturned ? (
+                            <span className="inline-block px-3 py-1 bg-slate-100/90 text-slate-800 rounded-lg text-xs font-extrabold border border-slate-200/90 shadow-sm">
+                              {ext.weight_volume || (isLiterItem ? '1 Liter' : '1 Kg')}
+                            </span>
+                          ) : (
+                            <select
+                              value={ext.weight_volume || (isLiterItem ? '1 Liter' : '1 Kg')}
+                              onChange={(e) => {
+                                const copy = [...(form.safety_equipment?.extinguishers || [])];
+                                copy[idx].weight_volume = e.target.value;
+                                updateSafetyField('extinguishers', copy);
+                              }}
+                              className="bg-white border border-sky-200/80 rounded-lg px-2 py-1 text-center font-bold text-xs focus:ring-2 focus:ring-sky-500 shadow-sm cursor-pointer"
+                            >
+                              {(isLiterItem ? literList : kgList).map((opt) => (
+                                <option key={opt} value={opt}>
+                                  {opt}
+                                </option>
+                              ))}
+                            </select>
+                          )}
+                        </td>
+                        <td className="p-2">
+                          {!isDraftOrReturned ? (
                             <span className="inline-block w-16 px-2 py-1 bg-slate-100/90 text-slate-800 rounded-lg text-center font-mono text-xs font-extrabold border border-slate-200/90 shadow-sm">
-                              {ext.quantity}
+                              {isYesNoItem && !isAvailable ? 0 : ext.quantity}
                             </span>
                           ) : (
                             <input
                               type="number"
                               min="0"
-                              value={ext.quantity}
+                              disabled={isYesNoItem && !isAvailable}
+                              value={isYesNoItem && !isAvailable ? 0 : ext.quantity}
                               onChange={(e) => {
                                 const copy = [...(form.safety_equipment?.extinguishers || [])];
-                                copy[idx].quantity = parseInt(e.target.value) || 0;
+                                copy[idx].quantity = Math.max(0, parseInt(e.target.value) || 0);
                                 updateSafetyField('extinguishers', copy);
                               }}
-                              className="w-16 bg-white border border-sky-200/80 rounded-lg px-2 py-1 text-center font-mono text-xs font-bold shadow-sm"
+                              className={`w-16 rounded-lg px-2 py-1 text-center font-mono text-xs font-bold border shadow-sm ${
+                                isYesNoItem && !isAvailable
+                                  ? 'bg-slate-100 text-slate-400 border-slate-200 cursor-not-allowed'
+                                  : 'bg-white text-slate-900 border-sky-200/80 focus:ring-2 focus:ring-sky-500'
+                              }`}
                             />
                           )}
                         </td>
