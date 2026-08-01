@@ -477,7 +477,7 @@ export const StationOpeningModule: React.FC<Props> = ({ currentUser, stations })
     <div className="min-h-screen bg-transparent pb-12">
       {/* MODULE HEADER BAR (GLASSMORPHISM STYLE) */}
       <div className="bg-white/60 backdrop-blur-2xl border-b border-white/80 shadow-md shadow-sky-900/5">
-        <div className="w-full px-4 sm:px-6 lg:px-8 py-3 flex flex-wrap items-center justify-between gap-4">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 flex flex-wrap items-center justify-between gap-4">
           <div className="flex items-center gap-3">
             <div className="p-2.5 bg-gradient-to-br from-amber-500/10 to-orange-500/10 text-amber-700 rounded-2xl border border-amber-500/20 shadow-sm">
               <Building className="w-5 h-5" />
