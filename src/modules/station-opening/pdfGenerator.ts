@@ -26,7 +26,7 @@ async function preloadImagesInClone(clone: HTMLElement): Promise<void> {
 
 /**
  * Pre-processes a cloned DOM node for PDF generation to ensure 100% WYSIWYG A4 print perfection:
- * 1. Forces exact A4 paper dimensions (794px width) and optimized compact PDF print padding.
+ * 1. Forces exact A4 paper dimensions (794px width) and optimized print padding.
  * 2. Unhides hidden print container elements.
  * 3. Replaces interactive input/select elements with clean inline text spans.
  */
@@ -48,7 +48,7 @@ function prepareElementForPdfExport(element: HTMLElement): { clone: HTMLElement;
   clone.style.maxWidth = '794px';
   clone.style.minWidth = '794px';
   clone.style.margin = '0';
-  clone.style.padding = '8px 16px';
+  clone.style.padding = '16px 20px';
   clone.style.backgroundColor = '#ffffff';
   clone.style.color = '#000000';
   clone.style.boxSizing = 'border-box';
@@ -96,7 +96,8 @@ function prepareElementForPdfExport(element: HTMLElement): { clone: HTMLElement;
 
 /**
  * Exports the Station Opening Form to a high-resolution A4 PDF document
- * with 100% WYSIWYG layout, official company logo (/logo_transparent.png), and digital signature boxes.
+ * with intelligent section-based height calculation and balanced pagination.
+ * Applies STRICTLY to the Station Opening Form module.
  */
 export async function exportStationOpeningToPdf(
   form: StationOpeningForm,
@@ -157,15 +158,76 @@ export async function exportStationOpeningToPdf(
     const printableWidth = pdfWidth - margin * 2; // 194mm
     const printableHeight = pdfHeight - margin * 2; // 281mm
 
-    const pageNodes = Array.from(prepared.clone.querySelectorAll('.pdf-page')) as HTMLElement[];
+    // Max printable content height in DOM pixels at 794px canvas width
+    const MAX_PAGE_HEIGHT_PX = 1040;
 
-    if (pageNodes.length > 0) {
-      // --- MULTI-PAGE SECTION-BASED RENDER (EXACT A4 PERFECTION) ---
-      for (let i = 0; i < pageNodes.length; i++) {
-        const pageEl = pageNodes[i];
-        await preloadImagesInClone(pageEl);
+    // Fetch all section elements marked with .pdf-section
+    const sections = Array.from(prepared.clone.querySelectorAll('.pdf-section')) as HTMLElement[];
+    const page2HeaderTemplate = prepared.clone.querySelector('#pdf-page2-header-template') as HTMLElement;
 
-        const canvas = await toCanvas(pageEl, {
+    if (sections.length > 0) {
+      // --- INTELLIGENT DYNAMIC SECTION PAGINATION ENGINE ---
+      const pageContainers: HTMLElement[] = [];
+
+      let currentPageContainer = document.createElement('div');
+      currentPageContainer.style.width = '794px';
+      currentPageContainer.style.backgroundColor = '#ffffff';
+      currentPageContainer.style.padding = '16px 20px';
+      currentPageContainer.style.boxSizing = 'border-box';
+      currentPageContainer.style.fontFamily = 'system-ui, -apple-system, sans-serif';
+
+      let currentHeightPx = 0;
+
+      sections.forEach((sec, idx) => {
+        // Measure section height in DOM
+        const secHeight = sec.offsetHeight + 10; // includes 10px margin spacing
+
+        if (currentHeightPx > 0 && currentHeightPx + secHeight > MAX_PAGE_HEIGHT_PX) {
+          // Push current filled page to containers array
+          pageContainers.push(currentPageContainer);
+
+          // Create new page container
+          currentPageContainer = document.createElement('div');
+          currentPageContainer.style.width = '794px';
+          currentPageContainer.style.backgroundColor = '#ffffff';
+          currentPageContainer.style.padding = '16px 20px';
+          currentPageContainer.style.boxSizing = 'border-box';
+          currentPageContainer.style.fontFamily = 'system-ui, -apple-system, sans-serif';
+          currentHeightPx = 0;
+
+          // Prepend Page 2 Top Header if template exists
+          if (page2HeaderTemplate) {
+            const page2Header = page2HeaderTemplate.cloneNode(true) as HTMLElement;
+            page2Header.style.display = 'flex';
+            page2Header.id = `pdf-page2-header-${idx}`;
+            currentPageContainer.appendChild(page2Header);
+            currentHeightPx += page2Header.offsetHeight + 10;
+          }
+        }
+
+        // Clone and append section to current page container
+        const secClone = sec.cloneNode(true) as HTMLElement;
+        currentPageContainer.appendChild(secClone);
+        currentHeightPx += secHeight;
+      });
+
+      if (currentPageContainer.childNodes.length > 0) {
+        pageContainers.push(currentPageContainer);
+      }
+
+      // Render each dynamically created page container to canvas and add to PDF
+      const wrapper = document.createElement('div');
+      wrapper.style.position = 'absolute';
+      wrapper.style.left = '-9999px';
+      wrapper.style.top = '0';
+      document.body.appendChild(wrapper);
+
+      for (let pIdx = 0; pIdx < pageContainers.length; pIdx++) {
+        const pageDiv = pageContainers[pIdx];
+        wrapper.appendChild(pageDiv);
+        await preloadImagesInClone(pageDiv);
+
+        const canvas = await toCanvas(pageDiv, {
           pixelRatio: 2,
           backgroundColor: '#ffffff',
           cacheBust: true,
@@ -176,14 +238,19 @@ export async function exportStationOpeningToPdf(
         const imgHeightMm = (canvas.height * printableWidth) / canvas.width;
         const finalImgHeight = Math.min(printableHeight, imgHeightMm);
 
-        if (i > 0) {
+        if (pIdx > 0) {
           pdf.addPage();
         }
 
         pdf.addImage(imgData, 'JPEG', margin, margin, printableWidth, finalImgHeight);
+        wrapper.removeChild(pageDiv);
+      }
+
+      if (wrapper.parentNode) {
+        wrapper.parentNode.removeChild(wrapper);
       }
     } else {
-      // --- SINGLE CANVAS FALLBACK ---
+      // Single Canvas Fallback
       const canvas = await toCanvas(prepared.clone, {
         pixelRatio: 2,
         backgroundColor: '#ffffff',
@@ -211,7 +278,7 @@ export async function exportStationOpeningToPdf(
       }
     }
 
-    // 5. Save PDF file
+    // Save PDF file
     const sanitizedStation = (form.station_name || 'Station').replace(/[^a-zA-Z0-9]/g, '_');
     const fileName = `Station_Opening_Form_${form.form_number}_${sanitizedStation}.pdf`;
     pdf.save(fileName);
