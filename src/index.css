@@ -1,0 +1,320 @@
+@import "tailwindcss";
+
+@layer base {
+  :root {
+    --bg-main: #f0f9ff;
+    --bg-card: rgba(255, 255, 255, 0.55);
+    --border-color: rgba(255, 255, 255, 0.8);
+    --accent-emerald: #00a651;
+    --accent-red: #ed1c24;
+    --accent-amber: #d49a00;
+    --text-primary: #0f172a;
+    --text-secondary: #475569;
+  }
+
+  html, body, #root {
+    width: 100%;
+    max-width: 100vw;
+    overflow-x: hidden;
+    box-sizing: border-box;
+  }
+
+  *, ::before, ::after {
+    box-sizing: border-box;
+  }
+
+  body {
+    font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+    background: linear-gradient(135deg, #e0f2fe 0%, #f0f9ff 35%, #e0f7fa 70%, #e0e7ff 100%);
+    background-attachment: fixed;
+    color: #0f172a;
+    margin: 0;
+    padding: 0;
+    -webkit-font-smoothing: antialiased;
+    min-height: 100vh;
+  }
+}
+
+/* RTL Typography & Direction overrides */
+[dir="rtl"] {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, 'Cairo', sans-serif;
+}
+
+
+/* Unified Glassmorphism Utility Tokens */
+.glass-panel {
+  background: rgba(255, 255, 255, 0.45);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: 1px solid rgba(255, 255, 255, 0.8);
+  box-shadow: 0 20px 50px rgba(14, 165, 233, 0.15);
+}
+
+.glass-card {
+  background: rgba(255, 255, 255, 0.55);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.9);
+  box-shadow: 0 15px 35px rgba(14, 165, 233, 0.12);
+  transition: all 0.3s ease;
+}
+
+.glass-card:hover {
+  background: rgba(255, 255, 255, 0.7);
+  box-shadow: 0 20px 45px rgba(14, 165, 233, 0.22);
+  transform: translateY(-2px);
+}
+
+.glass-header {
+  background: rgba(255, 255, 255, 0.65);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.8);
+  box-shadow: 0 10px 30px rgba(14, 165, 233, 0.08);
+}
+
+/* Custom Scrollbars */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: rgba(224, 242, 254, 0.5);
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(14, 165, 233, 0.3);
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(14, 165, 233, 0.5);
+}
+
+/* EXACT PAPER FORM STYLING (For digital view & print rendering)
+   Uses standard RGB / Hex color declarations to prevent html2canvas oklch parse errors
+*/
+#paper-form-document,
+.paper-form {
+  direction: ltr !important;
+  background-color: #ffffff !important;
+  color: #000000 !important;
+  font-family: Arial, sans-serif !important;
+
+  width: 100%;
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 24px 32px;
+  border-radius: 4px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+  box-sizing: border-box;
+}
+
+/* Override all paper form children to force standard RGB/Hex colors for html2canvas */
+#paper-form-document *,
+.paper-form * {
+  border-color: #000000;
+}
+
+.paper-header {
+  border-bottom: 2px solid #000000;
+  padding-bottom: 12px;
+  margin-bottom: 16px;
+}
+
+.paper-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 16px;
+  background-color: #ffffff !important;
+}
+
+.paper-table th,
+.paper-table td {
+  border: 1px solid #000000 !important;
+  padding: 3px 6px;
+  font-size: 11px;
+  text-align: center;
+  color: #000000 !important;
+  background-color: #ffffff;
+}
+
+.paper-table th {
+  font-weight: bold;
+}
+
+/* Fuel section headers with explicit hex colors */
+.paper-header-p91 {
+  background-color: #00a651 !important;
+  color: #ffffff !important;
+  font-size: 14px !important;
+  font-weight: bold !important;
+  text-align: center !important;
+  letter-spacing: 1px;
+}
+
+.paper-header-p95 {
+  background-color: #ed1c24 !important;
+  color: #ffffff !important;
+  font-size: 14px !important;
+  font-weight: bold !important;
+  text-align: center !important;
+  letter-spacing: 1px;
+}
+
+.paper-header-diesel {
+  background-color: #d49a00 !important;
+  color: #ffffff !important;
+  font-size: 14px !important;
+  font-weight: bold !important;
+  text-align: center !important;
+  letter-spacing: 1px;
+}
+
+.paper-input {
+  width: 100%;
+  border: none;
+  background: transparent;
+  text-align: center;
+  font-size: 11px;
+  font-family: inherit;
+  outline: none;
+  color: #000000 !important;
+}
+
+.paper-input:focus {
+  background-color: #f0fdf4 !important;
+}
+
+.paper-line-input {
+  width: 100%;
+  border: none !important;
+  border-bottom: 1px solid #000000 !important;
+  background: transparent !important;
+  text-align: right;
+  font-size: 12px;
+  font-family: inherit;
+  outline: none !important;
+  color: #000000 !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  padding: 1px 4px;
+}
+
+.paper-line-input:focus {
+  border-bottom: 2px solid #000000 !important;
+  background: transparent !important;
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+.paper-input-readonly {
+  font-weight: bold;
+  background-color: #f8fafc !important;
+}
+
+/* Responsive Mobile Optimizations for Android Web Browsers */
+.paper-table-wrapper {
+  width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  margin-bottom: 12px;
+}
+
+.paper-table-wrapper table {
+  min-width: 580px;
+}
+
+@media screen and (max-width: 767px) {
+  #paper-form-document,
+  .paper-form {
+    padding: 12px 14px !important;
+    border-radius: 12px !important;
+  }
+
+  .paper-table th,
+  .paper-table td {
+    padding: 6px 4px !important;
+    font-size: 12px !important;
+  }
+
+  .paper-input {
+    min-height: 38px !important;
+    font-size: 16px !important; /* Prevents auto-zoom on Android & iOS devices */
+    touch-action: manipulation;
+  }
+
+  button, input, select {
+    min-height: 44px; /* Touch target accessibility standard */
+  }
+}
+
+/* Unified Printed Page rules (Identical to A4 Export PDF Layout) */
+@media print {
+  html, body {
+    background: #ffffff !important;
+    color: #000000 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    width: 100% !important;
+    height: auto !important;
+  }
+
+  body * {
+    visibility: hidden;
+  }
+
+  #paper-form-document,
+  #paper-form-document * {
+    visibility: visible;
+  }
+
+  #paper-form-document {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100% !important;
+    max-width: 100% !important;
+    margin: 0 !important;
+    padding: 10px 16px !important;
+    box-shadow: none !important;
+    background: #ffffff !important;
+    color: #000000 !important;
+    border: none !important;
+  }
+
+  .no-print,
+  .no-print * {
+    display: none !important;
+    visibility: hidden !important;
+  }
+
+  @page {
+    size: A4 portrait;
+    margin: 6mm 8mm;
+  }
+
+  thead {
+    display: table-header-group;
+  }
+
+  tr {
+    page-break-inside: avoid;
+  }
+
+  .paper-signatory-section {
+    page-break-inside: avoid;
+  }
+
+  .paper-table th,
+  .paper-table td {
+    border: 1px solid #000000 !important;
+    padding: 1px 2px !important;
+    font-size: 8.5px !important;
+    line-height: 1.05 !important;
+  }
+
+  .paper-input {
+    border: none !important;
+    background: transparent !important;
+    font-size: 10px !important;
+  }
+}
