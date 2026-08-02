@@ -816,7 +816,6 @@ export const SOFormView: React.FC<Props> = ({
                     <input
                       type="text"
                       value={form.safety_equipment?.fire_hose_cabinet_locations?.[i] || ''}
-                      placeholder={`Cabinet Location ${i + 1}`}
                       onChange={(e) => {
                         const copy = [...(form.safety_equipment?.fire_hose_cabinet_locations || Array(12).fill(''))];
                         copy[i] = e.target.value;
