@@ -628,7 +628,7 @@ export const ModernAuditForm: React.FC<Props> = ({
                         <th className="p-3">{t('auditForm.closingReading')} (L)</th>
                         <th className="p-3 text-right">{t('auditForm.quantitySold')} (L)</th>
                         <th className="p-3 text-center">{t('auditForm.unitPrice')}</th>
-                        <th className="p-3 text-right">{t('auditForm.totalAmount')} (SAR)</th>
+                        <th className="p-3 text-right">{t('auditForm.totalAmount')}</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-slate-100 text-slate-800 font-medium">
