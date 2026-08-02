@@ -612,15 +612,15 @@ export const ModernAuditForm: React.FC<Props> = ({
                                 onChange={(e) => {
                                   const raw = e.target.value;
                                   if (raw === '') {
+                                    onItemChange(fuelType, 15, 'start_reading', null);
                                     if (onTotalOpeningChange) onTotalOpeningChange(fuelType, null);
-                                    else onItemChange(fuelType, 15, 'start_reading', null);
                                     return;
                                   }
                                   if (/^[0-9]*\.?[0-9]*$/.test(raw)) {
                                     const parsed = parseFloat(raw);
                                     const val = isNaN(parsed) ? null : parsed;
+                                    onItemChange(fuelType, 15, 'start_reading', val);
                                     if (onTotalOpeningChange) onTotalOpeningChange(fuelType, val);
-                                    else onItemChange(fuelType, 15, 'start_reading', val);
                                   }
                                 }}
                                 placeholder="Manual Entry"

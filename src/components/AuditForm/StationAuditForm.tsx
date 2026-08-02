@@ -164,6 +164,28 @@ export const StationAuditForm: React.FC<Props> = ({
 
   const handleTotalOpeningChange = (fuelType: FuelType, value: number | null) => {
     setTotalOpeningReadings((prev) => ({ ...prev, [fuelType]: value }));
+    setItems((prevItems) =>
+      prevItems.map((item) => {
+        if (item.fuel_type === fuelType && item.pump_no === 15) {
+          const updated = { ...item, start_reading: value };
+          if (value != null && item.end_reading != null) {
+            const diff = Number((Number(item.end_reading) - Number(value)).toFixed(2));
+            if (diff >= 0) {
+              updated.quantity_sold = diff;
+              updated.amount = Number((diff * item.price).toFixed(2));
+            } else {
+              updated.quantity_sold = 0;
+              updated.amount = 0;
+            }
+          } else {
+            updated.quantity_sold = null;
+            updated.amount = null;
+          }
+          return updated;
+        }
+        return item;
+      })
+    );
   };
 
   const totals = calculateAuditTotals(
@@ -186,6 +208,10 @@ export const StationAuditForm: React.FC<Props> = ({
     field: keyof PumpReadingItem,
     value: number | null
   ) => {
+    if (pumpNo === 15 && field === 'start_reading') {
+      setTotalOpeningReadings((prev) => ({ ...prev, [fuelType]: value }));
+    }
+
     setItems((prevItems) =>
       prevItems.map((item) => {
         if (item.fuel_type === fuelType && item.pump_no === pumpNo) {
@@ -199,6 +225,9 @@ export const StationAuditForm: React.FC<Props> = ({
               if (diff >= 0) {
                 updated.quantity_sold = diff;
                 updated.amount = Number((diff * item.price).toFixed(2));
+              } else {
+                updated.quantity_sold = 0;
+                updated.amount = 0;
               }
             } else {
               updated.quantity_sold = null;
