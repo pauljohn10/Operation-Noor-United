@@ -29,6 +29,7 @@ interface Props {
     value: number | null
   ) => void;
   onPriceChange: (fuelType: FuelType, newPrice: number) => void;
+  onTotalOpeningChange?: (fuelType: FuelType, value: number | null) => void;
   onMetaChange: (field: string, value: any) => void;
   onSignatoryClick: (roleKey: string) => void;
   isReadOnly: boolean;
@@ -42,6 +43,7 @@ export const ModernAuditForm: React.FC<Props> = ({
   stations,
   onItemChange,
   onPriceChange,
+  onTotalOpeningChange,
   onMetaChange,
   onSignatoryClick,
   isReadOnly,
@@ -58,9 +60,9 @@ export const ModernAuditForm: React.FC<Props> = ({
     setCollapsedSections((prev) => ({ ...prev, [sectionKey]: !prev[sectionKey] }));
   };
 
-  const p91Totals = calculateFuelSectionTotals(items, 'PETROL_91', prices.PETROL_91);
-  const p95Totals = calculateFuelSectionTotals(items, 'PETROL_95', prices.PETROL_95);
-  const dieselTotals = calculateFuelSectionTotals(items, 'DIESEL', prices.DIESEL);
+  const p91Totals = calculateFuelSectionTotals(items, 'PETROL_91', prices.PETROL_91, audit.p91_total_opening_reading);
+  const p95Totals = calculateFuelSectionTotals(items, 'PETROL_95', prices.PETROL_95, audit.p95_total_opening_reading);
+  const dieselTotals = calculateFuelSectionTotals(items, 'DIESEL', prices.DIESEL, audit.diesel_total_opening_reading);
 
   const grandTotalSales = p91Totals.total_sales + p95Totals.total_sales + dieselTotals.total_sales;
   const noorKhoyVal = audit.noor_khoy_amount || 0;
@@ -566,12 +568,52 @@ export const ModernAuditForm: React.FC<Props> = ({
                   })}
 
                   {/* Section Total Footer for Mobile */}
-                  <div className="p-4 bg-gradient-to-r from-sky-50 via-white to-emerald-50 border border-slate-200 rounded-2xl flex items-center justify-between text-xs font-black shadow-xs">
-                    <span className="text-slate-700 uppercase tracking-wider">{sec.title} Total:</span>
-                    <div className="text-end font-mono">
-                      <span className="text-sky-900 font-black">{formatNumber(sec.totals.total_quantity)} L</span>
-                      <span className="mx-1 text-slate-400">•</span>
-                      <span className="text-emerald-900 font-black">{formatCurrency(sec.totals.total_sales)} {t('common.sar')}</span>
+                  <div className="p-4 bg-gradient-to-r from-blue-50 via-sky-50 to-emerald-50 border border-slate-200 rounded-2xl flex flex-col space-y-3 text-xs font-black shadow-xs">
+                    <div className="flex items-center justify-between border-b border-sky-100 pb-1.5">
+                      <span className="text-slate-900 font-extrabold uppercase tracking-wider">{sec.title} TOTAL</span>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-3 text-xs">
+                      <div>
+                        <label className="block text-[11px] font-bold text-slate-700 mb-1">
+                          Opening Reading (Manual Entry)
+                        </label>
+                        {isReadOnly ? (
+                          <div className="w-full min-h-[40px] bg-white border border-slate-300 rounded-xl px-3 py-2 text-sm font-black text-center text-slate-900 font-mono flex items-center justify-center">
+                            {sec.totals.total_opening_reading != null ? formatNumber(sec.totals.total_opening_reading) : '-'}
+                          </div>
+                        ) : (
+                          <input
+                            type="number"
+                            step="0.01"
+                            inputMode="decimal"
+                            value={sec.totals.total_opening_reading ?? ''}
+                            onChange={(e) =>
+                              onTotalOpeningChange &&
+                              onTotalOpeningChange(
+                                fuelType,
+                                e.target.value === '' ? null : parseFloat(e.target.value) || 0
+                              )
+                            }
+                            placeholder="Manual Entry"
+                            className="w-full min-h-[40px] text-sm font-black text-center bg-yellow-50 border border-amber-300 rounded-xl px-3 py-2 text-slate-900 focus:outline-none focus:ring-2 focus:ring-sky-500 font-mono shadow-xs"
+                          />
+                        )}
+                      </div>
+
+                      <div>
+                        <label className="block text-[11px] font-bold text-slate-700 mb-1">
+                          Closing Reading (Auto Calculated)
+                        </label>
+                        <div className="w-full min-h-[40px] bg-blue-100/80 border border-blue-300 rounded-xl px-3 py-2 text-sm font-black text-center text-blue-950 font-mono flex items-center justify-center">
+                          {formatNumber(sec.totals.final_closing_reading)} L
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center justify-between pt-2 border-t border-slate-200/80 font-mono text-xs">
+                      <span className="text-sky-900 font-black">Sold: {formatNumber(sec.totals.total_quantity)} L</span>
+                      <span className="text-emerald-900 font-black">Sales: {formatCurrency(sec.totals.total_sales)} {t('common.sar')}</span>
                     </div>
                   </div>
                 </div>
@@ -669,11 +711,34 @@ export const ModernAuditForm: React.FC<Props> = ({
                     </tbody>
                     <tfoot>
                       <tr className="bg-slate-100 text-slate-900 font-black border-t-2 border-slate-300 text-xs">
-                        <td colSpan={2} className="p-3 text-right uppercase">
-                          {sec.title} Section Total:
+                        <td className="p-3 font-extrabold uppercase text-slate-900">
+                          TOTAL
                         </td>
-                        <td className="p-3 font-mono font-black text-blue-900">
-                          Final Closing: {formatNumber(sec.totals.final_closing_reading)} L
+                        <td className="p-2.5">
+                          {isReadOnly ? (
+                            <span className="font-mono font-black text-slate-900">
+                              {sec.totals.total_opening_reading != null ? formatNumber(sec.totals.total_opening_reading) : '-'}
+                            </span>
+                          ) : (
+                            <input
+                              type="number"
+                              step="0.01"
+                              inputMode="decimal"
+                              value={sec.totals.total_opening_reading ?? ''}
+                              onChange={(e) =>
+                                onTotalOpeningChange &&
+                                onTotalOpeningChange(
+                                  fuelType,
+                                  e.target.value === '' ? null : parseFloat(e.target.value) || 0
+                                )
+                              }
+                              placeholder="Manual Entry"
+                              className="w-full text-xs font-black text-slate-900 bg-yellow-50 border border-amber-300 rounded-lg px-2.5 py-1 focus:ring-2 focus:ring-sky-500 font-mono shadow-xs"
+                            />
+                          )}
+                        </td>
+                        <td className="p-3 font-mono font-black text-blue-950">
+                          {formatNumber(sec.totals.final_closing_reading)} L
                         </td>
                         <td className="p-3 text-right font-mono font-black text-sky-900">
                           {formatNumber(sec.totals.total_quantity)} L

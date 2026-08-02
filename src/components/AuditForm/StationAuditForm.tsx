@@ -156,12 +156,23 @@ export const StationAuditForm: React.FC<Props> = ({
       operation_supervisor_name: currentUser.full_name,
     };
 
+  const [totalOpeningReadings, setTotalOpeningReadings] = useState<Record<FuelType, number | null>>({
+    PETROL_91: initialAudit?.p91_total_opening_reading !== undefined ? initialAudit.p91_total_opening_reading : null,
+    PETROL_95: initialAudit?.p95_total_opening_reading !== undefined ? initialAudit.p95_total_opening_reading : null,
+    DIESEL: initialAudit?.diesel_total_opening_reading !== undefined ? initialAudit.diesel_total_opening_reading : null,
+  });
+
+  const handleTotalOpeningChange = (fuelType: FuelType, value: number | null) => {
+    setTotalOpeningReadings((prev) => ({ ...prev, [fuelType]: value }));
+  };
+
   const totals = calculateAuditTotals(
     items,
     sectionPrices,
     noorKhoy,
     atm,
-    cashReceived
+    cashReceived,
+    totalOpeningReadings
   );
 
   // Handle Section Price Update (Updates all 14 pump rows of that fuel type)
@@ -403,6 +414,10 @@ export const StationAuditForm: React.FC<Props> = ({
       p91_price: sectionPrices.PETROL_91,
       p95_price: sectionPrices.PETROL_95,
       diesel_price: sectionPrices.DIESEL,
+
+      p91_total_opening_reading: totalOpeningReadings.PETROL_91,
+      p95_total_opening_reading: totalOpeningReadings.PETROL_95,
+      diesel_total_opening_reading: totalOpeningReadings.DIESEL,
       notes: notes,
 
       created_at: initialAudit?.created_at || new Date().toISOString(),
@@ -801,6 +816,7 @@ export const StationAuditForm: React.FC<Props> = ({
           stations={stations}
           onItemChange={handleItemChange}
           onPriceChange={handleFuelPriceChange}
+          onTotalOpeningChange={handleTotalOpeningChange}
           onMetaChange={handleMetaChange}
           onSignatoryClick={handleSignatoryClick}
           isReadOnly={isReadOnly}
@@ -815,6 +831,7 @@ export const StationAuditForm: React.FC<Props> = ({
           prices={sectionPrices}
           onItemChange={handleItemChange}
           onPriceChange={handleFuelPriceChange}
+          onTotalOpeningChange={handleTotalOpeningChange}
           onMetaChange={handleMetaChange}
           onSignatoryClick={handleSignatoryClick}
           isReadOnly={isReadOnly}

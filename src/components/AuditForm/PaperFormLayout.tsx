@@ -14,6 +14,7 @@ interface Props {
     value: number | null
   ) => void;
   onPriceChange?: (fuelType: FuelType, newPrice: number) => void;
+  onTotalOpeningChange?: (fuelType: FuelType, value: number | null) => void;
   onMetaChange?: (field: keyof StationAudit, value: any) => void;
   onSignatoryClick?: (roleKey: string) => void;
   isReadOnly?: boolean;
@@ -25,13 +26,14 @@ export const PaperFormLayout: React.FC<Props> = ({
   prices,
   onItemChange,
   onPriceChange,
+  onTotalOpeningChange,
   onMetaChange,
   onSignatoryClick,
   isReadOnly = false,
 }) => {
-  const p91Totals = calculateFuelSectionTotals(items, 'PETROL_91', prices.PETROL_91);
-  const p95Totals = calculateFuelSectionTotals(items, 'PETROL_95', prices.PETROL_95);
-  const dieselTotals = calculateFuelSectionTotals(items, 'DIESEL', prices.DIESEL);
+  const p91Totals = calculateFuelSectionTotals(items, 'PETROL_91', prices.PETROL_91, audit.p91_total_opening_reading);
+  const p95Totals = calculateFuelSectionTotals(items, 'PETROL_95', prices.PETROL_95, audit.p95_total_opening_reading);
+  const dieselTotals = calculateFuelSectionTotals(items, 'DIESEL', prices.DIESEL, audit.diesel_total_opening_reading);
 
   const getFuelItems = (type: FuelType) => items.filter((i) => i.fuel_type === type);
 
@@ -588,17 +590,48 @@ export const PaperFormLayout: React.FC<Props> = ({
         </div>
 
         {/* Section Final Closing & Totals Summary Card for Mobile */}
-        <div className="p-4 bg-gradient-to-r from-blue-50 via-sky-50 to-emerald-50 border border-sky-200 rounded-2xl flex flex-col sm:flex-row items-start sm:items-center justify-between text-xs font-black shadow-sm gap-2">
-          <span className="text-slate-800 uppercase tracking-wider">{title} Final Closing & Totals:</span>
-          <div className="text-end font-mono space-y-1 sm:space-y-0">
-            <div className="text-blue-900 font-black">
-              Final Closing: {formatNumber(sectionTotals.final_closing_reading)} L
-            </div>
+        <div className="p-4 bg-gradient-to-r from-blue-50 via-sky-50 to-emerald-50 border border-sky-200 rounded-2xl flex flex-col space-y-3 text-xs font-black shadow-sm">
+          <div className="flex items-center justify-between border-b border-sky-200/60 pb-2">
+            <span className="text-slate-900 font-extrabold uppercase tracking-wider">{title} TOTAL:</span>
+          </div>
+
+          <div className="grid grid-cols-2 gap-3 text-xs">
             <div>
-              <span className="text-sky-900 font-black">{formatNumber(sectionTotals.total_quantity)} L</span>
-              <span className="mx-1 text-slate-400">•</span>
-              <span className="text-emerald-900 font-black">{formatCurrency(sectionTotals.total_sales)} SAR</span>
+              <label className="block text-[11px] font-bold text-slate-700 mb-1">Opening Reading (Manual Entry)</label>
+              {isReadOnly ? (
+                <div className="bg-white border border-slate-300 rounded-xl px-3 py-2 text-slate-900 font-mono font-bold text-center">
+                  {sectionTotals.total_opening_reading != null ? formatNumber(sectionTotals.total_opening_reading) : '-'}
+                </div>
+              ) : (
+                <input
+                  type="number"
+                  step="0.01"
+                  inputMode="decimal"
+                  value={sectionTotals.total_opening_reading ?? ''}
+                  onChange={(e) =>
+                    onTotalOpeningChange &&
+                    onTotalOpeningChange(
+                      fuelTypeKey,
+                      e.target.value === '' ? null : (parseFloat(e.target.value) || 0)
+                    )
+                  }
+                  placeholder="0.00"
+                  className="w-full text-sm font-black text-center bg-yellow-50 border border-amber-300 rounded-xl px-3 py-2 text-slate-900 focus:ring-2 focus:ring-sky-500 font-mono"
+                />
+              )}
             </div>
+
+            <div>
+              <label className="block text-[11px] font-bold text-slate-700 mb-1">Closing Reading (Auto Calculated)</label>
+              <div className="bg-blue-100/70 border border-blue-300 rounded-xl px-3 py-2 text-blue-950 font-mono font-black text-center text-sm">
+                {formatNumber(sectionTotals.final_closing_reading)} L
+              </div>
+            </div>
+          </div>
+
+          <div className="flex items-center justify-between pt-2 border-t border-sky-200/60 font-mono">
+            <span className="text-sky-900 font-black">Sold: {formatNumber(sectionTotals.total_quantity)} L</span>
+            <span className="text-emerald-900 font-black">Sales: {formatCurrency(sectionTotals.total_sales)} SAR</span>
           </div>
         </div>
       </div>
@@ -793,18 +826,44 @@ export const PaperFormLayout: React.FC<Props> = ({
               );
             })}
 
-            {/* FINAL CLOSING READING SUMMARY ROW */}
+            {/* TOTAL SUMMARY ROW */}
             <tr className="bg-blue-50/80 font-black text-black border-t-2 border-black">
-              <td className="font-extrabold text-blue-900 text-[9px] uppercase tracking-wider p-1">
-                TOTAL / CLOSING
+              <td className="font-extrabold text-black text-xs uppercase tracking-wider p-1">
+                TOTAL
               </td>
-              <td className="text-center font-bold text-gray-400">-</td>
+              {/* OPENING READING (MANUAL ENTRY) */}
+              <td className="text-center">
+                {isReadOnly ? (
+                  <span className="font-mono font-bold text-slate-900">
+                    {sectionTotals.total_opening_reading != null ? formatNumber(sectionTotals.total_opening_reading) : '-'}
+                  </span>
+                ) : (
+                  <input
+                    type="number"
+                    step="0.01"
+                    inputMode="decimal"
+                    value={sectionTotals.total_opening_reading ?? ''}
+                    onChange={(e) =>
+                      onTotalOpeningChange &&
+                      onTotalOpeningChange(
+                        fuelTypeKey,
+                        e.target.value === '' ? null : (parseFloat(e.target.value) || 0)
+                      )
+                    }
+                    placeholder="0.00"
+                    className="paper-input text-center font-bold font-mono bg-yellow-50/90 border border-amber-400 rounded px-1 py-0.5"
+                  />
+                )}
+              </td>
+              {/* CLOSING READING (AUTO CALCULATED) */}
               <td className="text-center font-mono font-black text-blue-950 p-1 text-xs">
                 {formatNumber(sectionTotals.final_closing_reading)}
               </td>
+              {/* QUANTITY SOLD (AUTO TOTAL) */}
               <td className="text-center font-mono font-black text-sky-950 p-1 text-xs">
                 {formatNumber(sectionTotals.total_quantity)}
               </td>
+              {/* SALES AMOUNT (AUTO TOTAL) */}
               <td className="text-center font-mono font-black text-emerald-950 p-1 text-xs">
                 {formatCurrency(sectionTotals.total_sales)}
               </td>

@@ -32,6 +32,7 @@ export interface FuelSectionTotals {
   total_quantity: number;
   price: number;
   total_sales: number;
+  total_opening_reading: number | null;
   final_closing_reading: number;
 }
 
@@ -155,6 +156,11 @@ export interface StationAudit {
   p91_price?: number;
   p95_price?: number;
   diesel_price?: number;
+
+  // Manual Total Opening Readings entered by auditor per fuel type
+  p91_total_opening_reading?: number | null;
+  p95_total_opening_reading?: number | null;
+  diesel_total_opening_reading?: number | null;
 
   notes?: string;
 
