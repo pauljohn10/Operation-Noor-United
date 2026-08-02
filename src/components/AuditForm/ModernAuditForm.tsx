@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import type { StationAudit, PumpReadingItem, FuelType, Station } from '../../types/audit';
-import { calculateFuelSectionTotals, formatCurrency, formatNumber } from '../../lib/calculations';
+import { calculateFuelSectionTotals, formatCurrency, formatNumber, formatMeterReading } from '../../lib/calculations';
 import { useLanguage } from '../../context/LanguageContext';
 import {
   Building,
@@ -511,7 +511,7 @@ export const ModernAuditForm: React.FC<Props> = ({
                             </label>
                             {isReadOnly ? (
                               <div className="w-full min-h-[44px] bg-slate-100 border border-slate-300 rounded-xl px-3 py-2.5 text-sm font-black text-end text-slate-900 font-mono flex items-center justify-end">
-                                {item.start_reading != null ? formatNumber(item.start_reading) : '0'}
+                                {item.start_reading != null ? formatMeterReading(item.start_reading) : '0'}
                               </div>
                             ) : (
                               <input
@@ -540,7 +540,7 @@ export const ModernAuditForm: React.FC<Props> = ({
                             </label>
                             {isReadOnly ? (
                               <div className="w-full min-h-[44px] bg-slate-100 border border-slate-300 rounded-xl px-3 py-2.5 text-sm font-black text-end text-slate-900 font-mono flex items-center justify-end">
-                                {item.end_reading != null ? formatNumber(item.end_reading) : '0'}
+                                {item.end_reading != null ? formatMeterReading(item.end_reading) : '0'}
                               </div>
                             ) : (
                               <input
@@ -579,7 +579,7 @@ export const ModernAuditForm: React.FC<Props> = ({
                         </label>
                         {isReadOnly ? (
                           <div className="w-full min-h-[40px] bg-white border border-slate-300 rounded-xl px-3 py-2 text-sm font-black text-center text-slate-900 font-mono flex items-center justify-center">
-                            {sec.totals.total_opening_reading != null ? formatNumber(sec.totals.total_opening_reading) : '-'}
+                            {sec.totals.total_opening_reading != null ? formatMeterReading(sec.totals.total_opening_reading) : '-'}
                           </div>
                         ) : (
                           <input
@@ -605,7 +605,7 @@ export const ModernAuditForm: React.FC<Props> = ({
                           Closing Reading (Auto Calculated)
                         </label>
                         <div className="w-full min-h-[40px] bg-blue-100/80 border border-blue-300 rounded-xl px-3 py-2 text-sm font-black text-center text-blue-950 font-mono flex items-center justify-center">
-                          {formatNumber(sec.totals.final_closing_reading)} L
+                          {formatMeterReading(sec.totals.final_closing_reading)} L
                         </div>
                       </div>
                     </div>
@@ -648,7 +648,7 @@ export const ModernAuditForm: React.FC<Props> = ({
                             <td className="p-2.5">
                               {isReadOnly ? (
                                 <span className="font-mono font-bold text-slate-900">
-                                  {item.start_reading != null ? formatNumber(item.start_reading) : '-'}
+                                  {item.start_reading != null ? formatMeterReading(item.start_reading) : '-'}
                                 </span>
                               ) : (
                                 <input
@@ -672,11 +672,11 @@ export const ModernAuditForm: React.FC<Props> = ({
                             <td className="p-2.5">
                               {isTotalRow ? (
                                 <span className="font-mono font-black text-blue-950">
-                                  {item.end_reading != null ? `${formatNumber(item.end_reading)} L` : '-'}
+                                  {item.end_reading != null ? `${formatMeterReading(item.end_reading)} L` : '-'}
                                 </span>
                               ) : isReadOnly ? (
                                 <span className="font-mono font-bold text-slate-900">
-                                  {item.end_reading != null ? formatNumber(item.end_reading) : '-'}
+                                  {item.end_reading != null ? formatMeterReading(item.end_reading) : '-'}
                                 </span>
                               ) : (
                                 <input

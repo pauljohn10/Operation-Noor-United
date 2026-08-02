@@ -112,10 +112,15 @@ export function formatCurrency(amount?: number | null): string {
   }).format(amount);
 }
 
-export function formatNumber(num?: number | null): string {
+export function formatNumber(num?: number | null, useGrouping = true): string {
   if (num == null || isNaN(num)) return '';
   return new Intl.NumberFormat('en-US', {
+    useGrouping,
     minimumFractionDigits: 0,
     maximumFractionDigits: 2,
   }).format(num);
+}
+
+export function formatMeterReading(num?: number | null): string {
+  return formatNumber(num, false);
 }

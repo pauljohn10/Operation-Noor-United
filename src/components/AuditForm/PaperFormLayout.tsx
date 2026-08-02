@@ -1,6 +1,6 @@
 import React from 'react';
 import type { StationAudit, PumpReadingItem, FuelType } from '../../types/audit';
-import { calculateFuelSectionTotals, formatCurrency, formatNumber } from '../../lib/calculations';
+import { calculateFuelSectionTotals, formatCurrency, formatNumber, formatMeterReading } from '../../lib/calculations';
 import { CheckCircle2, XCircle, AlertTriangle, ShieldCheck, PenTool, Banknote } from 'lucide-react';
 
 interface Props {
@@ -497,7 +497,7 @@ export const PaperFormLayout: React.FC<Props> = ({
                     <label className="block text-xs font-bold text-slate-700 mb-1">Start Reading</label>
                     {isReadOnly ? (
                       <div className="bg-white border border-slate-300 rounded-xl px-3 py-2.5 text-slate-900 font-mono text-sm font-bold text-center">
-                        {formatNumber(item.start_reading)}
+                        {formatMeterReading(item.start_reading)}
                       </div>
                     ) : (
                       <input
@@ -520,7 +520,7 @@ export const PaperFormLayout: React.FC<Props> = ({
                     <label className="block text-xs font-bold text-slate-700 mb-1">End Reading</label>
                     {isReadOnly ? (
                       <div className="bg-white border border-slate-300 rounded-xl px-3 py-2.5 text-slate-900 font-mono text-sm font-bold text-center">
-                        {formatNumber(item.end_reading)}
+                        {formatMeterReading(item.end_reading)}
                       </div>
                     ) : (
                       <input
@@ -600,7 +600,7 @@ export const PaperFormLayout: React.FC<Props> = ({
               <label className="block text-[11px] font-bold text-slate-700 mb-1">Opening Reading (Manual Entry)</label>
               {isReadOnly ? (
                 <div className="bg-white border border-slate-300 rounded-xl px-3 py-2 text-slate-900 font-mono font-bold text-center">
-                  {sectionTotals.total_opening_reading != null ? formatNumber(sectionTotals.total_opening_reading) : '-'}
+                  {sectionTotals.total_opening_reading != null ? formatMeterReading(sectionTotals.total_opening_reading) : '-'}
                 </div>
               ) : (
                 <input
@@ -624,7 +624,7 @@ export const PaperFormLayout: React.FC<Props> = ({
             <div>
               <label className="block text-[11px] font-bold text-slate-700 mb-1">Closing Reading (Auto Calculated)</label>
               <div className="bg-blue-100/70 border border-blue-300 rounded-xl px-3 py-2 text-blue-950 font-mono font-black text-center text-sm">
-                {formatNumber(sectionTotals.final_closing_reading)} L
+                {formatMeterReading(sectionTotals.final_closing_reading)} L
               </div>
             </div>
           </div>
@@ -682,7 +682,7 @@ export const PaperFormLayout: React.FC<Props> = ({
                   {/* Start Reading (Opening Reading) */}
                   <td>
                     {isReadOnly ? (
-                      formatNumber(item.start_reading)
+                      formatMeterReading(item.start_reading)
                     ) : (
                       <input
                         type="number"
@@ -708,10 +708,10 @@ export const PaperFormLayout: React.FC<Props> = ({
                   <td>
                     {isTotalRow ? (
                       <span className="font-mono font-black text-blue-950 p-1 text-xs">
-                        {formatNumber(item.end_reading)}
+                        {formatMeterReading(item.end_reading)}
                       </span>
                     ) : isReadOnly ? (
-                      formatNumber(item.end_reading)
+                      formatMeterReading(item.end_reading)
                     ) : (
                       <input
                         type="number"
