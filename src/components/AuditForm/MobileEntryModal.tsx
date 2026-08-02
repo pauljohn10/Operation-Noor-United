@@ -72,7 +72,7 @@ export const MobileEntryModal: React.FC<Props> = ({
         currentValue: prices[ft] || 0,
       });
 
-      // Pump items 1 to 14
+      // Active pumps 1 to 14
       for (let p = 1; p <= 14; p++) {
         const item = items.find((i) => i.fuel_type === ft && i.pump_no === p);
 
@@ -95,27 +95,19 @@ export const MobileEntryModal: React.FC<Props> = ({
           fieldKey: 'end_reading',
           currentValue: item?.end_reading || 0,
         });
-
-        list.push({
-          id: `${ft}-${p}-quantity_sold`,
-          category: 'PUMP',
-          fuelType: ft,
-          pumpNo: p,
-          fieldName: `${fuelName} — Pump #${p} — Quantity Sold (L)`,
-          fieldKey: 'quantity_sold',
-          currentValue: item?.quantity_sold || 0,
-        });
-
-        list.push({
-          id: `${ft}-${p}-amount`,
-          category: 'PUMP',
-          fuelType: ft,
-          pumpNo: p,
-          fieldName: `${fuelName} — Pump #${p} — Amount (SAR)`,
-          fieldKey: 'amount',
-          currentValue: item?.amount || 0,
-        });
       }
+
+      // Total row (Pump 15) manual opening reading entry
+      const totalItem = items.find((i) => i.fuel_type === ft && i.pump_no === 15);
+      list.push({
+        id: `${ft}-15-start_reading`,
+        category: 'PUMP',
+        fuelType: ft,
+        pumpNo: 15,
+        fieldName: `${fuelName} — Total Opening Reading (Manual Entry)`,
+        fieldKey: 'start_reading',
+        currentValue: totalItem?.start_reading || 0,
+      });
     });
 
     // Collection metadata fields

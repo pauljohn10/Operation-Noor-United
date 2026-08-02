@@ -31,9 +31,9 @@ export const PaperFormLayout: React.FC<Props> = ({
   onSignatoryClick,
   isReadOnly = false,
 }) => {
-  const p91Totals = calculateFuelSectionTotals(items, 'PETROL_91', prices.PETROL_91, audit.p91_total_opening_reading);
-  const p95Totals = calculateFuelSectionTotals(items, 'PETROL_95', prices.PETROL_95, audit.p95_total_opening_reading);
-  const dieselTotals = calculateFuelSectionTotals(items, 'DIESEL', prices.DIESEL, audit.diesel_total_opening_reading);
+  const p91Totals = calculateFuelSectionTotals(items, 'PETROL_91', prices.PETROL_91);
+  const p95Totals = calculateFuelSectionTotals(items, 'PETROL_95', prices.PETROL_95);
+  const dieselTotals = calculateFuelSectionTotals(items, 'DIESEL', prices.DIESEL);
 
   const getFuelItems = (type: FuelType) => items.filter((i) => i.fuel_type === type);
 
@@ -668,12 +668,18 @@ export const PaperFormLayout: React.FC<Props> = ({
           <tbody>
             {fuelItems.map((item, idx) => {
               const pumpNo = item.pump_no;
+              const isTotalRow = pumpNo === 15;
 
               return (
-                <tr key={pumpNo} className="hover:bg-gray-50">
-                  <td className="font-bold text-black">{pumpNo}</td>
+                <tr
+                  key={pumpNo}
+                  className={isTotalRow ? 'bg-blue-50/80 font-black text-black border-t-2 border-black' : 'hover:bg-gray-50'}
+                >
+                  <td className="font-bold text-black">
+                    {isTotalRow ? <span className="font-extrabold text-blue-900 text-xs uppercase tracking-wider">Total</span> : pumpNo}
+                  </td>
                   
-                  {/* Start Reading */}
+                  {/* Start Reading (Opening Reading) */}
                   <td>
                     {isReadOnly ? (
                       formatNumber(item.start_reading)
@@ -692,14 +698,19 @@ export const PaperFormLayout: React.FC<Props> = ({
                             e.target.value === '' ? null : (parseFloat(e.target.value) || 0)
                           )
                         }
-                        className="paper-input"
+                        className={isTotalRow ? 'paper-input text-center font-bold font-mono bg-yellow-50/90 border border-amber-400 rounded px-1 py-0.5' : 'paper-input'}
+                        placeholder={isTotalRow ? 'Manual Entry' : '0.00'}
                       />
                     )}
                   </td>
 
-                  {/* End Reading */}
+                  {/* End Reading (Closing Reading) */}
                   <td>
-                    {isReadOnly ? (
+                    {isTotalRow ? (
+                      <span className="font-mono font-black text-blue-950 p-1 text-xs">
+                        {formatNumber(item.end_reading)}
+                      </span>
+                    ) : isReadOnly ? (
                       formatNumber(item.end_reading)
                     ) : (
                       <input
@@ -721,55 +732,25 @@ export const PaperFormLayout: React.FC<Props> = ({
                     )}
                   </td>
 
-                  {/* Quantity Sold */}
+                  {/* Quantity Sold (Sold Liters) */}
                   <td>
-                    {isReadOnly ? (
-                      <span className="font-bold text-gray-900">
+                    {isTotalRow ? (
+                      <span className="font-mono font-black text-sky-950 p-1 text-xs">
                         {formatNumber(item.quantity_sold)}
                       </span>
                     ) : (
-                      <input
-                        type="number"
-                        step="0.01"
-                        inputMode="decimal"
-                        value={item.quantity_sold ?? ''}
-                        onChange={(e) =>
-                          onItemChange &&
-                          onItemChange(
-                            item.fuel_type,
-                            pumpNo,
-                            'quantity_sold',
-                            e.target.value === '' ? null : (parseFloat(e.target.value) || 0)
-                          )
-                        }
-                        className="paper-input font-bold"
-                      />
+                      <span className="text-gray-400 font-bold">-</span>
                     )}
                   </td>
 
                   {/* Amount (Total Sales) */}
                   <td>
-                    {isReadOnly ? (
-                      <span className="font-bold text-gray-900">
+                    {isTotalRow ? (
+                      <span className="font-mono font-black text-emerald-950 p-1 text-xs">
                         {formatCurrency(item.amount)}
                       </span>
                     ) : (
-                      <input
-                        type="number"
-                        step="0.01"
-                        inputMode="decimal"
-                        value={item.amount ?? ''}
-                        onChange={(e) =>
-                          onItemChange &&
-                          onItemChange(
-                            item.fuel_type,
-                            pumpNo,
-                            'amount',
-                            e.target.value === '' ? null : (parseFloat(e.target.value) || 0)
-                          )
-                        }
-                        className="paper-input font-bold"
-                      />
+                      <span className="text-gray-400 font-bold">-</span>
                     )}
                   </td>
 
@@ -825,49 +806,6 @@ export const PaperFormLayout: React.FC<Props> = ({
                 </tr>
               );
             })}
-
-            {/* TOTAL SUMMARY ROW */}
-            <tr className="bg-blue-50/80 font-black text-black border-t-2 border-black">
-              <td className="font-extrabold text-black text-xs uppercase tracking-wider p-1">
-                TOTAL
-              </td>
-              {/* OPENING READING (MANUAL ENTRY) */}
-              <td className="text-center">
-                {isReadOnly ? (
-                  <span className="font-mono font-bold text-slate-900">
-                    {sectionTotals.total_opening_reading != null ? formatNumber(sectionTotals.total_opening_reading) : '-'}
-                  </span>
-                ) : (
-                  <input
-                    type="number"
-                    step="0.01"
-                    inputMode="decimal"
-                    value={sectionTotals.total_opening_reading ?? ''}
-                    onChange={(e) =>
-                      onTotalOpeningChange &&
-                      onTotalOpeningChange(
-                        fuelTypeKey,
-                        e.target.value === '' ? null : (parseFloat(e.target.value) || 0)
-                      )
-                    }
-                    placeholder="0.00"
-                    className="paper-input text-center font-bold font-mono bg-yellow-50/90 border border-amber-400 rounded px-1 py-0.5"
-                  />
-                )}
-              </td>
-              {/* CLOSING READING (AUTO CALCULATED) */}
-              <td className="text-center font-mono font-black text-blue-950 p-1 text-xs">
-                {formatNumber(sectionTotals.final_closing_reading)}
-              </td>
-              {/* QUANTITY SOLD (AUTO TOTAL) */}
-              <td className="text-center font-mono font-black text-sky-950 p-1 text-xs">
-                {formatNumber(sectionTotals.total_quantity)}
-              </td>
-              {/* SALES AMOUNT (AUTO TOTAL) */}
-              <td className="text-center font-mono font-black text-emerald-950 p-1 text-xs">
-                {formatCurrency(sectionTotals.total_sales)}
-              </td>
-            </tr>
           </tbody>
         </table>
       </div>

@@ -9,62 +9,58 @@ export const DEFAULT_FUEL_PRICES: Record<FuelType, number> = {
 export function calculateFuelSectionTotals(
   items: PumpReadingItem[],
   fuelType: FuelType,
-  priceFallback: number,
-  manualTotalOpeningReading?: number | null
+  priceFallback: number
 ): FuelSectionTotals {
-  const fuelItems = items.filter((i) => i.fuel_type === fuelType && Number(i.pump_no) <= 14);
+  const fuelItems = items.filter((i) => i.fuel_type === fuelType);
+  const activePumps = fuelItems.filter((i) => Number(i.pump_no) < 15);
+  const totalItem = fuelItems.find((i) => Number(i.pump_no) === 15);
 
-  let totalQty = 0;
-  let totalSales = 0;
-  let finalClosingReading = 0;
   const currentPrice = fuelItems[0]?.price || priceFallback;
 
-  fuelItems.forEach((item) => {
-    let qty = 0;
-    let amt = 0;
-
-    // Accumulate closing readings of all active pumps (Pump 1 to Pump 14)
+  // Sum Closing Readings of active pumps (Pump 1 through Pump 14)
+  let sumEndReadings = 0;
+  activePumps.forEach((item) => {
     if (item.end_reading != null) {
       const closing = Number(item.end_reading);
       if (!isNaN(closing)) {
-        finalClosingReading += closing;
+        sumEndReadings += closing;
       }
     }
-
-    // Auto-calculate quantity_sold and amount if readings are available
-    if (item.start_reading != null && item.end_reading != null) {
-      const start = Number(item.start_reading);
-      const end = Number(item.end_reading);
-      if (!isNaN(start) && !isNaN(end) && end >= start) {
-        qty = Number((end - start).toFixed(2));
-        amt = Number((qty * (item.price || currentPrice)).toFixed(2));
-      }
-    } else {
-      if (item.quantity_sold != null) {
-        const q = Number(item.quantity_sold);
-        if (!isNaN(q)) qty = q;
-      }
-      if (item.amount != null) {
-        const a = Number(item.amount);
-        if (!isNaN(a)) amt = a;
-      }
-    }
-
-    totalQty += qty;
-    totalSales += amt;
   });
 
-  const totalOpening = manualTotalOpeningReading !== undefined
-    ? manualTotalOpeningReading
-    : null;
+  const autoClosing = Number(sumEndReadings.toFixed(2));
+  let totalQty = 0;
+  let totalSales = 0;
+  let manualOpening: number | null = null;
+
+  if (totalItem) {
+    // Synchronize Total row (Pump 15) closing reading with auto-calculated sum
+    totalItem.end_reading = autoClosing;
+
+    if (totalItem.start_reading != null) {
+      const s = Number(totalItem.start_reading);
+      if (!isNaN(s)) {
+        manualOpening = s;
+        if (autoClosing != null) {
+          totalQty = Math.max(0, Number((autoClosing - s).toFixed(2)));
+          totalSales = Number((totalQty * (totalItem.price || currentPrice)).toFixed(2));
+          totalItem.quantity_sold = totalQty;
+          totalItem.amount = totalSales;
+        }
+      }
+    } else {
+      if (totalItem.quantity_sold != null) totalQty = Number(totalItem.quantity_sold);
+      if (totalItem.amount != null) totalSales = Number(totalItem.amount);
+    }
+  }
 
   return {
     fuel_type: fuelType,
     total_quantity: Number(totalQty.toFixed(2)),
     price: currentPrice,
     total_sales: Number(totalSales.toFixed(2)),
-    total_opening_reading: totalOpening != null ? Number(Number(totalOpening).toFixed(2)) : null,
-    final_closing_reading: Number(finalClosingReading.toFixed(2)),
+    total_opening_reading: manualOpening,
+    final_closing_reading: autoClosing,
   };
 }
 
@@ -73,12 +69,11 @@ export function calculateAuditTotals(
   prices: Record<FuelType, number>,
   noorKhoy?: number | null,
   atm?: number | null,
-  cashReceived?: number | null,
-  totalOpeningReadings?: Record<FuelType, number | null>
+  cashReceived?: number | null
 ) {
-  const p91 = calculateFuelSectionTotals(items, 'PETROL_91', prices.PETROL_91, totalOpeningReadings?.PETROL_91);
-  const p95 = calculateFuelSectionTotals(items, 'PETROL_95', prices.PETROL_95, totalOpeningReadings?.PETROL_95);
-  const diesel = calculateFuelSectionTotals(items, 'DIESEL', prices.DIESEL, totalOpeningReadings?.DIESEL);
+  const p91 = calculateFuelSectionTotals(items, 'PETROL_91', prices.PETROL_91);
+  const p95 = calculateFuelSectionTotals(items, 'PETROL_95', prices.PETROL_95);
+  const diesel = calculateFuelSectionTotals(items, 'DIESEL', prices.DIESEL);
 
   const grandTotalSales = Number(
     (p91.total_sales + p95.total_sales + diesel.total_sales).toFixed(2)

@@ -60,9 +60,9 @@ export const ModernAuditForm: React.FC<Props> = ({
     setCollapsedSections((prev) => ({ ...prev, [sectionKey]: !prev[sectionKey] }));
   };
 
-  const p91Totals = calculateFuelSectionTotals(items, 'PETROL_91', prices.PETROL_91, audit.p91_total_opening_reading);
-  const p95Totals = calculateFuelSectionTotals(items, 'PETROL_95', prices.PETROL_95, audit.p95_total_opening_reading);
-  const dieselTotals = calculateFuelSectionTotals(items, 'DIESEL', prices.DIESEL, audit.diesel_total_opening_reading);
+  const p91Totals = calculateFuelSectionTotals(items, 'PETROL_91', prices.PETROL_91);
+  const p95Totals = calculateFuelSectionTotals(items, 'PETROL_95', prices.PETROL_95);
+  const dieselTotals = calculateFuelSectionTotals(items, 'DIESEL', prices.DIESEL);
 
   const grandTotalSales = p91Totals.total_sales + p95Totals.total_sales + dieselTotals.total_sales;
   const noorKhoyVal = audit.noor_khoy_amount || 0;
@@ -632,123 +632,105 @@ export const ModernAuditForm: React.FC<Props> = ({
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-slate-100 text-slate-800 font-medium">
-                      {fuelItems.map((item, index) => (
-                        <tr key={item.pump_no} className="hover:bg-sky-50/50 transition-colors">
-                          <td className="p-2.5 text-center font-bold font-mono bg-slate-50/60 text-slate-900 rounded-l-lg">
-                            Pump {item.pump_no}
-                          </td>
-                          <td className="p-2.5">
-                            {isReadOnly ? (
-                              <span className="font-mono font-bold text-slate-900">
-                                {item.start_reading != null ? formatNumber(item.start_reading) : '-'}
-                              </span>
-                            ) : (
-                              <input
-                                type="number"
-                                step="0.01"
-                                inputMode="decimal"
-                                value={item.start_reading ?? ''}
-                                onChange={(e) =>
-                                  onItemChange(
-                                    fuelType,
-                                    item.pump_no,
-                                    'start_reading',
-                                    e.target.value === '' ? null : parseFloat(e.target.value) || 0
-                                  )
-                                }
-                                placeholder="0.00"
-                                className="w-full min-h-[40px] text-xs font-bold text-slate-900 bg-white border border-slate-300 rounded-lg px-2.5 py-1 focus:ring-2 focus:ring-sky-500 font-mono"
-                              />
-                            )}
-                          </td>
-                          <td className="p-2.5">
-                            {isReadOnly ? (
-                              <span className="font-mono font-bold text-slate-900">
-                                {item.end_reading != null ? formatNumber(item.end_reading) : '-'}
-                              </span>
-                            ) : (
-                              <input
-                                type="number"
-                                step="0.01"
-                                inputMode="decimal"
-                                value={item.end_reading ?? ''}
-                                onChange={(e) =>
-                                  onItemChange(
-                                    fuelType,
-                                    item.pump_no,
-                                    'end_reading',
-                                    e.target.value === '' ? null : parseFloat(e.target.value) || 0
-                                  )
-                                }
-                                placeholder="0.00"
-                                className="w-full min-h-[40px] text-xs font-bold text-slate-900 bg-white border border-slate-300 rounded-lg px-2.5 py-1 focus:ring-2 focus:ring-sky-500 font-mono"
-                              />
-                            )}
-                          </td>
-                          <td className="p-2.5 text-right font-black font-mono text-slate-900">
-                            {item.quantity_sold != null && item.quantity_sold > 0
-                              ? formatNumber(item.quantity_sold)
-                              : '-'}
-                          </td>
-                          {index === 0 && (
-                            <td
-                              rowSpan={fuelItems.length}
-                              className="p-3 text-center align-middle font-black font-mono text-slate-800 bg-slate-100/70 border-x border-slate-200"
-                            >
-                              <span className="text-xs">SAR {sec.price.toFixed(2)}</span>
-                              <span className="block text-[10px] text-slate-500 font-sans font-bold mt-0.5">
-                                Shared Unit Price
-                              </span>
+                      {fuelItems.map((item, index) => {
+                        const isTotalRow = item.pump_no === 15;
+                        return (
+                          <tr
+                            key={item.pump_no}
+                            className={isTotalRow ? 'bg-blue-50/80 font-black border-t-2 border-slate-300' : 'hover:bg-sky-50/50 transition-colors'}
+                          >
+                            <td className="p-2.5 text-center font-bold font-mono text-slate-900 rounded-l-lg">
+                              {isTotalRow ? (
+                                <span className="font-extrabold text-blue-950 font-sans uppercase text-xs">Total</span>
+                              ) : (
+                                `Pump ${item.pump_no}`
+                              )}
                             </td>
-                          )}
-                          <td className="p-2.5 text-right font-black font-mono text-slate-900 rounded-r-lg">
-                            {item.amount != null && item.amount > 0
-                              ? `${formatCurrency(item.amount)} SAR`
-                              : '-'}
-                          </td>
-                        </tr>
-                      ))}
+                            <td className="p-2.5">
+                              {isReadOnly ? (
+                                <span className="font-mono font-bold text-slate-900">
+                                  {item.start_reading != null ? formatNumber(item.start_reading) : '-'}
+                                </span>
+                              ) : (
+                                <input
+                                  type="number"
+                                  step="0.01"
+                                  inputMode="decimal"
+                                  value={item.start_reading ?? ''}
+                                  onChange={(e) =>
+                                    onItemChange(
+                                      fuelType,
+                                      item.pump_no,
+                                      'start_reading',
+                                      e.target.value === '' ? null : parseFloat(e.target.value) || 0
+                                    )
+                                  }
+                                  placeholder={isTotalRow ? 'Manual Entry' : '0.00'}
+                                  className={isTotalRow ? 'w-full text-xs font-black text-slate-900 bg-yellow-50 border border-amber-300 rounded-lg px-2.5 py-1 focus:ring-2 focus:ring-sky-500 font-mono shadow-xs' : 'w-full min-h-[40px] text-xs font-bold text-slate-900 bg-white border border-slate-300 rounded-lg px-2.5 py-1 focus:ring-2 focus:ring-sky-500 font-mono'}
+                                />
+                              )}
+                            </td>
+                            <td className="p-2.5">
+                              {isTotalRow ? (
+                                <span className="font-mono font-black text-blue-950">
+                                  {item.end_reading != null ? `${formatNumber(item.end_reading)} L` : '-'}
+                                </span>
+                              ) : isReadOnly ? (
+                                <span className="font-mono font-bold text-slate-900">
+                                  {item.end_reading != null ? formatNumber(item.end_reading) : '-'}
+                                </span>
+                              ) : (
+                                <input
+                                  type="number"
+                                  step="0.01"
+                                  inputMode="decimal"
+                                  value={item.end_reading ?? ''}
+                                  onChange={(e) =>
+                                    onItemChange(
+                                      fuelType,
+                                      item.pump_no,
+                                      'end_reading',
+                                      e.target.value === '' ? null : parseFloat(e.target.value) || 0
+                                    )
+                                  }
+                                  placeholder="0.00"
+                                  className="w-full min-h-[40px] text-xs font-bold text-slate-900 bg-white border border-slate-300 rounded-lg px-2.5 py-1 focus:ring-2 focus:ring-sky-500 font-mono"
+                                />
+                              )}
+                            </td>
+                            <td className="p-2.5 text-right font-black font-mono text-slate-900">
+                              {isTotalRow ? (
+                                <span className="text-sky-900 font-black">
+                                  {item.quantity_sold != null ? `${formatNumber(item.quantity_sold)} L` : '-'}
+                                </span>
+                              ) : (
+                                <span className="text-slate-400 font-bold">-</span>
+                              )}
+                            </td>
+                            {index === 0 && (
+                              <td
+                                rowSpan={fuelItems.length}
+                                className="p-3 text-center align-middle font-black font-mono text-slate-800 bg-slate-100/70 border-x border-slate-200"
+                              >
+                                <span className="text-xs">SAR {sec.price.toFixed(2)}</span>
+                                <span className="block text-[10px] text-slate-500 font-sans font-bold mt-0.5">
+                                  Shared Unit Price
+                                </span>
+                              </td>
+                            )}
+                            <td className="p-2.5 text-right font-black font-mono text-slate-900 rounded-r-lg">
+                              {isTotalRow ? (
+                                <span className="text-emerald-900 font-black">
+                                  {item.amount != null ? `${formatCurrency(item.amount)} SAR` : '-'}
+                                </span>
+                              ) : (
+                                <span className="text-slate-400 font-bold">-</span>
+                              )}
+                            </td>
+                          </tr>
+                        );
+                      })}
                     </tbody>
-                    <tfoot>
-                      <tr className="bg-slate-100 text-slate-900 font-black border-t-2 border-slate-300 text-xs">
-                        <td className="p-3 font-extrabold uppercase text-slate-900">
-                          TOTAL
-                        </td>
-                        <td className="p-2.5">
-                          {isReadOnly ? (
-                            <span className="font-mono font-black text-slate-900">
-                              {sec.totals.total_opening_reading != null ? formatNumber(sec.totals.total_opening_reading) : '-'}
-                            </span>
-                          ) : (
-                            <input
-                              type="number"
-                              step="0.01"
-                              inputMode="decimal"
-                              value={sec.totals.total_opening_reading ?? ''}
-                              onChange={(e) =>
-                                onTotalOpeningChange &&
-                                onTotalOpeningChange(
-                                  fuelType,
-                                  e.target.value === '' ? null : parseFloat(e.target.value) || 0
-                                )
-                              }
-                              placeholder="Manual Entry"
-                              className="w-full text-xs font-black text-slate-900 bg-yellow-50 border border-amber-300 rounded-lg px-2.5 py-1 focus:ring-2 focus:ring-sky-500 font-mono shadow-xs"
-                            />
-                          )}
-                        </td>
-                        <td className="p-3 font-mono font-black text-blue-950">
-                          {formatNumber(sec.totals.final_closing_reading)} L
-                        </td>
-                        <td className="p-3 text-right font-mono font-black text-sky-900">
-                          {formatNumber(sec.totals.total_quantity)} L
-                        </td>
-                        <td className="p-3"></td>
-                        <td className="p-3 text-right font-mono font-black text-sky-900">
-                          {formatCurrency(sec.totals.total_sales)} SAR
-                        </td>
-                      </tr>
-                    </tfoot>
                   </table>
                 </div>
               </>

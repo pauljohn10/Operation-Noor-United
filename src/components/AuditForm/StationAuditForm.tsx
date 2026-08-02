@@ -171,8 +171,7 @@ export const StationAuditForm: React.FC<Props> = ({
     sectionPrices,
     noorKhoy,
     atm,
-    cashReceived,
-    totalOpeningReadings
+    cashReceived
   );
 
   // Handle Section Price Update (Updates all 14 pump rows of that fuel type)

@@ -178,7 +178,7 @@ export function generateEmptyItems(): PumpReadingItem[] {
 
   fuels.forEach((fuel) => {
     const price = DEFAULT_FUEL_PRICES[fuel];
-    for (let p = 1; p <= 14; p++) {
+    for (let p = 1; p <= 15; p++) {
       items.push({
         fuel_type: fuel,
         pump_no: p,
@@ -197,53 +197,92 @@ export function generateEmptyItems(): PumpReadingItem[] {
 export function generateSampleItems(): PumpReadingItem[] {
   const items: PumpReadingItem[] = [];
   
+  // PETROL 91
+  let p91EndSum = 0;
   for (let p = 1; p <= 14; p++) {
     const start = 12000 + p * 450;
     const end = start + (p <= 6 ? 320 + p * 15 : 0);
-    const qty = end - start;
-    const price = DEFAULT_FUEL_PRICES.PETROL_91;
+    p91EndSum += end;
     items.push({
       fuel_type: 'PETROL_91',
       pump_no: p,
       start_reading: start,
       end_reading: end,
-      quantity_sold: qty,
-      price: price,
-      amount: Number((qty * price).toFixed(2)),
+      quantity_sold: null,
+      price: DEFAULT_FUEL_PRICES.PETROL_91,
+      amount: null,
     });
   }
+  // Total row (Pump 15) for PETROL 91
+  const p91OpeningTotal = 175000;
+  const p91Qty = Math.max(0, p91EndSum - p91OpeningTotal);
+  items.push({
+    fuel_type: 'PETROL_91',
+    pump_no: 15,
+    start_reading: p91OpeningTotal,
+    end_reading: p91EndSum,
+    quantity_sold: p91Qty,
+    price: DEFAULT_FUEL_PRICES.PETROL_91,
+    amount: Number((p91Qty * DEFAULT_FUEL_PRICES.PETROL_91).toFixed(2)),
+  });
 
+  // PETROL 95
+  let p95EndSum = 0;
   for (let p = 1; p <= 14; p++) {
     const start = 8500 + p * 320;
     const end = start + (p <= 4 ? 280 + p * 12 : 0);
-    const qty = end - start;
-    const price = DEFAULT_FUEL_PRICES.PETROL_95;
+    p95EndSum += end;
     items.push({
       fuel_type: 'PETROL_95',
       pump_no: p,
       start_reading: start,
       end_reading: end,
-      quantity_sold: qty,
-      price: price,
-      amount: Number((qty * price).toFixed(2)),
+      quantity_sold: null,
+      price: DEFAULT_FUEL_PRICES.PETROL_95,
+      amount: null,
     });
   }
+  // Total row (Pump 15) for PETROL 95
+  const p95OpeningTotal = 150000;
+  const p95Qty = Math.max(0, p95EndSum - p95OpeningTotal);
+  items.push({
+    fuel_type: 'PETROL_95',
+    pump_no: 15,
+    start_reading: p95OpeningTotal,
+    end_reading: p95EndSum,
+    quantity_sold: p95Qty,
+    price: DEFAULT_FUEL_PRICES.PETROL_95,
+    amount: Number((p95Qty * DEFAULT_FUEL_PRICES.PETROL_95).toFixed(2)),
+  });
 
+  // DIESEL
+  let dieselEndSum = 0;
   for (let p = 1; p <= 14; p++) {
     const start = 24000 + p * 600;
     const end = start + (p <= 5 ? 450 + p * 25 : 0);
-    const qty = end - start;
-    const price = DEFAULT_FUEL_PRICES.DIESEL;
+    dieselEndSum += end;
     items.push({
       fuel_type: 'DIESEL',
       pump_no: p,
       start_reading: start,
       end_reading: end,
-      quantity_sold: qty,
-      price: price,
-      amount: Number((qty * price).toFixed(2)),
+      quantity_sold: null,
+      price: DEFAULT_FUEL_PRICES.DIESEL,
+      amount: null,
     });
   }
+  // Total row (Pump 15) for DIESEL
+  const dieselOpeningTotal = 390000;
+  const dieselQty = Math.max(0, dieselEndSum - dieselOpeningTotal);
+  items.push({
+    fuel_type: 'DIESEL',
+    pump_no: 15,
+    start_reading: dieselOpeningTotal,
+    end_reading: dieselEndSum,
+    quantity_sold: dieselQty,
+    price: DEFAULT_FUEL_PRICES.DIESEL,
+    amount: Number((dieselQty * DEFAULT_FUEL_PRICES.DIESEL).toFixed(2)),
+  });
 
   return items;
 }
