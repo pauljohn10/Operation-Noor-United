@@ -394,10 +394,10 @@ export const SOPdfLayout: React.FC<Props> = ({ form }) => {
                       {renderStatusBadge(isAvail, 'Available', 'Not Available')}
                     </td>
                     <td style={{ padding: '4px 8px', textAlign: 'center', fontWeight: '800', fontFamily: 'monospace' }}>
-                      {tank?.tank_capacity ? `${tank.tank_capacity.toLocaleString()} L` : '0 L'}
+                      {tank?.tank_capacity ? `${tank.tank_capacity} L` : '—'}
                     </td>
                     <td style={{ padding: '4px 8px', textAlign: 'center', fontWeight: '800' }}>
-                      {tank?.no_of_tanks || 0}
+                      {tank?.no_of_tanks || '—'}
                     </td>
                   </tr>
                 );
@@ -430,10 +430,10 @@ export const SOPdfLayout: React.FC<Props> = ({ form }) => {
                   <tr key={nItem.key} style={{ borderBottom: '1px solid #F1F5F9' }}>
                     <td style={{ padding: '3px 8px', fontWeight: '700', color: nItem.color }}>{nItem.name}</td>
                     <td style={{ padding: '3px 8px', textAlign: 'center', fontWeight: '800', fontFamily: 'monospace' }}>
-                      {noz?.quantity || 0}
+                      {noz?.quantity || '—'}
                     </td>
                     <td style={{ padding: '3px 8px', textAlign: 'center', fontWeight: '800' }}>
-                      {noz?.no_of_pumps || 0}
+                      {noz?.no_of_pumps || '—'}
                     </td>
                   </tr>
                 );
@@ -560,7 +560,6 @@ export const SOPdfLayout: React.FC<Props> = ({ form }) => {
             <tbody>
               {extinguishersList.map((ext, idx) => {
                 const isYesNoItem = ['6', '7', '8', '9'].includes(ext.id) || ['Sand Bucket', 'Traffic Cone', 'Waste Bin', 'CCTV 24/7 Monitoring'].some(n => ext.name.includes(n));
-                const isLiterItem = ['2', '4'].includes(ext.id) || ext.name.includes('Foam');
                 const isAvailable = Boolean(ext.is_available);
 
                 return (
@@ -570,12 +569,12 @@ export const SOPdfLayout: React.FC<Props> = ({ form }) => {
                       {isYesNoItem ? (
                         renderStatusBadge(isAvailable, 'Available', 'Not Available')
                       ) : (
-                        ext.weight_volume || (isLiterItem ? '1 Liter' : '1 Kg')
+                        ext.weight_volume || '—'
                       )}
                     </td>
                     <td style={{ padding: '3.5px 8px', textAlign: 'center' }}>
                       <span style={{ fontWeight: '900', fontFamily: 'monospace', color: '#0F172A' }}>
-                        {isYesNoItem && !isAvailable ? 0 : ext.quantity} Units
+                        {isYesNoItem && !isAvailable ? '0 Units' : (ext.quantity ? `${ext.quantity} Units` : '—')}
                       </span>
                     </td>
                   </tr>

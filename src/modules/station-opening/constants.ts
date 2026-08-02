@@ -5,11 +5,11 @@ import type {
 } from './types';
 
 export const DEFAULT_FIRE_EXTINGUISHERS: FireExtinguisherItem[] = [
-  { id: '1', name: 'Automatic Dry Powder', weight_volume: '1 Kg', quantity: 0, is_available: true },
-  { id: '2', name: 'Automatic Foam', weight_volume: '1 Liter', quantity: 0, is_available: true },
-  { id: '3', name: 'Dry Powder', weight_volume: '1 Kg', quantity: 0, is_available: true },
-  { id: '4', name: 'Foam', weight_volume: '1 Liter', quantity: 0, is_available: true },
-  { id: '5', name: 'CO₂ Fire Extinguisher', weight_volume: '1 Kg', quantity: 0, is_available: true },
+  { id: '1', name: 'Automatic Dry Powder', weight_volume: '', quantity: 0, is_available: false },
+  { id: '2', name: 'Automatic Foam', weight_volume: '', quantity: 0, is_available: false },
+  { id: '3', name: 'Dry Powder', weight_volume: '', quantity: 0, is_available: false },
+  { id: '4', name: 'Foam', weight_volume: '', quantity: 0, is_available: false },
+  { id: '5', name: 'CO₂ Fire Extinguisher', weight_volume: '', quantity: 0, is_available: false },
   { id: '6', name: 'Sand Bucket', weight_volume: 'Standard', quantity: 0, is_available: false },
   { id: '7', name: 'Traffic Cone', weight_volume: 'Standard', quantity: 0, is_available: false },
   { id: '8', name: 'Waste Bin', weight_volume: 'Large', quantity: 0, is_available: false },

@@ -406,7 +406,7 @@ export const SOFormView: React.FC<Props> = ({
               <label className="block text-xs font-extrabold text-slate-700 mb-1">{t('so.noOfPumps')}</label>
               <input
                 type="number"
-                value={form.no_of_fuel_pump}
+                value={form.no_of_fuel_pump || ''}
                 onChange={(e) => updateField('no_of_fuel_pump', parseInt(e.target.value) || 0)}
                 disabled={!isDraftOrReturned}
                 className="w-full bg-white/70 backdrop-blur-md border border-sky-200/80 rounded-xl px-3.5 py-2.5 text-xs font-black text-slate-900 font-mono focus:ring-2 focus:ring-sky-500 shadow-sm"
@@ -460,7 +460,7 @@ export const SOFormView: React.FC<Props> = ({
                       <td className="p-3">
                         <input
                           type="text"
-                          value={tank.tank_capacity}
+                          value={tank.tank_capacity || ''}
                           onChange={(e) => {
                             const updated = [...form.fuel_tanks];
                             updated[idx].tank_capacity = e.target.value;
@@ -473,7 +473,7 @@ export const SOFormView: React.FC<Props> = ({
                       <td className="p-3">
                         <input
                           type="number"
-                          value={tank.no_of_tanks}
+                          value={tank.no_of_tanks || ''}
                           onChange={(e) => {
                             const updated = [...form.fuel_tanks];
                             updated[idx].no_of_tanks = parseInt(e.target.value) || 0;
@@ -574,7 +574,7 @@ export const SOFormView: React.FC<Props> = ({
                     <td className="p-3">
                       <input
                         type="number"
-                        value={form.nozzle_details?.find((n) => n.fuel_type === 'PETROL_91')?.quantity || 0}
+                        value={form.nozzle_details?.find((n) => n.fuel_type === 'PETROL_91')?.quantity || ''}
                         onChange={(e) => {
                           const val = parseInt(e.target.value) || 0;
                           const copy = [...(form.nozzle_details || [])];
@@ -590,7 +590,7 @@ export const SOFormView: React.FC<Props> = ({
                     <td className="p-3 text-end">
                       <input
                         type="number"
-                        value={form.nozzle_details?.find((n) => n.fuel_type === 'PETROL_91')?.no_of_pumps || 0}
+                        value={form.nozzle_details?.find((n) => n.fuel_type === 'PETROL_91')?.no_of_pumps || ''}
                         onChange={(e) => {
                           const val = parseInt(e.target.value) || 0;
                           const copy = [...(form.nozzle_details || [])];
@@ -611,7 +611,7 @@ export const SOFormView: React.FC<Props> = ({
                     <td className="p-3">
                       <input
                         type="number"
-                        value={form.nozzle_details?.find((n) => n.fuel_type === 'PETROL_95')?.quantity || 0}
+                        value={form.nozzle_details?.find((n) => n.fuel_type === 'PETROL_95')?.quantity || ''}
                         onChange={(e) => {
                           const val = parseInt(e.target.value) || 0;
                           const copy = [...(form.nozzle_details || [])];
@@ -627,7 +627,7 @@ export const SOFormView: React.FC<Props> = ({
                     <td className="p-3 text-end">
                       <input
                         type="number"
-                        value={form.nozzle_details?.find((n) => n.fuel_type === 'PETROL_95')?.no_of_pumps || 0}
+                        value={form.nozzle_details?.find((n) => n.fuel_type === 'PETROL_95')?.no_of_pumps || ''}
                         onChange={(e) => {
                           const val = parseInt(e.target.value) || 0;
                           const copy = [...(form.nozzle_details || [])];
@@ -648,7 +648,7 @@ export const SOFormView: React.FC<Props> = ({
                     <td className="p-3">
                       <input
                         type="number"
-                        value={form.nozzle_details?.find((n) => n.fuel_type === 'DIESEL')?.quantity || 0}
+                        value={form.nozzle_details?.find((n) => n.fuel_type === 'DIESEL')?.quantity || ''}
                         onChange={(e) => {
                           const val = parseInt(e.target.value) || 0;
                           const copy = [...(form.nozzle_details || [])];
@@ -664,7 +664,7 @@ export const SOFormView: React.FC<Props> = ({
                     <td className="p-3 text-end">
                       <input
                         type="number"
-                        value={form.nozzle_details?.find((n) => n.fuel_type === 'DIESEL')?.no_of_pumps || 0}
+                        value={form.nozzle_details?.find((n) => n.fuel_type === 'DIESEL')?.no_of_pumps || ''}
                         onChange={(e) => {
                           const val = parseInt(e.target.value) || 0;
                           const copy = [...(form.nozzle_details || [])];
@@ -685,7 +685,7 @@ export const SOFormView: React.FC<Props> = ({
                     <td className="p-3">
                       <input
                         type="number"
-                        value={form.nozzle_details?.find((n) => n.fuel_type === 'COMBINED')?.quantity || 0}
+                        value={form.nozzle_details?.find((n) => n.fuel_type === 'COMBINED')?.quantity || ''}
                         onChange={(e) => {
                           const val = parseInt(e.target.value) || 0;
                           const copy = [...(form.nozzle_details || [])];
@@ -701,7 +701,7 @@ export const SOFormView: React.FC<Props> = ({
                     <td className="p-3 text-end">
                       <input
                         type="number"
-                        value={form.nozzle_details?.find((n) => n.fuel_type === 'COMBINED')?.no_of_pumps || 0}
+                        value={form.nozzle_details?.find((n) => n.fuel_type === 'COMBINED')?.no_of_pumps || ''}
                         onChange={(e) => {
                           const val = parseInt(e.target.value) || 0;
                           const copy = [...(form.nozzle_details || [])];
@@ -722,7 +722,7 @@ export const SOFormView: React.FC<Props> = ({
                     <td className="p-3">
                       <input
                         type="number"
-                        value={form.nozzle_details?.find((n) => n.fuel_type === 'KEROSENE')?.quantity || 0}
+                        value={form.nozzle_details?.find((n) => n.fuel_type === 'KEROSENE')?.quantity || ''}
                         onChange={(e) => {
                           const val = parseInt(e.target.value) || 0;
                           const copy = [...(form.nozzle_details || [])];
@@ -738,7 +738,7 @@ export const SOFormView: React.FC<Props> = ({
                     <td className="p-3 text-end">
                       <input
                         type="number"
-                        value={form.nozzle_details?.find((n) => n.fuel_type === 'KEROSENE')?.no_of_pumps || 0}
+                        value={form.nozzle_details?.find((n) => n.fuel_type === 'KEROSENE')?.no_of_pumps || ''}
                         onChange={(e) => {
                           const val = parseInt(e.target.value) || 0;
                           const copy = [...(form.nozzle_details || [])];
@@ -892,11 +892,11 @@ export const SOFormView: React.FC<Props> = ({
                             )
                           ) : !isDraftOrReturned ? (
                             <span className="inline-block px-3 py-1 bg-slate-100/90 text-slate-800 rounded-lg text-xs font-extrabold border border-slate-200/90 shadow-sm">
-                              {ext.weight_volume || (isLiterItem ? '1 Liter' : '1 Kg')}
+                              {ext.weight_volume || '-'}
                             </span>
                           ) : (
                             <select
-                              value={ext.weight_volume || (isLiterItem ? '1 Liter' : '1 Kg')}
+                              value={ext.weight_volume || ''}
                               onChange={(e) => {
                                 const copy = [...(form.safety_equipment?.extinguishers || [])];
                                 copy[idx].weight_volume = e.target.value;
@@ -904,6 +904,7 @@ export const SOFormView: React.FC<Props> = ({
                               }}
                               className="bg-white border border-sky-200/80 rounded-lg px-2 py-1 text-center font-bold text-xs focus:ring-2 focus:ring-sky-500 shadow-sm cursor-pointer"
                             >
+                              <option value="">Select Weight / Volume...</option>
                               {(isLiterItem ? literList : kgList).map((opt) => (
                                 <option key={opt} value={opt}>
                                   {opt}
@@ -915,14 +916,15 @@ export const SOFormView: React.FC<Props> = ({
                         <td className="p-2">
                           {!isDraftOrReturned ? (
                             <span className="inline-block w-16 px-2 py-1 bg-slate-100/90 text-slate-800 rounded-lg text-center font-mono text-xs font-extrabold border border-slate-200/90 shadow-sm">
-                              {isYesNoItem && !isAvailable ? 0 : ext.quantity}
+                              {isYesNoItem && !isAvailable ? 0 : (ext.quantity || 0)}
                             </span>
                           ) : (
                             <input
                               type="number"
                               min="0"
                               disabled={isYesNoItem && !isAvailable}
-                              value={isYesNoItem && !isAvailable ? 0 : ext.quantity}
+                              value={isYesNoItem && !isAvailable ? '' : (ext.quantity || '')}
+                              placeholder="0"
                               onChange={(e) => {
                                 const copy = [...(form.safety_equipment?.extinguishers || [])];
                                 copy[idx].quantity = Math.max(0, parseInt(e.target.value) || 0);
