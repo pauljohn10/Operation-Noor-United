@@ -606,19 +606,25 @@ export const PaperFormLayout: React.FC<Props> = ({
                 </div>
               ) : (
                 <input
-                  type="number"
-                  step="0.01"
+                  type="text"
                   inputMode="decimal"
+                  pattern="[0-9.]*"
                   value={sectionTotals.total_opening_reading ?? ''}
-                  onChange={(e) =>
-                    onTotalOpeningChange &&
-                    onTotalOpeningChange(
-                      fuelTypeKey,
-                      e.target.value === '' ? null : (parseFloat(e.target.value) || 0)
-                    )
-                  }
-                  placeholder="0.00"
-                  className="w-full text-sm font-black text-center bg-yellow-50 border border-amber-300 rounded-xl px-3 py-2 text-slate-900 focus:ring-2 focus:ring-sky-500 font-mono"
+                  onClick={(e) => e.stopPropagation()}
+                  onTouchStart={(e) => e.stopPropagation()}
+                  onChange={(e) => {
+                    const raw = e.target.value;
+                    if (raw === '') {
+                      if (onTotalOpeningChange) onTotalOpeningChange(fuelTypeKey, null);
+                      return;
+                    }
+                    if (/^[0-9]*\.?[0-9]*$/.test(raw)) {
+                      const parsed = parseFloat(raw);
+                      if (onTotalOpeningChange) onTotalOpeningChange(fuelTypeKey, isNaN(parsed) ? null : parsed);
+                    }
+                  }}
+                  placeholder="Manual Entry"
+                  className="w-full text-sm font-black text-center bg-yellow-50 border border-amber-300 rounded-xl px-3 py-2 text-slate-900 focus:ring-2 focus:ring-amber-500 font-mono touch-manipulation cursor-text"
                 />
               )}
             </div>

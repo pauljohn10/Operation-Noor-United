@@ -603,20 +603,28 @@ export const ModernAuditForm: React.FC<Props> = ({
                               </div>
                             ) : (
                               <input
-                                type="number"
-                                step="0.01"
+                                type="text"
                                 inputMode="decimal"
+                                pattern="[0-9.]*"
                                 value={totalOpening ?? ''}
+                                onClick={(e) => e.stopPropagation()}
+                                onTouchStart={(e) => e.stopPropagation()}
                                 onChange={(e) => {
-                                  const val = e.target.value === '' ? null : parseFloat(e.target.value) || 0;
-                                  if (onTotalOpeningChange) {
-                                    onTotalOpeningChange(fuelType, val);
-                                  } else {
-                                    onItemChange(fuelType, 15, 'start_reading', val);
+                                  const raw = e.target.value;
+                                  if (raw === '') {
+                                    if (onTotalOpeningChange) onTotalOpeningChange(fuelType, null);
+                                    else onItemChange(fuelType, 15, 'start_reading', null);
+                                    return;
+                                  }
+                                  if (/^[0-9]*\.?[0-9]*$/.test(raw)) {
+                                    const parsed = parseFloat(raw);
+                                    const val = isNaN(parsed) ? null : parsed;
+                                    if (onTotalOpeningChange) onTotalOpeningChange(fuelType, val);
+                                    else onItemChange(fuelType, 15, 'start_reading', val);
                                   }
                                 }}
                                 placeholder="Manual Entry"
-                                className="w-full min-h-[44px] text-base font-black text-end bg-yellow-50 border-2 border-amber-300/80 rounded-xl px-3 py-2 text-slate-900 focus:outline-none focus:ring-2 focus:ring-sky-500 font-mono shadow-xs"
+                                className="w-full min-h-[48px] text-base font-black text-end bg-yellow-50 border-2 border-amber-300/80 rounded-xl px-3 py-2 text-slate-900 focus:outline-none focus:bg-white focus:ring-4 focus:ring-amber-500/30 focus:border-amber-500 font-mono shadow-xs touch-manipulation relative z-10 cursor-text"
                               />
                             )}
                           </div>
@@ -679,20 +687,30 @@ export const ModernAuditForm: React.FC<Props> = ({
                                 </span>
                               ) : (
                                 <input
-                                  type="number"
-                                  step="0.01"
+                                  type="text"
                                   inputMode="decimal"
+                                  pattern="[0-9.]*"
                                   value={item.start_reading ?? ''}
-                                  onChange={(e) =>
-                                    onItemChange(
-                                      fuelType,
-                                      item.pump_no,
-                                      'start_reading',
-                                      e.target.value === '' ? null : parseFloat(e.target.value) || 0
-                                    )
-                                  }
+                                  onClick={(e) => e.stopPropagation()}
+                                  onTouchStart={(e) => e.stopPropagation()}
+                                  onChange={(e) => {
+                                    const raw = e.target.value;
+                                    if (raw === '') {
+                                      onItemChange(fuelType, item.pump_no, 'start_reading', null);
+                                      return;
+                                    }
+                                    if (/^[0-9]*\.?[0-9]*$/.test(raw)) {
+                                      const parsed = parseFloat(raw);
+                                      onItemChange(
+                                        fuelType,
+                                        item.pump_no,
+                                        'start_reading',
+                                        isNaN(parsed) ? null : parsed
+                                      );
+                                    }
+                                  }}
                                   placeholder={isTotalRow ? 'Manual Entry' : '0.00'}
-                                  className={isTotalRow ? 'w-full text-xs font-black text-slate-900 bg-yellow-50 border border-amber-300 rounded-lg px-2.5 py-1 focus:ring-2 focus:ring-sky-500 font-mono shadow-xs' : 'w-full min-h-[40px] text-xs font-bold text-slate-900 bg-white border border-slate-300 rounded-lg px-2.5 py-1 focus:ring-2 focus:ring-sky-500 font-mono'}
+                                  className={isTotalRow ? 'w-full text-xs font-black text-slate-900 bg-yellow-50 border border-amber-300 rounded-lg px-2.5 py-1.5 focus:ring-2 focus:ring-amber-500 font-mono shadow-xs touch-manipulation cursor-text' : 'w-full min-h-[40px] text-xs font-bold text-slate-900 bg-white border border-slate-300 rounded-lg px-2.5 py-1 focus:ring-2 focus:ring-sky-500 font-mono touch-manipulation cursor-text'}
                                 />
                               )}
                             </td>
