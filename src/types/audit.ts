@@ -32,6 +32,7 @@ export interface FuelSectionTotals {
   total_quantity: number;
   price: number;
   total_sales: number;
+  final_closing_reading: number;
 }
 
 export type AuditStatus =
@@ -47,6 +48,7 @@ export type FuelType = 'PETROL_91' | 'PETROL_95' | 'DIESEL';
 
 // 3 Sequential Approval Roles (Accountant -> Account Manager -> Management)
 export type ApprovalRole =
+  | 'operation_supervisor'
   | 'accountant'
   | 'account_manager'
   | 'management';
@@ -69,7 +71,7 @@ export interface PumpReadingItem {
   id?: string;
   audit_id?: string;
   fuel_type: FuelType;
-  pump_no: number; // 1 to 15
+  pump_no: number; // 1 to 14
   start_reading?: number | null;
   end_reading?: number | null;
   quantity_sold?: number | null;

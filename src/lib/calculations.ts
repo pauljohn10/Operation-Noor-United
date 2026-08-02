@@ -11,25 +11,32 @@ export function calculateFuelSectionTotals(
   fuelType: FuelType,
   priceFallback: number
 ): FuelSectionTotals {
-  const fuelItems = items.filter((i) => i.fuel_type === fuelType);
+  const fuelItems = items.filter((i) => i.fuel_type === fuelType && Number(i.pump_no) <= 14);
 
   let totalQty = 0;
   let totalSales = 0;
+  let finalClosingReading = 0;
   const currentPrice = fuelItems[0]?.price || priceFallback;
 
   fuelItems.forEach((item) => {
     let qty = 0;
     let amt = 0;
 
-    // Pump 15 ONLY uses automatic calculation when both readings are provided
-    if (item.pump_no === 15) {
-      if (item.start_reading != null && item.end_reading != null) {
-        const start = Number(item.start_reading);
-        const end = Number(item.end_reading);
-        if (!isNaN(start) && !isNaN(end)) {
-          qty = Math.max(0, end - start);
-          amt = Number((qty * (item.price || currentPrice)).toFixed(2));
-        }
+    // Accumulate closing readings of all active pumps (Pump 1 to Pump 14)
+    if (item.end_reading != null) {
+      const closing = Number(item.end_reading);
+      if (!isNaN(closing)) {
+        finalClosingReading += closing;
+      }
+    }
+
+    // Auto-calculate quantity_sold and amount if readings are available
+    if (item.start_reading != null && item.end_reading != null) {
+      const start = Number(item.start_reading);
+      const end = Number(item.end_reading);
+      if (!isNaN(start) && !isNaN(end) && end >= start) {
+        qty = Number((end - start).toFixed(2));
+        amt = Number((qty * (item.price || currentPrice)).toFixed(2));
       }
     } else {
       if (item.quantity_sold != null) {
@@ -51,6 +58,7 @@ export function calculateFuelSectionTotals(
     total_quantity: Number(totalQty.toFixed(2)),
     price: currentPrice,
     total_sales: Number(totalSales.toFixed(2)),
+    final_closing_reading: Number(finalClosingReading.toFixed(2)),
   };
 }
 

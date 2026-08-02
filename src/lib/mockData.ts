@@ -178,7 +178,7 @@ export function generateEmptyItems(): PumpReadingItem[] {
 
   fuels.forEach((fuel) => {
     const price = DEFAULT_FUEL_PRICES[fuel];
-    for (let p = 1; p <= 15; p++) {
+    for (let p = 1; p <= 14; p++) {
       items.push({
         fuel_type: fuel,
         pump_no: p,
@@ -197,7 +197,7 @@ export function generateEmptyItems(): PumpReadingItem[] {
 export function generateSampleItems(): PumpReadingItem[] {
   const items: PumpReadingItem[] = [];
   
-  for (let p = 1; p <= 15; p++) {
+  for (let p = 1; p <= 14; p++) {
     const start = 12000 + p * 450;
     const end = start + (p <= 6 ? 320 + p * 15 : 0);
     const qty = end - start;
@@ -213,7 +213,7 @@ export function generateSampleItems(): PumpReadingItem[] {
     });
   }
 
-  for (let p = 1; p <= 15; p++) {
+  for (let p = 1; p <= 14; p++) {
     const start = 8500 + p * 320;
     const end = start + (p <= 4 ? 280 + p * 12 : 0);
     const qty = end - start;
@@ -229,7 +229,7 @@ export function generateSampleItems(): PumpReadingItem[] {
     });
   }
 
-  for (let p = 1; p <= 15; p++) {
+  for (let p = 1; p <= 14; p++) {
     const start = 24000 + p * 600;
     const end = start + (p <= 5 ? 450 + p * 25 : 0);
     const qty = end - start;

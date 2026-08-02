@@ -669,8 +669,11 @@ export const ModernAuditForm: React.FC<Props> = ({
                     </tbody>
                     <tfoot>
                       <tr className="bg-slate-100 text-slate-900 font-black border-t-2 border-slate-300 text-xs">
-                        <td colSpan={3} className="p-3 text-right uppercase">
+                        <td colSpan={2} className="p-3 text-right uppercase">
                           {sec.title} Section Total:
+                        </td>
+                        <td className="p-3 font-mono font-black text-blue-900">
+                          Final Closing: {formatNumber(sec.totals.final_closing_reading)} L
                         </td>
                         <td className="p-3 text-right font-mono font-black text-sky-900">
                           {formatNumber(sec.totals.total_quantity)} L

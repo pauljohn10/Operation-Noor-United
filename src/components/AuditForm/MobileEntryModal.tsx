@@ -72,10 +72,9 @@ export const MobileEntryModal: React.FC<Props> = ({
         currentValue: prices[ft] || 0,
       });
 
-      // Pump items 1 to 15
-      for (let p = 1; p <= 15; p++) {
+      // Pump items 1 to 14
+      for (let p = 1; p <= 14; p++) {
         const item = items.find((i) => i.fuel_type === ft && i.pump_no === p);
-        const isPump15 = p === 15;
 
         list.push({
           id: `${ft}-${p}-start_reading`,
@@ -97,27 +96,25 @@ export const MobileEntryModal: React.FC<Props> = ({
           currentValue: item?.end_reading || 0,
         });
 
-        if (!isPump15) {
-          list.push({
-            id: `${ft}-${p}-quantity_sold`,
-            category: 'PUMP',
-            fuelType: ft,
-            pumpNo: p,
-            fieldName: `${fuelName} — Pump #${p} — Quantity Sold (L)`,
-            fieldKey: 'quantity_sold',
-            currentValue: item?.quantity_sold || 0,
-          });
+        list.push({
+          id: `${ft}-${p}-quantity_sold`,
+          category: 'PUMP',
+          fuelType: ft,
+          pumpNo: p,
+          fieldName: `${fuelName} — Pump #${p} — Quantity Sold (L)`,
+          fieldKey: 'quantity_sold',
+          currentValue: item?.quantity_sold || 0,
+        });
 
-          list.push({
-            id: `${ft}-${p}-amount`,
-            category: 'PUMP',
-            fuelType: ft,
-            pumpNo: p,
-            fieldName: `${fuelName} — Pump #${p} — Sales Amount (SAR)`,
-            fieldKey: 'amount',
-            currentValue: item?.amount || 0,
-          });
-        }
+        list.push({
+          id: `${ft}-${p}-amount`,
+          category: 'PUMP',
+          fuelType: ft,
+          pumpNo: p,
+          fieldName: `${fuelName} — Pump #${p} — Amount (SAR)`,
+          fieldKey: 'amount',
+          currentValue: item?.amount || 0,
+        });
       }
     });
 

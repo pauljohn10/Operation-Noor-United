@@ -164,7 +164,7 @@ export const StationAuditForm: React.FC<Props> = ({
     cashReceived
   );
 
-  // Handle Section Price Update (Updates all 15 pump rows of that fuel type)
+  // Handle Section Price Update (Updates all 14 pump rows of that fuel type)
   const handleFuelPriceChange = (fuelType: FuelType, newPrice: number) => {
     setSectionPrices((prev) => ({ ...prev, [fuelType]: newPrice }));
   };

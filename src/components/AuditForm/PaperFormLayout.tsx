@@ -458,7 +458,7 @@ export const PaperFormLayout: React.FC<Props> = ({
         <div className={`p-4 rounded-2xl text-white shadow-md flex items-center justify-between gap-3 ${headerClass}`}>
           <div>
             <h3 className="text-base font-black tracking-wide uppercase">{title}</h3>
-            <p className="text-[11px] font-bold opacity-90">15 Pump Fuel Lines</p>
+            <p className="text-[11px] font-bold opacity-90">14 Active Pump Lines</p>
           </div>
           <div className="flex items-center gap-2 bg-black/25 px-3 py-1.5 rounded-xl border border-white/20">
             <span className="text-xs font-bold whitespace-nowrap">Unit Price:</span>
@@ -482,26 +482,11 @@ export const PaperFormLayout: React.FC<Props> = ({
         <div className="space-y-3">
           {fuelItems.map((item) => {
             const pumpNo = item.pump_no;
-            const isPump15 = pumpNo === 15;
-
-            const isHasReadings = item.start_reading != null && item.end_reading != null;
-            const calculatedQty = isPump15
-              ? (isHasReadings ? Math.max(0, Number(item.end_reading) - Number(item.start_reading)) : null)
-              : item.quantity_sold;
-
-            const calculatedAmt = isPump15
-              ? (calculatedQty != null ? Number((calculatedQty * item.price).toFixed(2)) : null)
-              : item.amount;
 
             return (
               <div key={pumpNo} className="bg-slate-50 border border-slate-300 rounded-2xl p-4 space-y-3 shadow-sm">
                 <div className="flex items-center justify-between border-b border-slate-200 pb-2">
                   <span className="font-extrabold text-sm text-slate-900">{title} — Pump #{pumpNo}</span>
-                  {isPump15 && (
-                    <span className="text-[10px] bg-blue-100 text-blue-800 font-bold px-2.5 py-0.5 rounded-full border border-blue-200">
-                      Auto-Calculated Pump
-                    </span>
-                  )}
                 </div>
 
                 <div className="grid grid-cols-2 gap-3">
@@ -554,9 +539,9 @@ export const PaperFormLayout: React.FC<Props> = ({
                   {/* Quantity Sold */}
                   <div>
                     <label className="block text-xs font-bold text-slate-700 mb-1">Quantity Sold (L)</label>
-                    {isReadOnly || isPump15 ? (
+                    {isReadOnly ? (
                       <div className="bg-slate-100 border border-slate-300 rounded-xl px-3 py-2.5 text-slate-900 font-mono text-sm font-black text-center min-h-[48px] flex items-center justify-center">
-                        {formatNumber(calculatedQty)}
+                        {formatNumber(item.quantity_sold)}
                       </div>
                     ) : (
                       <input
@@ -577,9 +562,9 @@ export const PaperFormLayout: React.FC<Props> = ({
                   {/* Sales Amount */}
                   <div>
                     <label className="block text-xs font-bold text-slate-700 mb-1">Sales Amount (SAR)</label>
-                    {isReadOnly || isPump15 ? (
+                    {isReadOnly ? (
                       <div className="bg-slate-100 border border-slate-300 rounded-xl px-3 py-2.5 text-slate-900 font-mono text-sm font-black text-center min-h-[48px] flex items-center justify-center">
-                        {formatCurrency(calculatedAmt)}
+                        {formatCurrency(item.amount)}
                       </div>
                     ) : (
                       <input
@@ -600,6 +585,21 @@ export const PaperFormLayout: React.FC<Props> = ({
               </div>
             );
           })}
+        </div>
+
+        {/* Section Final Closing & Totals Summary Card for Mobile */}
+        <div className="p-4 bg-gradient-to-r from-blue-50 via-sky-50 to-emerald-50 border border-sky-200 rounded-2xl flex flex-col sm:flex-row items-start sm:items-center justify-between text-xs font-black shadow-sm gap-2">
+          <span className="text-slate-800 uppercase tracking-wider">{title} Final Closing & Totals:</span>
+          <div className="text-end font-mono space-y-1 sm:space-y-0">
+            <div className="text-blue-900 font-black">
+              Final Closing: {formatNumber(sectionTotals.final_closing_reading)} L
+            </div>
+            <div>
+              <span className="text-sky-900 font-black">{formatNumber(sectionTotals.total_quantity)} L</span>
+              <span className="mx-1 text-slate-400">•</span>
+              <span className="text-emerald-900 font-black">{formatCurrency(sectionTotals.total_sales)} SAR</span>
+            </div>
+          </div>
         </div>
       </div>
     );
@@ -635,16 +635,6 @@ export const PaperFormLayout: React.FC<Props> = ({
           <tbody>
             {fuelItems.map((item, idx) => {
               const pumpNo = item.pump_no;
-              const isPump15 = pumpNo === 15;
-
-              const isHasReadings = item.start_reading != null && item.end_reading != null;
-              const calculatedQty = isPump15
-                ? (isHasReadings ? Math.max(0, Number(item.end_reading) - Number(item.start_reading)) : null)
-                : item.quantity_sold;
-
-              const calculatedAmt = isPump15
-                ? (calculatedQty != null ? Number((calculatedQty * item.price).toFixed(2)) : null)
-                : item.amount;
 
               return (
                 <tr key={pumpNo} className="hover:bg-gray-50">
@@ -700,9 +690,9 @@ export const PaperFormLayout: React.FC<Props> = ({
 
                   {/* Quantity Sold */}
                   <td>
-                    {isReadOnly || isPump15 ? (
-                      <span className={`font-bold ${isPump15 ? 'text-blue-900 bg-blue-50 px-1 py-0.5 rounded' : 'text-gray-900'}`}>
-                        {formatNumber(calculatedQty)}
+                    {isReadOnly ? (
+                      <span className="font-bold text-gray-900">
+                        {formatNumber(item.quantity_sold)}
                       </span>
                     ) : (
                       <input
@@ -726,9 +716,9 @@ export const PaperFormLayout: React.FC<Props> = ({
 
                   {/* Amount (Total Sales) */}
                   <td>
-                    {isReadOnly || isPump15 ? (
-                      <span className={`font-bold ${isPump15 ? 'text-blue-900 bg-blue-50 px-1 py-0.5 rounded' : 'text-gray-900'}`}>
-                        {formatCurrency(calculatedAmt)}
+                    {isReadOnly ? (
+                      <span className="font-bold text-gray-900">
+                        {formatCurrency(item.amount)}
                       </span>
                     ) : (
                       <input
@@ -802,6 +792,23 @@ export const PaperFormLayout: React.FC<Props> = ({
                 </tr>
               );
             })}
+
+            {/* FINAL CLOSING READING SUMMARY ROW */}
+            <tr className="bg-blue-50/80 font-black text-black border-t-2 border-black">
+              <td className="font-extrabold text-blue-900 text-[9px] uppercase tracking-wider p-1">
+                TOTAL / CLOSING
+              </td>
+              <td className="text-center font-bold text-gray-400">-</td>
+              <td className="text-center font-mono font-black text-blue-950 p-1 text-xs">
+                {formatNumber(sectionTotals.final_closing_reading)}
+              </td>
+              <td className="text-center font-mono font-black text-sky-950 p-1 text-xs">
+                {formatNumber(sectionTotals.total_quantity)}
+              </td>
+              <td className="text-center font-mono font-black text-emerald-950 p-1 text-xs">
+                {formatCurrency(sectionTotals.total_sales)}
+              </td>
+            </tr>
           </tbody>
         </table>
       </div>
