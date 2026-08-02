@@ -89,7 +89,6 @@ export const ModernAuditForm: React.FC<Props> = ({
             </div>
             <div>
               <h3 className="text-base font-black text-slate-900">{t('auditForm.auditInfoTitle')}</h3>
-              <p className="text-xs text-slate-500 font-medium">{t('auditForm.auditInfoSub')}</p>
             </div>
           </div>
           <span className="text-xs font-mono font-bold text-sky-800 bg-sky-50 px-3 py-1 rounded-full border border-sky-200">
