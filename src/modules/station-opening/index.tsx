@@ -72,7 +72,7 @@ export const StationOpeningModule: React.FC<Props> = ({ currentUser, stations })
 
   const changeTab = (tab: 'dashboard' | 'repository' | 'form' | 'users' | 'notifications' | 'activity') => {
     if (tab === 'form' && !currentFormId && currentUser.role !== 'Head of Operation') {
-      alert('Access Denied: Only the Head of Operation can create new Station Opening Forms.');
+      alert('Access Denied: Only the Operation Supervisor can create new Station Opening Forms.');
       return;
     }
     setActiveTab(tab);
@@ -122,7 +122,7 @@ export const StationOpeningModule: React.FC<Props> = ({ currentUser, stations })
   // Handlers
   const handleOpenStationModal = () => {
     if (currentUser.role !== 'Head of Operation') {
-      alert('Access Denied: Only the Head of Operation can create new Station Opening Forms.');
+      alert('Access Denied: Only the Operation Supervisor can create new Station Opening Forms.');
       return;
     }
     setIsStationModalOpen(true);
@@ -130,7 +130,7 @@ export const StationOpeningModule: React.FC<Props> = ({ currentUser, stations })
 
   const handleStationSelected = async (selectedStation: Station) => {
     if (currentUser.role !== 'Head of Operation') {
-      alert('Access Denied: Only the Head of Operation can create new Station Opening Forms.');
+      alert('Access Denied: Only the Operation Supervisor can create new Station Opening Forms.');
       return;
     }
     setIsStationModalOpen(false);
@@ -228,7 +228,7 @@ export const StationOpeningModule: React.FC<Props> = ({ currentUser, stations })
       form_creator_id: saved.created_by || currentUser.id,
       sender_name: currentUser.full_name,
       action_type: isResubmission ? 'resubmitted' : 'submitted',
-      message: `Station Opening Form ${saved.form_number} for ${saved.station_name} ${isResubmission ? 'resubmitted' : 'submitted'} by Head of Operation and is awaiting your review.`,
+      message: `Station Opening Form ${saved.form_number} for ${saved.station_name} ${isResubmission ? 'resubmitted' : 'submitted'} by Operation Supervisor and is awaiting your review.`,
       is_read: false,
       created_at: new Date().toISOString(),
     });

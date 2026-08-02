@@ -216,7 +216,7 @@ export const SOListView: React.FC<Props> = ({ forms, currentUser, onOpenForm, on
                     </td>
 
                     <td className="p-4 text-center">
-                      <p className="text-slate-900 font-bold">{f.head_of_operation_name || f.created_by_name || 'Head of Operation'}</p>
+                      <p className="text-slate-900 font-bold">{f.head_of_operation_name || f.created_by_name || 'Operation Supervisor'}</p>
                     </td>
 
                     <td className="p-4 text-center">

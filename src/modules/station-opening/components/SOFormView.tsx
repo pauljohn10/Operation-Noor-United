@@ -207,11 +207,11 @@ export const SOFormView: React.FC<Props> = ({
                     return;
                   }
                   if (!form.head_of_operation_name || !form.head_of_operation_name.trim()) {
-                    alert('Please enter the Head of Operation Name before submitting.');
+                    alert('Please enter the Operation Supervisor Name before submitting.');
                     return;
                   }
                   if (!form.head_of_operation_signature_url) {
-                    alert('Please sign as Head of Operation before submitting.');
+                    alert('Please sign as Operation Supervisor before submitting.');
                     return;
                   }
                   onSubmit(form);
@@ -371,9 +371,9 @@ export const SOFormView: React.FC<Props> = ({
               )}
             </div>
 
-            {/* Head of Operation Name */}
+            {/* Operation Supervisor Name */}
             <div>
-              <label className="block text-xs font-extrabold text-slate-700 mb-1">Head of Operation</label>
+              <label className="block text-xs font-extrabold text-slate-700 mb-1">Operation Supervisor</label>
               <div className="w-full bg-white/70 backdrop-blur-md border border-sky-200/80 rounded-xl px-3.5 py-2.5 text-xs font-black text-slate-900 flex items-center min-h-[42px]">
                 {form.created_by_name}
               </div>
@@ -1113,7 +1113,7 @@ export const SOFormView: React.FC<Props> = ({
                     value={form.head_of_operation_name}
                     onChange={(e) => updateField('head_of_operation_name', e.target.value)}
                     disabled={!isDraftOrReturned}
-                    placeholder="Enter Head of Operation name..."
+                    placeholder="Enter Operation Supervisor name..."
                     className="w-full bg-white/70 backdrop-blur-md border border-sky-200/80 rounded-xl px-3.5 py-2.5 text-xs font-black text-slate-900 focus:ring-2 focus:ring-sky-500 shadow-sm"
                   />
                 </div>
@@ -1124,7 +1124,7 @@ export const SOFormView: React.FC<Props> = ({
                   </label>
                   <div className="bg-white/80 border border-sky-200/80 rounded-xl p-2 min-h-[48px] flex items-center justify-center shadow-inner">
                     {form.head_of_operation_signature_url ? (
-                      <img src={form.head_of_operation_signature_url} alt="Head of Operation Signature" className="h-10 object-contain" />
+                      <img src={form.head_of_operation_signature_url} alt="Operation Supervisor Signature" className="h-10 object-contain" />
                     ) : (
                       <span className="text-xs text-slate-400 font-medium">{t('so.sigNotCaptured')}</span>
                     )}
@@ -1179,9 +1179,9 @@ export const SOFormView: React.FC<Props> = ({
       {isHeadOfOpSignatureModalOpen && (
         <SignaturePadModal
           isOpen={isHeadOfOpSignatureModalOpen}
-          title="Head of Operation Signature"
-          signatoryName={form.head_of_operation_name || currentUser?.full_name || 'Head of Operation'}
-          signatoryRole="Head of Operation"
+          title="Operation Supervisor Signature"
+          signatoryName={form.head_of_operation_name || currentUser?.full_name || 'Operation Supervisor'}
+          signatoryRole="Operation Supervisor"
           onSaveSignature={async (sigUrl, editedName) => {
             if (editedName) {
               updateField('head_of_operation_name', editedName);

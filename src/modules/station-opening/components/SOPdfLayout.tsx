@@ -284,7 +284,7 @@ export const SOPdfLayout: React.FC<Props> = ({ form }) => {
               <div style={{ fontSize: '8.5px', fontWeight: '700', color: '#0F172A' }}>{form.address || 'Saudi Arabia'}</div>
             </div>
             <div style={{ gridColumn: 'span 2' }}>
-              <div style={{ fontSize: '7px', fontWeight: 'bold', color: '#64748B', textTransform: 'uppercase' }}>Head of Operation (Creator)</div>
+              <div style={{ fontSize: '7px', fontWeight: 'bold', color: '#64748B', textTransform: 'uppercase' }}>Operation Supervisor (Creator)</div>
               <div style={{ fontSize: '8.5px', fontWeight: '800', color: '#0369A1' }}>
                 {form.head_of_operation_name || form.created_by_name || 'N/A'}
               </div>
@@ -696,9 +696,9 @@ export const SOPdfLayout: React.FC<Props> = ({ form }) => {
               </div>
             </div>
 
-            {/* Box 2: Head of Operation */}
+            {/* Box 2: Operation Supervisor */}
             <div style={{ border: '1px solid #E2E8F0', borderRadius: '6px', padding: '6px', backgroundColor: '#F8FAFC' }}>
-              <div style={{ fontSize: '7px', fontWeight: '800', color: '#64748B', textTransform: 'uppercase' }}>Head of Operation</div>
+              <div style={{ fontSize: '7px', fontWeight: '800', color: '#64748B', textTransform: 'uppercase' }}>Operation Supervisor</div>
               <div style={{ fontSize: '8.5px', fontWeight: '800', color: '#0F172A', marginTop: '2px' }}>
                 {form.head_of_operation_name || form.created_by_name || 'N/A'}
               </div>

@@ -424,7 +424,7 @@ export const SOUserManagement: React.FC<Props> = ({
                   onChange={(e) => setEditingUser({ ...editingUser, role: e.target.value as any })}
                   className="w-full bg-white border border-sky-200/80 rounded-xl px-3 py-2 text-slate-900 font-extrabold focus:ring-2 focus:ring-sky-500 shadow-sm"
                 >
-                  <option value="Head of Operation">Head of Operation (Form Creator & Submitter)</option>
+                  <option value="Head of Operation">Operation Supervisor (Form Creator & Submitter)</option>
                   <option value="Safety & Quality Control">Safety & Quality Control (Step 1 Approver)</option>
                   <option value="Document Controller">Document Controller (Step 2 Approver)</option>
                   <option value="Engineering Department">Engineering Department (Step 3 Approver)</option>
