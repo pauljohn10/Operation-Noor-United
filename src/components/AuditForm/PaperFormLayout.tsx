@@ -482,8 +482,10 @@ export const PaperFormLayout: React.FC<Props> = ({
 
         {/* STACKED PUMP CARDS */}
         <div className="space-y-3">
-          {fuelItems.map((item) => {
-            const pumpNo = item.pump_no;
+          {fuelItems
+            .filter((item) => item.pump_no !== 15)
+            .map((item) => {
+              const pumpNo = item.pump_no;
 
             return (
               <div key={pumpNo} className="bg-slate-50 border border-slate-300 rounded-2xl p-4 space-y-3 shadow-sm">
