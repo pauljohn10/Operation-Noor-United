@@ -687,24 +687,11 @@ export async function saveAudit(audit: StationAudit): Promise<StationAudit> {
     total_sales: audit.total_sales != null ? Number(audit.total_sales) : 0,
     total_quantity: audit.total_quantity != null ? Number(audit.total_quantity) : 0,
     discrepancy_amount: audit.discrepancy_amount != null ? Number(audit.discrepancy_amount) : 0,
-    p91_total_opening_reading: audit.p91_total_opening_reading != null ? Number(audit.p91_total_opening_reading) : null,
-    p95_total_opening_reading: audit.p95_total_opening_reading != null ? Number(audit.p95_total_opening_reading) : null,
-    diesel_total_opening_reading: audit.diesel_total_opening_reading != null ? Number(audit.diesel_total_opening_reading) : null,
     notes: audit.notes || '',
     updated_at: new Date().toISOString(),
   };
 
-  let { error: parentErr } = await supabase.from('station_audits').upsert(parentPayload, { onConflict: 'id' });
-
-  if (parentErr && parentErr.code === 'PGRST204') {
-    console.warn(`[SAVE AUDIT RECOVERABLE WARN] Schema column missing in station_audits table (${parentErr.message}). Retrying upsert without optional columns...`);
-    delete (parentPayload as any).p91_total_opening_reading;
-    delete (parentPayload as any).p95_total_opening_reading;
-    delete (parentPayload as any).diesel_total_opening_reading;
-
-    const retryResult = await supabase.from('station_audits').upsert(parentPayload, { onConflict: 'id' });
-    parentErr = retryResult.error;
-  }
+  const { error: parentErr } = await supabase.from('station_audits').upsert(parentPayload, { onConflict: 'id' });
 
   if (parentErr) {
     console.error(`[SAVE AUDIT FAILURE] Table: station_audits | Code: ${parentErr.code} | Message: ${parentErr.message} | Details: ${parentErr.details}`);
