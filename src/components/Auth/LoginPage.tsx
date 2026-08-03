@@ -43,40 +43,45 @@ export const LoginPage: React.FC = () => {
   return (
     <div
       onMouseMove={handleMouseMove}
-      className="min-h-screen bg-gradient-to-br from-sky-100 via-blue-50 via-cyan-100 to-indigo-100 flex flex-col items-center justify-center p-4 sm:p-6 relative overflow-hidden selection:bg-sky-500 selection:text-white"
+      className="min-h-screen min-h-[100dvh] w-full flex flex-col items-center justify-center p-4 sm:p-6 relative overflow-x-hidden selection:bg-sky-500 selection:text-white"
     >
-      {/* LANGUAGE SWITCHER BUTTON TOP CORNER */}
-      <div className="absolute top-4 right-4 z-50">
-        <button
-          onClick={toggleLanguage}
-          className="flex items-center gap-2 px-3.5 py-2 rounded-2xl bg-white/80 backdrop-blur-md border border-white/90 shadow-md text-sky-800 font-extrabold text-xs hover:bg-white transition-all"
-        >
-          <Globe className="w-4 h-4 text-sky-600" />
-          <span>{language === 'en' ? 'العربية' : 'English'}</span>
-        </button>
-      </div>
-
-      {/* 1. INTERACTIVE MOUSE CURSOR SPOTLIGHT (DESKTOP) */}
+      {/* 1. FULL-SCREEN BACKGROUND IMAGE (COVER, CENTERED, FIXED) */}
       <div
-        className="absolute w-[600px] h-[600px] rounded-full bg-gradient-to-r from-sky-400/20 via-cyan-300/20 to-blue-400/20 blur-3xl pointer-events-none transition-all duration-75 ease-out transform -translate-x-1/2 -translate-y-1/2 hidden md:block"
+        className="fixed inset-0 w-full h-full bg-cover bg-center bg-no-repeat pointer-events-none z-0 scale-105 transition-transform duration-1000"
+        style={{
+          backgroundImage: `url('/login-bg.png')`,
+        }}
+      ></div>
+
+      {/* 2. SUBTLE DARK OVERLAY (APPROX 55% OPACITY FOR OPTIMAL READABILITY & CONTRAST) */}
+      <div className="fixed inset-0 w-full h-full bg-slate-950/55 backdrop-blur-[3px] pointer-events-none z-0"></div>
+
+      {/* 3. INTERACTIVE MOUSE CURSOR SPOTLIGHT (DESKTOP) */}
+      <div
+        className="fixed w-[650px] h-[650px] rounded-full bg-gradient-to-r from-sky-400/25 via-cyan-300/20 to-blue-500/25 blur-3xl pointer-events-none transition-all duration-75 ease-out transform -translate-x-1/2 -translate-y-1/2 hidden md:block z-0"
         style={{
           left: `${(mousePos.x + 1) * 50}%`,
           top: `${(mousePos.y + 1) * 50}%`,
         }}
       ></div>
 
-      {/* 2. CINEMATIC BACKGROUND AURORA BLOBS */}
-      <div className="absolute -top-36 -left-36 w-[650px] h-[650px] bg-gradient-to-tr from-sky-400/35 via-blue-400/25 to-cyan-300/35 rounded-full blur-3xl pointer-events-none animate-pulse duration-1000"></div>
-      <div className="absolute -bottom-36 -right-36 w-[750px] h-[750px] bg-gradient-to-bl from-blue-400/30 via-indigo-300/25 to-sky-300/30 rounded-full blur-3xl pointer-events-none"></div>
+      {/* 4. CINEMATIC GLOW BLOBS */}
+      <div className="fixed -top-36 -left-36 w-[650px] h-[650px] bg-gradient-to-tr from-sky-500/20 via-blue-500/15 to-cyan-400/20 rounded-full blur-3xl pointer-events-none animate-pulse duration-1000 z-0"></div>
+      <div className="fixed -bottom-36 -right-36 w-[750px] h-[750px] bg-gradient-to-bl from-blue-600/20 via-indigo-500/15 to-sky-400/20 rounded-full blur-3xl pointer-events-none z-0"></div>
 
-      {/* 3. FLOATING GLASS GEOMETRIES */}
-      <div
-        className="absolute top-16 left-[10%] w-28 h-28 rounded-full bg-gradient-to-br from-white/70 via-sky-200/40 to-white/10 backdrop-blur-xl border border-white/90 shadow-[0_15px_35px_rgba(14,165,233,0.18)] pointer-events-none transition-transform duration-300 ease-out hidden md:block"
-        style={{ transform: `translate(${mousePos.x * -20}px, ${mousePos.y * -20}px)` }}
-      ></div>
+      {/* LANGUAGE SWITCHER BUTTON TOP CORNER */}
+      <div className="absolute top-4 right-4 z-50">
+        <button
+          onClick={toggleLanguage}
+          className="flex items-center gap-2 px-4 py-2.5 rounded-2xl bg-white/90 backdrop-blur-xl border border-white/90 shadow-lg text-slate-900 font-extrabold text-xs hover:bg-white hover:scale-105 active:scale-95 transition-all cursor-pointer"
+        >
+          <Globe className="w-4 h-4 text-sky-600" />
+          <span>{language === 'en' ? 'العربية' : 'English'}</span>
+        </button>
+      </div>
 
       {/* MAIN CONTENT CONTAINER */}
-      <div className="max-w-md w-full relative z-10 animate-in fade-in zoom-in-95 duration-500 perspective-1000">
+      <div className="max-w-md w-full relative z-10 my-auto py-8 animate-in fade-in zoom-in-95 duration-500 perspective-1000">
         
         {/* OFFICIAL BRANDING LOGO & PORTAL TITLE */}
         <div className="text-center mb-6">
@@ -84,43 +89,43 @@ export const LoginPage: React.FC = () => {
             <img
               src="/logo_transparent.png"
               alt="Al Noor United Fuel Est. Logo"
-              className="h-28 w-auto object-contain"
+              className="h-28 w-auto object-contain drop-shadow-xl"
               style={{ background: 'transparent', filter: 'none' }}
             />
           </div>
-          <h1 className="text-2xl font-black text-slate-900 tracking-tight">
+          <h1 className="text-2xl sm:text-3xl font-black text-white tracking-tight drop-shadow-md">
             {t('login.title')}
           </h1>
-          <p className="text-xs font-bold text-sky-800 mt-0.5 tracking-wide">
+          <p className="text-xs sm:text-sm font-bold text-sky-200 mt-1 tracking-wide drop-shadow-sm">
             {t('login.subtitle')}
           </p>
         </div>
 
         {/* TRIPLE-LAYER CRYSTAL GLASS LOGIN CARD */}
         <div
-          className="relative group bg-white/35 backdrop-blur-[60px] border border-white/90 rounded-[32px] p-8 sm:p-10 shadow-[0_35px_100px_rgba(14,165,233,0.25),0_15px_35px_rgba(0,0,0,0.05)] ring-1 ring-white/70 space-y-5 transition-all duration-300"
+          className="relative group bg-white/90 backdrop-blur-2xl border border-white/90 rounded-[32px] p-8 sm:p-10 shadow-[0_35px_100px_rgba(0,0,0,0.4),0_15px_35px_rgba(14,165,233,0.15)] ring-1 ring-white/80 space-y-5 transition-all duration-300"
           style={{
             transform: `rotateY(${mousePos.x * 2.5}deg) rotateX(${-mousePos.y * 2.5}deg)`,
             transformStyle: 'preserve-3d',
           }}
         >
           {/* TOP GLASS SPECULAR REFLECTION HIGHLIGHT */}
-          <div className="absolute inset-x-0 top-0 h-32 bg-gradient-to-b from-white/70 via-white/20 to-transparent rounded-t-[32px] pointer-events-none"></div>
+          <div className="absolute inset-x-0 top-0 h-32 bg-gradient-to-b from-white/80 via-white/30 to-transparent rounded-t-[32px] pointer-events-none"></div>
 
           {/* CARD HEADER */}
-          <div className="relative z-10 border-b border-sky-200/50 pb-3.5">
+          <div className="relative z-10 border-b border-slate-200/80 pb-3.5">
             <h2 className="text-xl font-black text-slate-900 tracking-tight flex items-center justify-between">
               <span>{t('login.welcomeBack')}</span>
               <Sparkles className="w-4 h-4 text-sky-600 animate-pulse" />
             </h2>
-            <p className="text-xs text-slate-600 font-medium mt-0.5">
+            <p className="text-xs text-slate-600 font-semibold mt-0.5">
               {t('login.signInPrompt')}
             </p>
           </div>
 
           {/* ERROR ALERT */}
           {errorMessage && (
-            <div className="relative z-10 p-3.5 bg-red-500/10 border border-red-500/30 rounded-2xl text-red-700 text-xs font-semibold flex items-center gap-2.5 backdrop-blur-md animate-in fade-in duration-200">
+            <div className="relative z-10 p-3.5 bg-red-500/10 border border-red-500/30 rounded-2xl text-red-700 text-xs font-bold flex items-center gap-2.5 backdrop-blur-md animate-in fade-in duration-200">
               <AlertCircle className="w-4 h-4 text-red-600 shrink-0" />
               <span>{errorMessage === 'Invalid login credentials' ? t('login.invalidCredentials') : errorMessage}</span>
             </div>
@@ -142,7 +147,7 @@ export const LoginPage: React.FC = () => {
                   value={identifier}
                   onChange={(e) => setIdentifier(e.target.value)}
                   placeholder={t('login.usernameLabel')}
-                  className="w-full bg-white/60 backdrop-blur-md border border-white/90 rounded-2xl ps-10 pe-4 py-3 text-xs font-medium text-slate-900 placeholder-slate-400 focus:outline-none focus:bg-white/90 focus:border-sky-500 focus:ring-4 focus:ring-sky-500/20 transition-all duration-300 shadow-[inset_0_2px_4px_rgba(0,0,0,0.02)]"
+                  className="w-full bg-white/80 backdrop-blur-md border border-slate-300/90 rounded-2xl ps-10 pe-4 py-3 text-xs font-bold text-slate-900 placeholder-slate-400 focus:outline-none focus:bg-white focus:border-sky-500 focus:ring-4 focus:ring-sky-500/20 transition-all duration-300 shadow-inner"
                 />
               </div>
             </div>
@@ -160,12 +165,12 @@ export const LoginPage: React.FC = () => {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder={t('login.passwordLabel')}
-                  className="w-full bg-white/60 backdrop-blur-md border border-white/90 rounded-2xl ps-10 pe-10 py-3 text-xs font-medium text-slate-900 placeholder-slate-400 focus:outline-none focus:bg-white/90 focus:border-sky-500 focus:ring-4 focus:ring-sky-500/20 transition-all duration-300 shadow-[inset_0_2px_4px_rgba(0,0,0,0.02)]"
+                  className="w-full bg-white/80 backdrop-blur-md border border-slate-300/90 rounded-2xl ps-10 pe-10 py-3 text-xs font-bold text-slate-900 placeholder-slate-400 focus:outline-none focus:bg-white focus:border-sky-500 focus:ring-4 focus:ring-sky-500/20 transition-all duration-300 shadow-inner"
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute end-3.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-700 transition-colors"
+                  className="absolute end-3.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-700 transition-colors cursor-pointer"
                 >
                   {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                 </button>
@@ -174,7 +179,7 @@ export const LoginPage: React.FC = () => {
 
             {/* Remember Me Checkbox */}
             <div className="flex items-center justify-between pt-0.5">
-              <label className="flex items-center gap-2 text-xs font-medium text-slate-600 cursor-pointer select-none">
+              <label className="flex items-center gap-2 text-xs font-bold text-slate-700 cursor-pointer select-none">
                 <input
                   type="checkbox"
                   checked={rememberMe}
@@ -189,7 +194,7 @@ export const LoginPage: React.FC = () => {
             <button
               type="submit"
               disabled={isLoading}
-              className="relative overflow-hidden w-full py-3.5 bg-gradient-to-r from-sky-600 via-blue-600 to-indigo-600 hover:from-sky-500 hover:to-indigo-500 text-white font-extrabold text-sm rounded-2xl shadow-[0_14px_30px_rgba(2,132,199,0.35)] hover:shadow-[0_20px_45px_rgba(2,132,199,0.45)] hover:-translate-y-0.5 active:translate-y-0 disabled:opacity-70 disabled:cursor-not-allowed transition-all duration-300 flex items-center justify-center gap-2 group/btn"
+              className="relative overflow-hidden w-full py-3.5 bg-gradient-to-r from-sky-600 via-blue-600 to-indigo-600 hover:from-sky-500 hover:to-indigo-500 text-white font-black text-sm rounded-2xl shadow-[0_14px_30px_rgba(2,132,199,0.35)] hover:shadow-[0_20px_45px_rgba(2,132,199,0.45)] hover:-translate-y-0.5 active:translate-y-0 disabled:opacity-70 disabled:cursor-not-allowed transition-all duration-300 flex items-center justify-center gap-2 group/btn cursor-pointer"
             >
               {/* Button Specular Reflection Line */}
               <div className="absolute inset-x-0 top-0 h-1/2 bg-gradient-to-b from-white/35 to-transparent pointer-events-none"></div>
@@ -211,8 +216,8 @@ export const LoginPage: React.FC = () => {
         </div>
 
         {/* FOOTER */}
-        <p className="text-center text-[11px] font-medium text-slate-500 mt-6 flex items-center justify-center gap-1.5">
-          <ShieldCheck className="w-3.5 h-3.5 text-sky-600" />
+        <p className="text-center text-[11px] font-bold text-sky-100 mt-6 flex items-center justify-center gap-1.5 drop-shadow-sm">
+          <ShieldCheck className="w-3.5 h-3.5 text-sky-300" />
           <span>© 2026 Al Noor United Fuel Est. (مؤسسة النور المتحدة للوقود)</span>
         </p>
 
