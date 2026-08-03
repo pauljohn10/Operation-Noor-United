@@ -224,9 +224,9 @@ export const LoginPage: React.FC = () => {
 
         </div>
 
-        {/* FOOTER */}
-        <p className="text-center text-[11px] font-bold text-sky-100 mt-6 flex items-center justify-center gap-1.5 drop-shadow-sm">
-          <ShieldCheck className="w-3.5 h-3.5 text-sky-300" />
+        {/* FOOTER COPYRIGHT TEXT (FIXED BOTTOM-CENTER ON DESKTOP/LAPTOP lg:, STANDARD BELOW-CARD FLOW ON MOBILE/TABLET) */}
+        <p className="text-center text-[11px] font-bold text-sky-100/80 drop-shadow-sm flex items-center justify-center gap-1.5 mt-6 lg:mt-0 lg:fixed lg:bottom-6 lg:left-1/2 lg:-translate-x-1/2 lg:z-20 lg:text-slate-200/80 lg:drop-shadow-md transition-all">
+          <ShieldCheck className="w-3.5 h-3.5 text-sky-300 lg:text-slate-300" />
           <span>© 2026 Al Noor United Fuel Est. (مؤسسة النور المتحدة للوقود)</span>
         </p>
 
