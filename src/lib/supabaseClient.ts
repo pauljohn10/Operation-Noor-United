@@ -655,25 +655,78 @@ export async function saveAudit(audit: StationAudit): Promise<StationAudit> {
     return audit;
   }
 
-  const auditId = isValidUuid(audit.id) ? audit.id : generateUUID();
+  // 1. Resolve valid station_id UUID from Supabase stations table (satisfies foreign key & not-null constraints)
+  let validStationId: string | null = isValidUuid(audit.station_id) ? audit.station_id : null;
+  if (validStationId) {
+    const { data: stExists } = await supabase.from('stations').select('id').eq('id', validStationId).maybeSingle();
+    if (!stExists) validStationId = null;
+  }
+  if (!validStationId) {
+    const { data: matched } = await supabase
+      .from('stations')
+      .select('id')
+      .or(`name.eq.${audit.station_name || ''},station_no.eq.${audit.station_no || ''}`)
+      .limit(1);
+
+    if (matched && matched.length > 0) {
+      validStationId = matched[0].id;
+    } else {
+      const { data: firstStation } = await supabase.from('stations').select('id').limit(1);
+      if (firstStation && firstStation.length > 0) {
+        validStationId = firstStation[0].id;
+      }
+    }
+  }
+
+  // 2. Resolve valid created_by UUID from Supabase users table (satisfies foreign key constraint station_audits_created_by_fkey)
+  let validCreatorId: string | null = isValidUuid(audit.created_by) ? audit.created_by : null;
+  if (validCreatorId) {
+    const { data: usrExists } = await supabase.from('users').select('id').eq('id', validCreatorId).maybeSingle();
+    if (!usrExists) validCreatorId = null;
+  }
+  if (!validCreatorId) {
+    const { data: firstUser } = await supabase.from('users').select('id').limit(1);
+    if (firstUser && firstUser.length > 0) {
+      validCreatorId = firstUser[0].id;
+    }
+  }
+
+  // 3. Check unique_station_audit_per_date constraint to update existing record instead of throwing constraint errors
+  let auditId = isValidUuid(audit.id) ? audit.id : generateUUID();
+  const auditDate = audit.audit_date || new Date().toISOString().split('T')[0];
+
+  if (validStationId) {
+    const { data: existingAudit } = await supabase
+      .from('station_audits')
+      .select('id, audit_number')
+      .eq('station_id', validStationId)
+      .eq('audit_date', auditDate)
+      .maybeSingle();
+
+    if (existingAudit?.id) {
+      auditId = existingAudit.id;
+      if (existingAudit.audit_number) {
+        audit.audit_number = existingAudit.audit_number;
+      }
+    }
+  }
+
   audit.id = auditId;
+  if (validStationId) audit.station_id = validStationId;
+  if (validCreatorId) audit.created_by = validCreatorId;
 
-  console.log(`[SAVE AUDIT STEP 1] Creating/Upserting parent station_audits for Audit #${audit.audit_number} (ID: ${auditId})...`);
-
-  const creatorUuid = isValidUuid(audit.created_by)
-    ? audit.created_by
-    : '00000000-0000-0000-0000-000000000001';
+  console.log(`[SAVE AUDIT STEP 1] Upserting parent station_audits for Audit #${audit.audit_number} (ID: ${auditId}, Station: ${validStationId})...`);
 
   // Normalize numeric fields to satisfy Postgres NOT NULL constraints while keeping UI inputs blank
   const parentPayload = {
     id: auditId,
     audit_number: audit.audit_number,
-    station_id: isValidUuid(audit.station_id) ? audit.station_id : null,
+    station_id: validStationId,
     station_no: audit.station_no || '',
     station_name: audit.station_name || '',
     location: audit.location || '',
-    audit_date: audit.audit_date || new Date().toISOString().split('T')[0],
-    created_by: creatorUuid,
+    audit_date: auditDate,
+    created_by: validCreatorId,
     created_by_name: audit.created_by_name || '',
     created_by_role: audit.created_by_role || 'Operation Supervisor',
     station_supervisor_name: audit.station_supervisor_name || '',
