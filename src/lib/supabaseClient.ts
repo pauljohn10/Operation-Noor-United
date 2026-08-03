@@ -694,7 +694,17 @@ export async function saveAudit(audit: StationAudit): Promise<StationAudit> {
     updated_at: new Date().toISOString(),
   };
 
-  const { error: parentErr } = await supabase.from('station_audits').upsert(parentPayload, { onConflict: 'id' });
+  let { error: parentErr } = await supabase.from('station_audits').upsert(parentPayload, { onConflict: 'id' });
+
+  if (parentErr && parentErr.code === 'PGRST204') {
+    console.warn(`[SAVE AUDIT RECOVERABLE WARN] Schema column missing in station_audits table (${parentErr.message}). Retrying upsert without optional columns...`);
+    delete (parentPayload as any).p91_total_opening_reading;
+    delete (parentPayload as any).p95_total_opening_reading;
+    delete (parentPayload as any).diesel_total_opening_reading;
+
+    const retryResult = await supabase.from('station_audits').upsert(parentPayload, { onConflict: 'id' });
+    parentErr = retryResult.error;
+  }
 
   if (parentErr) {
     console.error(`[SAVE AUDIT FAILURE] Table: station_audits | Code: ${parentErr.code} | Message: ${parentErr.message} | Details: ${parentErr.details}`);
