@@ -68,12 +68,11 @@ export const Navbar: React.FC<Props> = ({
               className="flex items-center gap-3 cursor-pointer group"
               onClick={() => setActiveTab(isSuperAdmin ? 'admin' : 'dashboard')}
             >
-              <div className="transition-transform group-hover:scale-105">
+              <div className="transition-transform group-hover:scale-105 w-9 h-9 sm:w-10 sm:h-10 shrink-0 flex items-center justify-center">
                 <img
-                  src="/logo_transparent.png"
-                  alt="Al Noor United Fuel Est. Logo"
-                  className="h-10 w-auto object-contain"
-                  style={{ background: 'transparent', filter: 'none' }}
+                  src="/flower_emblem.png"
+                  alt="Al Noor United Flower Emblem"
+                  className="w-full h-full object-contain animate-spin-slow"
                 />
               </div>
               <div>

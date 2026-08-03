@@ -85,12 +85,21 @@ export const LoginPage: React.FC = () => {
         
         {/* OFFICIAL BRANDING LOGO & PORTAL TITLE */}
         <div className="text-center mb-6">
-          <div className="inline-flex items-center justify-center mb-3 transition-transform hover:scale-105 duration-300">
+          <div className="inline-flex flex-col items-center justify-center mb-3">
+            {/* ROTATING FLOWER EMBLEM ICON ONLY (25s SMOOTH 360° GPU ROTATION) */}
+            <div className="w-20 h-20 sm:w-24 sm:h-24 mb-2 flex items-center justify-center transition-transform hover:scale-105 duration-300">
+              <img
+                src="/flower_emblem.png"
+                alt="Al Noor United Flower Emblem"
+                className="w-full h-full object-contain drop-shadow-xl animate-spin-slow"
+              />
+            </div>
+
+            {/* STATIONARY COMPANY TEXT */}
             <img
-              src="/logo_transparent.png"
-              alt="Al Noor United Fuel Est. Logo"
-              className="h-28 w-auto object-contain drop-shadow-xl"
-              style={{ background: 'transparent', filter: 'none' }}
+              src="/logo_text.png"
+              alt="Al Noor United Fuel Est."
+              className="h-8 sm:h-9 w-auto object-contain drop-shadow-md"
             />
           </div>
           <h1 className="text-2xl sm:text-3xl font-black text-white tracking-tight drop-shadow-md">

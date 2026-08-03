@@ -223,6 +223,29 @@
   min-width: 580px;
 }
 
+/* Slow 360-degree rotation animation for flower emblem */
+@keyframes spin-slow {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.animate-spin-slow {
+  animation: spin-slow 25s linear infinite;
+  will-change: transform;
+  transform-origin: 50% 50%;
+  backface-visibility: hidden;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-spin-slow {
+    animation: none !important;
+  }
+}
+
 /* Strip all scrollbars during PDF export & print mode */
 @media print {
   *,
