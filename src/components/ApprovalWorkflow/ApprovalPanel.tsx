@@ -36,14 +36,71 @@ export const ApprovalPanel: React.FC<Props> = ({
 
   const canActionCurrentStep = canApproveAuditStatus(audit.current_status);
 
-  // 3 Sequential Approval Steps
+  // 4 Sequential Approval Sequence Steps:
+  // 1. Operation Supervisor
+  // 2. Accountant
+  // 3. Account Manager
+  // 4. Management Executive
   const steps = [
-    { key: 'pending_accountant', label: t('approval.accountant'), role: 'Accountant' },
-    { key: 'pending_account_manager', label: t('approval.accountManager'), role: 'Account Manager' },
-    { key: 'pending_management', label: t('approval.management'), role: 'Management' },
-    { key: 'approved', label: t('approval.completed'), role: 'Final' },
+    { key: 'op_supervisor', label: 'Operation Supervisor', role: 'operation_supervisor' },
+    { key: 'pending_accountant', label: t('approval.accountant'), role: 'accountant' },
+    { key: 'pending_account_manager', label: t('approval.accountManager'), role: 'account_manager' },
+    { key: 'pending_management', label: 'Management Executive', role: 'management' },
   ];
 
+  const isStepCompleted = (role: string, idx: number): boolean => {
+    if ((audit.current_status as string) === 'approved') return true;
+
+    const appRecord = audit.approvals?.find((a) => a.role === role);
+    if (appRecord?.status === 'approved') return true;
+
+    if (idx === 0) {
+      return Boolean(
+        audit.operation_supervisor_signature_url ||
+        (audit.current_status && audit.current_status !== 'draft')
+      );
+    }
+
+    if (idx === 1) {
+      return (
+        audit.current_status === 'pending_account_manager' ||
+        audit.current_status === 'pending_management'
+      );
+    }
+
+    if (idx === 2) {
+      return audit.current_status === 'pending_management';
+    }
+
+    if (idx === 3) {
+      return (audit.current_status as string) === 'approved';
+    }
+
+    return false;
+  };
+
+  const isStepCurrent = (role: string, idx: number): boolean => {
+    if (audit.current_status === 'approved' || audit.current_status === 'rejected') {
+      return false;
+    }
+    if (isStepCompleted(role, idx)) {
+      return false;
+    }
+
+    switch (audit.current_status) {
+      case 'draft':
+      case 'returned_for_correction':
+        return idx === 0;
+      case 'pending_accountant':
+        return idx === 1;
+      case 'pending_account_manager':
+        return idx === 2;
+      case 'pending_management':
+        return idx === 3;
+      default:
+        return false;
+    }
+  };
 
   const getCurrentStepIndex = () => {
     switch (audit.current_status) {
@@ -51,13 +108,13 @@ export const ApprovalPanel: React.FC<Props> = ({
       case 'returned_for_correction':
         return 0;
       case 'pending_accountant':
-        return 0;
-      case 'pending_account_manager':
         return 1;
-      case 'pending_management':
+      case 'pending_account_manager':
         return 2;
-      case 'approved':
+      case 'pending_management':
         return 3;
+      case 'approved':
+        return 4;
       case 'rejected':
         return -1;
       default:
@@ -66,6 +123,16 @@ export const ApprovalPanel: React.FC<Props> = ({
   };
 
   const currentIndex = getCurrentStepIndex();
+
+  const getProgressWidthPercent = (): number => {
+    if (audit.current_status === 'approved') return 100;
+    if (audit.current_status === 'pending_management') return 75;
+    if (audit.current_status === 'pending_account_manager') return 50;
+    if (audit.current_status === 'pending_accountant') return 25;
+    return 10;
+  };
+
+  const progressPercent = getProgressWidthPercent();
 
   const handleModalSubmit = () => {
     if (!commentText.trim() && (actionType === 'reject' || actionType === 'return')) {
@@ -97,7 +164,7 @@ export const ApprovalPanel: React.FC<Props> = ({
             <span>Sequential Approval Chain</span>
           </h3>
           <p className="text-xs text-slate-600 font-medium mt-0.5">
-            Accountant → Account Manager → Management Executive
+            Operation Supervisor → Accountant → Account Manager → Management Executive
           </p>
         </div>
 
@@ -122,12 +189,19 @@ export const ApprovalPanel: React.FC<Props> = ({
 
       {/* STEP PROGRESSION BAR */}
       <div className="relative flex items-center justify-between mb-6 px-4 overflow-x-auto py-3">
+        {/* Background Track */}
         <div className="absolute top-1/2 left-10 right-10 h-1 bg-sky-200/80 -translate-y-1/2 -z-0"></div>
 
+        {/* Filled Progress Bar */}
+        <div
+          className="absolute top-1/2 left-10 h-1 bg-emerald-500 transition-all duration-500 -translate-y-1/2 -z-0"
+          style={{ width: `calc(${progressPercent}% - 40px)` }}
+        ></div>
+
         {steps.map((step, idx) => {
-          const isPassed = currentIndex > idx;
-          const isCurrent = currentIndex === idx;
-          const isRejected = audit.current_status === 'rejected';
+          const isPassed = isStepCompleted(step.role, idx);
+          const isCurrent = isStepCurrent(step.role, idx);
+          const isRejected = audit.current_status === 'rejected' && currentIndex === idx + 1;
 
           return (
             <div key={step.key} className="flex flex-col items-center relative z-10 min-w-[100px]">
@@ -146,7 +220,7 @@ export const ApprovalPanel: React.FC<Props> = ({
               </div>
               <span
                 className={`text-[11px] font-bold mt-2 text-center max-w-[110px] ${
-                  isCurrent ? 'text-sky-700 font-extrabold' : isPassed ? 'text-emerald-700' : 'text-slate-500'
+                  isPassed ? 'text-emerald-700 font-extrabold' : isCurrent ? 'text-sky-700 font-extrabold' : 'text-slate-500'
                 }`}
               >
                 {step.label}
