@@ -81,15 +81,15 @@ export const StationManagement: React.FC<Props> = ({
   return (
     <div className="space-y-6">
       {/* HEADER TOOLBAR */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white/50 backdrop-blur-xl border border-white/90 p-4 rounded-2xl shadow-[0_15px_35px_rgba(14,165,233,0.10)]">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white/10 backdrop-blur-3xl border border-white/25 p-4 rounded-2xl shadow-xl">
         <div className="relative flex-1">
-          <Search className="w-4 h-4 text-sky-600/70 absolute left-3.5 top-1/2 -translate-y-1/2" />
+          <Search className="w-4 h-4 text-sky-300 absolute left-3.5 top-1/2 -translate-y-1/2" />
           <input
             type="text"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             placeholder="Search stations by name, station #, location..."
-            className="w-full bg-white/70 backdrop-blur-md border border-sky-200/80 rounded-xl pl-10 pr-4 py-2 text-xs font-medium text-slate-900 placeholder-slate-400 focus:outline-none focus:bg-white focus:border-sky-500 focus:ring-4 focus:ring-sky-500/15 transition-all shadow-inner"
+            className="w-full bg-white/15 backdrop-blur-xl border border-white/30 rounded-xl pl-10 pr-4 py-2 text-xs font-bold text-white placeholder-sky-200/70 focus:outline-none focus:bg-white/25 focus:border-white/50 focus:ring-4 focus:ring-sky-400/20 transition-all shadow-inner"
           />
         </div>
 
@@ -103,10 +103,10 @@ export const StationManagement: React.FC<Props> = ({
       </div>
 
       {/* STATIONS TABLE */}
-      <div className="bg-white/50 backdrop-blur-2xl border border-white/90 rounded-[28px] overflow-hidden shadow-[0_20px_50px_rgba(14,165,233,0.12)]">
+      <div className="bg-white/10 backdrop-blur-3xl border border-white/25 rounded-[28px] overflow-hidden shadow-xl">
         <div className="overflow-x-auto">
           <table className="w-full text-left text-xs">
-            <thead className="bg-white/80 text-slate-700 uppercase font-extrabold border-b border-sky-100">
+            <thead className="bg-white/15 text-white uppercase font-extrabold border-b border-white/25">
               <tr>
                 <th className="p-4">Station #</th>
                 <th className="p-4">Station Name</th>
@@ -116,26 +116,26 @@ export const StationManagement: React.FC<Props> = ({
                 <th className="p-4 text-right">Actions</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-sky-100/60 text-slate-700">
+            <tbody className="divide-y divide-white/15 text-white">
               {filtered.length === 0 ? (
                 <tr>
-                  <td colSpan={6} className="p-8 text-center text-slate-500 font-medium italic">
+                  <td colSpan={6} className="p-8 text-center text-sky-200/80 font-medium italic">
                     No stations found.
                   </td>
                 </tr>
               ) : (
                 filtered.map((st) => (
-                  <tr key={st.id} className="hover:bg-sky-50/60 transition-colors">
-                    <td className="p-4 font-black text-sky-700">{st.station_no}</td>
-                    <td className="p-4 font-bold text-slate-900 flex items-center gap-2">
-                      <Building className="w-4 h-4 text-sky-600" />
+                  <tr key={st.id} className="hover:bg-white/15 transition-colors">
+                    <td className="p-4 font-black text-sky-300 font-mono">{st.station_no}</td>
+                    <td className="p-4 font-bold text-white flex items-center gap-2">
+                      <Building className="w-4 h-4 text-sky-300" />
                       <span>{st.name}</span>
                     </td>
                     <td className="p-4">
-                      <p className="text-slate-900 font-bold">{st.location}</p>
-                      <p className="text-[10px] text-slate-500 font-medium">{st.region || 'Central Region'}</p>
+                      <p className="text-white font-bold">{st.location}</p>
+                      <p className="text-[10px] text-sky-200/80 font-medium">{st.region || 'Central Region'}</p>
                     </td>
-                    <td className="p-4 font-extrabold text-sky-800">
+                    <td className="p-4 font-extrabold text-sky-200">
                       {st.operation_supervisor_name || 'Unassigned'}
                     </td>
                     <td className="p-4">

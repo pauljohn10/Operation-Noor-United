@@ -152,31 +152,31 @@ export const UserManagement: React.FC<Props> = ({
 
   return (
     <div className="space-y-6">
-      {/* TOOLBAR */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white/50 backdrop-blur-xl border border-white/90 p-4 rounded-2xl shadow-[0_15px_35px_rgba(14,165,233,0.10)]">
-        <div className="flex items-center gap-3 flex-1">
-          <div className="relative flex-1">
-            <Search className="w-4 h-4 text-sky-600/70 absolute left-3.5 top-1/2 -translate-y-1/2" />
+      {/* HEADER TOOLBAR */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white/10 backdrop-blur-3xl border border-white/25 p-4 rounded-2xl shadow-xl">
+        <div className="flex-1 flex flex-col sm:flex-row items-center gap-3">
+          <div className="relative w-full sm:w-72">
+            <Search className="w-4 h-4 text-sky-300 absolute left-3.5 top-1/2 -translate-y-1/2" />
             <input
               type="text"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              placeholder="Search users by name, employee ID, email, position..."
-              className="w-full bg-white/70 backdrop-blur-md border border-sky-200/80 rounded-xl pl-10 pr-4 py-2 text-xs font-medium text-slate-900 placeholder-slate-400 focus:outline-none focus:bg-white focus:border-sky-500 focus:ring-4 focus:ring-sky-500/15 transition-all shadow-inner"
+              placeholder="Search users..."
+              className="w-full bg-white/15 backdrop-blur-xl border border-white/30 rounded-xl pl-10 pr-4 py-2 text-xs font-bold text-white placeholder-sky-200/70 focus:outline-none focus:bg-white/25 focus:border-white/50 transition-all shadow-inner"
             />
           </div>
 
           <select
             value={roleFilter}
             onChange={(e) => setRoleFilter(e.target.value)}
-            className="bg-white/70 backdrop-blur-md border border-sky-200/80 text-xs font-extrabold rounded-xl px-3.5 py-2 text-slate-900 focus:outline-none cursor-pointer"
+            className="w-full sm:w-auto bg-white/15 backdrop-blur-xl border border-white/30 rounded-xl px-3 py-2 text-xs font-bold text-white focus:outline-none focus:bg-white/25 transition-all shadow-sm"
           >
-            <option value="ALL">All Roles</option>
-            <option value="Super Admin">Super Admin</option>
-            <option value="Management">Management</option>
-            <option value="Account Manager">Account Manager</option>
-            <option value="Accountant">Accountant</option>
-            <option value="Operation Supervisor">Operation Supervisor</option>
+            <option value="ALL" className="bg-slate-900 text-white">All Roles</option>
+            <option value="Super Admin" className="bg-slate-900 text-white">Super Admin</option>
+            <option value="Management" className="bg-slate-900 text-white">Management</option>
+            <option value="Account Manager" className="bg-slate-900 text-white">Account Manager</option>
+            <option value="Accountant" className="bg-slate-900 text-white">Accountant</option>
+            <option value="Operation Supervisor" className="bg-slate-900 text-white">Operation Supervisor</option>
           </select>
         </div>
 
@@ -190,10 +190,10 @@ export const UserManagement: React.FC<Props> = ({
       </div>
 
       {/* USERS TABLE */}
-      <div className="bg-white/50 backdrop-blur-2xl border border-white/90 rounded-[28px] overflow-hidden shadow-[0_20px_50px_rgba(14,165,233,0.12)]">
+      <div className="bg-white/10 backdrop-blur-3xl border border-white/25 rounded-[28px] overflow-hidden shadow-xl">
         <div className="overflow-x-auto">
           <table className="w-full text-left text-xs">
-            <thead className="bg-white/80 text-slate-700 uppercase font-extrabold border-b border-sky-100">
+            <thead className="bg-white/15 text-white uppercase font-extrabold border-b border-white/25">
               <tr>
                 <th className="p-4">User & Emp ID</th>
                 <th className="p-4">Role & Position</th>
@@ -204,31 +204,31 @@ export const UserManagement: React.FC<Props> = ({
                 <th className="p-4 text-right">Actions</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-sky-100/60 text-slate-700">
+            <tbody className="divide-y divide-white/15 text-white">
               {filtered.map((u) => (
-                <tr key={u.id} className="hover:bg-sky-50/60 transition-colors">
+                <tr key={u.id} className="hover:bg-white/15 transition-colors">
                   <td className="p-4">
-                    <p className="font-extrabold text-slate-900 flex items-center gap-2">
-                      <UserCheck className="w-4 h-4 text-sky-600" />
+                    <p className="font-extrabold text-white flex items-center gap-2">
+                      <UserCheck className="w-4 h-4 text-sky-300" />
                       <span>{u.full_name}</span>
                     </p>
-                    <p className="text-[10px] text-slate-500 font-mono font-bold mt-0.5">ID: {u.employee_id}</p>
+                    <p className="text-[10px] text-sky-200/80 font-mono font-bold mt-0.5">ID: {u.employee_id}</p>
                   </td>
 
                   <td className="p-4">
-                    <span className="font-extrabold text-purple-700 bg-purple-500/10 px-2.5 py-0.5 rounded-full border border-purple-500/20 text-[11px]">
+                    <span className="font-extrabold text-purple-200 bg-purple-500/20 px-2.5 py-0.5 rounded-full border border-purple-400/30 text-[11px]">
                       {u.role}
                     </span>
-                    <p className="text-[10px] text-slate-500 font-semibold mt-1">{u.position}</p>
+                    <p className="text-[10px] text-sky-200/80 font-semibold mt-1">{u.position}</p>
                   </td>
 
                   <td className="p-4">
-                    <p className="font-bold text-slate-900">{u.email}</p>
-                    <p className="text-[10px] text-slate-500 font-mono">@{u.username}</p>
+                    <p className="font-bold text-white">{u.email}</p>
+                    <p className="text-[10px] text-sky-200/80 font-mono">@{u.username}</p>
                   </td>
 
                   <td className="p-4">
-                    <p className="font-bold text-slate-900">{u.assigned_station_name || 'Central Office'}</p>
+                    <p className="font-bold text-white">{u.assigned_station_name || 'Central Office'}</p>
                   </td>
 
                   <td className="p-4">

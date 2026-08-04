@@ -70,16 +70,16 @@ export const AuditListView: React.FC<Props> = ({ audits, onOpenAudit }) => {
         </div>
       </div>
 
-      {/* FILTER TOOLBAR */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4 bg-white/50 backdrop-blur-xl border border-white/90 p-4 rounded-2xl shadow-[0_15px_35px_rgba(14,165,233,0.10)]">
-        <div className="md:col-span-2 relative">
-          <Search className="w-4 h-4 text-sky-600/70 absolute start-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+      {/* SEARCH AND FILTER CONTROLS */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-3 bg-white/10 backdrop-blur-3xl border border-white/25 p-4 rounded-2xl shadow-xl">
+        <div className="relative">
+          <Search className="w-4 h-4 text-sky-300 absolute left-3.5 top-1/2 -translate-y-1/2" />
           <input
             type="text"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             placeholder={t('auditsList.searchPlaceholder')}
-            className="w-full bg-white/70 backdrop-blur-md border border-sky-200/80 rounded-xl ps-10 pe-4 py-2.5 text-xs font-medium text-slate-900 placeholder-slate-400 focus:outline-none focus:bg-white focus:border-sky-500 focus:ring-4 focus:ring-sky-500/15 transition-all shadow-inner"
+            className="w-full bg-white/15 backdrop-blur-xl border border-white/30 rounded-xl pl-10 pr-4 py-2 text-xs font-bold text-white placeholder-sky-200/70 focus:outline-none focus:bg-white/25 focus:border-white/50 transition-all shadow-inner"
           />
         </div>
 
@@ -87,16 +87,15 @@ export const AuditListView: React.FC<Props> = ({ audits, onOpenAudit }) => {
           <select
             value={selectedStatus}
             onChange={(e) => setSelectedStatus(e.target.value)}
-            className="w-full bg-white/70 backdrop-blur-md border border-sky-200/80 text-xs font-extrabold rounded-xl px-3 py-2.5 text-slate-900 focus:outline-none focus:bg-white focus:border-sky-500 focus:ring-4 focus:ring-sky-500/15 cursor-pointer"
+            className="w-full bg-white/15 backdrop-blur-xl border border-white/30 text-xs font-bold rounded-xl px-3 py-2 text-white focus:outline-none focus:bg-white/25 transition-all shadow-sm"
           >
-            <option value="ALL">{t('auditsList.allStatuses')}</option>
-            <option value="draft">{t('auditsList.statusDraft')}</option>
-            <option value="pending_accountant">{t('auditsList.statusPendingAccountant')}</option>
-            <option value="pending_account_manager">{t('auditsList.statusPendingAccountManager')}</option>
-            <option value="pending_management">{t('auditsList.statusPendingManagement')}</option>
-            <option value="approved">{t('auditsList.statusApproved')}</option>
-            <option value="rejected">{t('auditsList.statusRejected')}</option>
-            <option value="returned_for_correction">{t('auditsList.statusReturned')}</option>
+            <option value="ALL" className="bg-slate-900 text-white">{t('auditsList.allStatuses')}</option>
+            <option value="pending_accountant" className="bg-slate-900 text-white">{t('auditsList.statusPendingAccountant')}</option>
+            <option value="pending_account_manager" className="bg-slate-900 text-white">{t('auditsList.statusPendingAccountManager')}</option>
+            <option value="pending_management" className="bg-slate-900 text-white">{t('auditsList.statusPendingManagement')}</option>
+            <option value="approved" className="bg-slate-900 text-white">{t('auditsList.statusApproved')}</option>
+            <option value="rejected" className="bg-slate-900 text-white">{t('auditsList.statusRejected')}</option>
+            <option value="returned_for_correction" className="bg-slate-900 text-white">{t('auditsList.statusReturned')}</option>
           </select>
         </div>
 
@@ -104,11 +103,11 @@ export const AuditListView: React.FC<Props> = ({ audits, onOpenAudit }) => {
           <select
             value={selectedStation}
             onChange={(e) => setSelectedStation(e.target.value)}
-            className="w-full bg-white/70 backdrop-blur-md border border-sky-200/80 text-xs font-extrabold rounded-xl px-3 py-2.5 text-slate-900 focus:outline-none focus:bg-white focus:border-sky-500 focus:ring-4 focus:ring-sky-500/15 cursor-pointer"
+            className="w-full bg-white/15 backdrop-blur-xl border border-white/30 text-xs font-bold rounded-xl px-3 py-2 text-white focus:outline-none focus:bg-white/25 transition-all shadow-sm"
           >
-            <option value="ALL">{t('auditsList.allStations')}</option>
+            <option value="ALL" className="bg-slate-900 text-white">{t('auditsList.allStations')}</option>
             {uniqueStations.map((st) => (
-              <option key={st} value={st}>
+              <option key={st} value={st} className="bg-slate-900 text-white">
                 {st}
               </option>
             ))}
@@ -117,10 +116,10 @@ export const AuditListView: React.FC<Props> = ({ audits, onOpenAudit }) => {
       </div>
 
       {/* AUDITS DATA TABLE */}
-      <div className="bg-white/50 backdrop-blur-2xl border border-white/90 rounded-[28px] overflow-hidden shadow-[0_20px_50px_rgba(14,165,233,0.12)]">
+      <div className="bg-white/10 backdrop-blur-3xl border border-white/25 rounded-[28px] overflow-hidden shadow-xl">
         <div className="overflow-x-auto">
           <table className="w-full text-center text-xs">
-            <thead className="bg-white/80 text-slate-700 uppercase font-extrabold border-b border-sky-100">
+            <thead className="bg-white/15 text-white uppercase font-extrabold border-b border-white/25">
               <tr>
                 <th className="p-4 text-center">{t('auditsList.auditNo')}</th>
                 <th className="p-4 text-center">{t('auditsList.station')}</th>
@@ -131,34 +130,34 @@ export const AuditListView: React.FC<Props> = ({ audits, onOpenAudit }) => {
                 <th className="p-4 text-center">{t('auditsList.actions')}</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-sky-100/60 text-slate-700">
+            <tbody className="divide-y divide-white/15 text-white">
               {filtered.length === 0 ? (
                 <tr>
-                  <td colSpan={7} className="p-8 text-center text-slate-500 font-medium italic">
+                  <td colSpan={7} className="p-8 text-center text-sky-200/80 font-medium italic">
                     {t('auditsList.noAuditsFound')}
                   </td>
                 </tr>
               ) : (
                 filtered.map((a) => (
-                  <tr key={a.id} className="hover:bg-sky-50/60 transition-colors">
+                  <tr key={a.id} className="hover:bg-white/15 transition-colors">
                     <td className="p-4 text-center">
-                      <p className="font-extrabold text-slate-900 flex items-center justify-center gap-1.5">
-                        <FileText className="w-4 h-4 text-sky-600" />
+                      <p className="font-extrabold text-white flex items-center justify-center gap-1.5">
+                        <FileText className="w-4 h-4 text-sky-300" />
                         <span>{a.audit_number}</span>
                       </p>
-                      <p className="text-[10px] text-slate-500 font-bold mt-0.5 flex items-center justify-center gap-1">
-                        <Calendar className="w-3 h-3 text-slate-400" />
+                      <p className="text-[10px] text-sky-200/80 font-bold mt-0.5 flex items-center justify-center gap-1">
+                        <Calendar className="w-3 h-3 text-sky-300" />
                         <span>{a.audit_date}</span>
                       </p>
                     </td>
 
                     <td className="p-4 text-center">
-                      <p className="font-bold text-slate-900">{a.station_name}</p>
-                      <p className="text-[10px] text-slate-500 font-medium">{a.location}</p>
+                      <p className="font-bold text-white">{a.station_name}</p>
+                      <p className="text-[10px] text-sky-200/80 font-medium">{a.location}</p>
                     </td>
 
                     <td className="p-4 text-center">
-                      <p className="text-slate-900 font-bold">{a.created_by_name || 'Operation Supervisor'}</p>
+                      <p className="text-white font-bold">{a.created_by_name || 'Operation Supervisor'}</p>
                     </td>
 
                     <td className="p-4 text-center">
