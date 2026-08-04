@@ -14,7 +14,6 @@ import {
   Terminal,
   Settings,
   LayoutDashboard,
-  CheckCircle,
 } from 'lucide-react';
 
 interface Props {
@@ -182,33 +181,119 @@ export const AdminDashboard: React.FC<Props> = ({
 
       {/* CONTENT PANELS */}
       {activeMenu === 'dashboard' && (
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <div className="bg-white/10 backdrop-blur-3xl border border-white/25 p-6 rounded-[24px] shadow-xl space-y-3">
-            <div className="flex items-center justify-between">
-              <h3 className="text-sm font-bold text-sky-100">System Health</h3>
-              <CheckCircle className="w-4 h-4 text-emerald-400" />
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+
+          {/* 1. System Health */}
+          <div className="relative group bg-white/10 backdrop-blur-3xl border border-white/25 rounded-[24px] p-6 shadow-[0_20px_45px_rgba(0,0,0,0.15),0_0_30px_rgba(255,255,255,0.05)] hover:shadow-[0_25px_55px_rgba(0,0,0,0.2),0_0_40px_rgba(16,185,129,0.15)] hover:bg-white/15 hover:border-white/40 hover:-translate-y-1 transition-all duration-300 overflow-hidden space-y-3">
+            <div className="absolute inset-x-0 top-0 h-14 bg-gradient-to-b from-white/30 via-white/5 to-transparent rounded-t-[24px] pointer-events-none"></div>
+
+            <div className="relative z-10 flex items-center justify-between">
+              <span className="text-xs font-extrabold text-emerald-100 uppercase tracking-wider drop-shadow-sm">System Health</span>
+              <div className="p-3 bg-emerald-500/20 backdrop-blur-xl rounded-2xl border border-emerald-400/30 text-emerald-300 shadow-sm">
+                <ShieldCheck className="w-5 h-5" />
+              </div>
             </div>
-            <p className="text-2xl font-black text-emerald-400">100% Operational</p>
-            <p className="text-xs text-sky-200/80 font-medium">Database & RLS Security Active</p>
+            <div className="relative z-10">
+              <p className="text-3xl font-black text-emerald-300 font-mono drop-shadow-md">100%</p>
+              <p className="text-xs text-emerald-200/90 font-bold mt-1 drop-shadow-sm">Database & RLS Security Active</p>
+            </div>
           </div>
 
-          <div className="bg-white/10 backdrop-blur-3xl border border-white/25 p-6 rounded-[24px] shadow-xl space-y-3">
-            <div className="flex items-center justify-between">
-              <h3 className="text-sm font-bold text-sky-100">Registered Users</h3>
-              <Users className="w-4 h-4 text-purple-300" />
+          {/* 2. Station Registry */}
+          <div
+            onClick={() => setActiveMenu('stations')}
+            className="relative group bg-white/10 backdrop-blur-3xl border border-white/25 rounded-[24px] p-6 shadow-[0_20px_45px_rgba(0,0,0,0.15),0_0_30px_rgba(255,255,255,0.05)] hover:shadow-[0_25px_55px_rgba(0,0,0,0.2),0_0_40px_rgba(56,189,248,0.15)] hover:bg-white/15 hover:border-white/40 hover:-translate-y-1 transition-all duration-300 overflow-hidden space-y-3 cursor-pointer"
+          >
+            <div className="absolute inset-x-0 top-0 h-14 bg-gradient-to-b from-white/30 via-white/5 to-transparent rounded-t-[24px] pointer-events-none"></div>
+
+            <div className="relative z-10 flex items-center justify-between">
+              <span className="text-xs font-extrabold text-sky-100 uppercase tracking-wider drop-shadow-sm">{t('admin.tabStations')}</span>
+              <div className="p-3 bg-sky-500/20 backdrop-blur-xl rounded-2xl border border-sky-400/30 text-sky-300 shadow-sm">
+                <Building className="w-5 h-5" />
+              </div>
             </div>
-            <p className="text-2xl font-black text-white">{users.length}</p>
-            <p className="text-xs text-purple-200/80 font-medium">{activeUsersCount} Active Accounts</p>
+            <div className="relative z-10">
+              <p className="text-3xl font-black text-white font-mono drop-shadow-md">{stations.length}</p>
+              <p className="text-xs text-sky-200/90 font-bold mt-1 drop-shadow-sm">{activeStationsCount} Operational Fuel Stations</p>
+            </div>
           </div>
 
-          <div className="bg-white/10 backdrop-blur-3xl border border-white/25 p-6 rounded-[24px] shadow-xl space-y-3">
-            <div className="flex items-center justify-between">
-              <h3 className="text-sm font-bold text-sky-100">Managed Stations</h3>
-              <Building className="w-4 h-4 text-sky-300" />
+          {/* 3. User Management */}
+          <div
+            onClick={() => setActiveMenu('users')}
+            className="relative group bg-white/10 backdrop-blur-3xl border border-white/25 rounded-[24px] p-6 shadow-[0_20px_45px_rgba(0,0,0,0.15),0_0_30px_rgba(255,255,255,0.05)] hover:shadow-[0_25px_55px_rgba(0,0,0,0.2),0_0_40px_rgba(168,85,247,0.15)] hover:bg-white/15 hover:border-white/40 hover:-translate-y-1 transition-all duration-300 overflow-hidden space-y-3 cursor-pointer"
+          >
+            <div className="absolute inset-x-0 top-0 h-14 bg-gradient-to-b from-white/30 via-white/5 to-transparent rounded-t-[24px] pointer-events-none"></div>
+
+            <div className="relative z-10 flex items-center justify-between">
+              <span className="text-xs font-extrabold text-purple-100 uppercase tracking-wider drop-shadow-sm">{t('admin.tabUsers')}</span>
+              <div className="p-3 bg-purple-500/20 backdrop-blur-xl rounded-2xl border border-purple-400/30 text-purple-300 shadow-sm">
+                <Users className="w-5 h-5" />
+              </div>
             </div>
-            <p className="text-2xl font-black text-white">{stations.length}</p>
-            <p className="text-xs text-sky-200/80 font-medium">{activeStationsCount} Operational Fuel Stations</p>
+            <div className="relative z-10">
+              <p className="text-3xl font-black text-white font-mono drop-shadow-md">{users.length}</p>
+              <p className="text-xs text-purple-200/90 font-bold mt-1 drop-shadow-sm">{activeUsersCount} Active Accounts</p>
+            </div>
           </div>
+
+          {/* 4. Audits */}
+          <div
+            onClick={() => setActiveMenu('audits')}
+            className="relative group bg-white/10 backdrop-blur-3xl border border-white/25 rounded-[24px] p-6 shadow-[0_20px_45px_rgba(0,0,0,0.15),0_0_30px_rgba(255,255,255,0.05)] hover:shadow-[0_25px_55px_rgba(0,0,0,0.2),0_0_40px_rgba(59,130,246,0.15)] hover:bg-white/15 hover:border-white/40 hover:-translate-y-1 transition-all duration-300 overflow-hidden space-y-3 cursor-pointer"
+          >
+            <div className="absolute inset-x-0 top-0 h-14 bg-gradient-to-b from-white/30 via-white/5 to-transparent rounded-t-[24px] pointer-events-none"></div>
+
+            <div className="relative z-10 flex items-center justify-between">
+              <span className="text-xs font-extrabold text-blue-100 uppercase tracking-wider drop-shadow-sm">{t('nav.audits')}</span>
+              <div className="p-3 bg-blue-500/20 backdrop-blur-xl rounded-2xl border border-blue-400/30 text-blue-300 shadow-sm">
+                <FileText className="w-5 h-5" />
+              </div>
+            </div>
+            <div className="relative z-10">
+              <p className="text-3xl font-black text-white font-mono drop-shadow-md">{audits.length}</p>
+              <p className="text-xs text-blue-200/90 font-bold mt-1 drop-shadow-sm">Total Filed Station Audits</p>
+            </div>
+          </div>
+
+          {/* 5. System Activity Logs */}
+          <div
+            onClick={() => setActiveMenu('reports')}
+            className="relative group bg-white/10 backdrop-blur-3xl border border-white/25 rounded-[24px] p-6 shadow-[0_20px_45px_rgba(0,0,0,0.15),0_0_30px_rgba(255,255,255,0.05)] hover:shadow-[0_25px_55px_rgba(0,0,0,0.2),0_0_40px_rgba(245,158,11,0.15)] hover:bg-white/15 hover:border-white/40 hover:-translate-y-1 transition-all duration-300 overflow-hidden space-y-3 cursor-pointer"
+          >
+            <div className="absolute inset-x-0 top-0 h-14 bg-gradient-to-b from-white/30 via-white/5 to-transparent rounded-t-[24px] pointer-events-none"></div>
+
+            <div className="relative z-10 flex items-center justify-between">
+              <span className="text-xs font-extrabold text-amber-100 uppercase tracking-wider drop-shadow-sm">{t('admin.tabLogs')}</span>
+              <div className="p-3 bg-amber-500/20 backdrop-blur-xl rounded-2xl border border-amber-400/30 text-amber-300 shadow-sm">
+                <Terminal className="w-5 h-5" />
+              </div>
+            </div>
+            <div className="relative z-10">
+              <p className="text-3xl font-black text-amber-300 font-mono drop-shadow-md">Active</p>
+              <p className="text-xs text-amber-200/90 font-bold mt-1 drop-shadow-sm">Real-time Audit Trail & Logs</p>
+            </div>
+          </div>
+
+          {/* 6. System Settings */}
+          <div
+            onClick={() => setActiveMenu('settings')}
+            className="relative group bg-white/10 backdrop-blur-3xl border border-white/25 rounded-[24px] p-6 shadow-[0_20px_45px_rgba(0,0,0,0.15),0_0_30px_rgba(255,255,255,0.05)] hover:shadow-[0_25px_55px_rgba(0,0,0,0.2),0_0_40px_rgba(99,102,241,0.15)] hover:bg-white/15 hover:border-white/40 hover:-translate-y-1 transition-all duration-300 overflow-hidden space-y-3 cursor-pointer"
+          >
+            <div className="absolute inset-x-0 top-0 h-14 bg-gradient-to-b from-white/30 via-white/5 to-transparent rounded-t-[24px] pointer-events-none"></div>
+
+            <div className="relative z-10 flex items-center justify-between">
+              <span className="text-xs font-extrabold text-indigo-100 uppercase tracking-wider drop-shadow-sm">{t('admin.tabSettings')}</span>
+              <div className="p-3 bg-indigo-500/20 backdrop-blur-xl rounded-2xl border border-indigo-400/30 text-indigo-300 shadow-sm">
+                <Settings className="w-5 h-5" />
+              </div>
+            </div>
+            <div className="relative z-10">
+              <p className="text-3xl font-black text-indigo-300 font-mono drop-shadow-md">Ready</p>
+              <p className="text-xs text-indigo-200/90 font-bold mt-1 drop-shadow-sm">System Parameters & Config</p>
+            </div>
+          </div>
+
         </div>
       )}
 
