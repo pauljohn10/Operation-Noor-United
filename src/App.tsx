@@ -380,11 +380,22 @@ function AppContent() {
     selectedAudit?.created_by !== currentUser.id;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#EAF6FF] via-[#D9F1FF] via-[#FFFFFF] to-[#E3F2FD] text-slate-900 flex flex-col font-sans selection:bg-sky-500 selection:text-white relative overflow-x-hidden">
+    <div className="min-h-screen min-h-[100dvh] w-full text-slate-900 flex flex-col font-sans selection:bg-sky-500 selection:text-white relative overflow-x-hidden">
       
-      {/* AMBIENT LIGHT BLOBS FOR GLASS DEPTH */}
-      <div className="fixed -top-36 -left-36 w-[650px] h-[650px] bg-gradient-to-tr from-sky-400/25 via-blue-300/20 to-cyan-300/25 rounded-full blur-3xl pointer-events-none"></div>
-      <div className="fixed -bottom-36 -right-36 w-[750px] h-[750px] bg-gradient-to-bl from-blue-300/20 via-indigo-200/20 to-sky-300/25 rounded-full blur-3xl pointer-events-none"></div>
+      {/* 1. GLOBAL FULL-SCREEN BACKGROUND IMAGE (COVER, CENTERED, FIXED) */}
+      <div
+        className="fixed inset-0 w-full h-full bg-cover bg-center bg-no-repeat pointer-events-none z-0 scale-105 transition-transform duration-1000"
+        style={{
+          backgroundImage: `url('/app-bg.jpg')`,
+        }}
+      ></div>
+
+      {/* 2. SUBTLE DARK OVERLAY (APPROX 60% OPACITY FOR VISIBLE GLASS REFRACTION & HIGH READABILITY) */}
+      <div className="fixed inset-0 w-full h-full bg-slate-950/60 pointer-events-none z-0"></div>
+
+      {/* 3. AMBIENT GLOW ACCENT BLOBS FOR GLASS DEPTH */}
+      <div className="fixed -top-36 -left-36 w-[650px] h-[650px] bg-gradient-to-tr from-sky-500/20 via-blue-500/15 to-cyan-400/20 rounded-full blur-3xl pointer-events-none z-0"></div>
+      <div className="fixed -bottom-36 -right-36 w-[750px] h-[750px] bg-gradient-to-bl from-blue-600/20 via-indigo-500/15 to-sky-400/20 rounded-full blur-3xl pointer-events-none z-0"></div>
 
       {/* NAVBAR */}
       <Navbar
