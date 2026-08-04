@@ -382,20 +382,27 @@ function AppContent() {
   return (
     <div className="min-h-screen min-h-[100dvh] w-full text-slate-900 flex flex-col font-sans selection:bg-sky-500 selection:text-white relative overflow-x-hidden">
       
-      {/* 1. GLOBAL FULL-SCREEN BACKGROUND IMAGE (COVER, CENTERED, FIXED) */}
-      <div
-        className="fixed inset-0 w-full h-full bg-cover bg-center bg-no-repeat pointer-events-none z-0 transition-all duration-700"
-        style={{
-          backgroundImage: `url('/app-bg.png')`,
-        }}
-      ></div>
+      {/* 1. ELEGANT BLUE ANIMATED ENTERPRISE BACKGROUND SYSTEM (NO IMAGE AFTER LOGIN) */}
+      <div className="fixed inset-0 w-full h-full bg-[#020617] pointer-events-none z-0 overflow-hidden">
+        {/* Layer 1: Base Gradient Mesh */}
+        <div className="absolute inset-0 bg-gradient-to-br from-[#020617] via-[#0f172a] to-[#030712]"></div>
 
-      {/* 2. SUBTLE DARK NAVY OVERLAY (60% OPACITY FOR VISIBLE ABSTRACT GRAPHIC & CRISP GLASS CONTRAST) */}
-      <div className="fixed inset-0 w-full h-full bg-slate-950/60 pointer-events-none z-0"></div>
+        {/* Layer 2: Radial Glow Center Accent */}
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_20%,rgba(37,99,235,0.18),transparent_65%)]"></div>
 
-      {/* 3. AMBIENT GLOW ACCENT BLOBS FOR GLASS DEPTH */}
-      <div className="fixed -top-36 -left-36 w-[650px] h-[650px] bg-gradient-to-tr from-sky-500/20 via-blue-500/15 to-cyan-400/20 rounded-full blur-3xl pointer-events-none z-0"></div>
-      <div className="fixed -bottom-36 -right-36 w-[750px] h-[750px] bg-gradient-to-bl from-blue-600/20 via-indigo-500/15 to-sky-400/20 rounded-full blur-3xl pointer-events-none z-0"></div>
+        {/* Layer 3: Floating Animated Light Orbs (GPU Accelerated) */}
+        {/* Top Left Royal Blue Glow */}
+        <div className="absolute -top-44 -left-44 w-[750px] h-[750px] bg-[#2563eb]/25 rounded-full blur-[130px] animate-orb-slow"></div>
+
+        {/* Bottom Right Sky Blue Glow */}
+        <div className="absolute -bottom-44 -right-44 w-[700px] h-[700px] bg-[#38bdf8]/20 rounded-full blur-[120px] animate-orb-reverse"></div>
+
+        {/* Center-Top Cyan Ambient Pulse Glow */}
+        <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-[600px] h-[600px] bg-[#06b6d4]/20 rounded-full blur-[110px] animate-pulse-glow"></div>
+
+        {/* Subtle Top Specular Refraction Beam */}
+        <div className="absolute inset-x-0 top-0 h-96 bg-gradient-to-b from-sky-400/10 via-blue-500/5 to-transparent pointer-events-none"></div>
+      </div>
 
       {/* NAVBAR */}
       <Navbar
