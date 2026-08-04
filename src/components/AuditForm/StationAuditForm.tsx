@@ -928,8 +928,8 @@ export const StationAuditForm: React.FC<Props> = ({
 
       {/* EXPLICIT WORKFLOW APPROVAL CONFIRMATION DIALOG */}
       {pendingApprovalConfirmation && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 backdrop-blur-md p-4">
-          <div className="bg-white/85 backdrop-blur-2xl border border-white/90 rounded-[28px] max-w-md w-full p-6 shadow-2xl ring-1 ring-white/60 animate-in fade-in zoom-in-95 duration-200">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 backdrop-blur-md p-4">
+          <div className="bg-white/15 backdrop-blur-3xl border border-white/35 rounded-[32px] max-w-md w-full p-6 shadow-2xl ring-1 ring-white/30 animate-in fade-in zoom-in-95 duration-200">
             <div className="flex items-center gap-3 mb-4">
               <div className="p-3 bg-emerald-500/10 text-emerald-600 rounded-2xl border border-emerald-500/20">
                 <CheckCircle2 className="w-6 h-6" />

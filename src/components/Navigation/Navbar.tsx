@@ -59,7 +59,7 @@ export const Navbar: React.FC<Props> = ({
 
   return (
     <>
-      <header className="sticky top-0 z-40 bg-white/60 backdrop-blur-2xl border-b border-white/80 shadow-md shadow-sky-900/5">
+      <header className="sticky top-0 z-40 glass-header">
         <div className="w-full px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16 gap-4">
             
@@ -77,14 +77,14 @@ export const Navbar: React.FC<Props> = ({
               </div>
               <div>
                 <div className="flex items-center gap-1.5">
-                  <h1 className="font-extrabold text-slate-900 text-xs sm:text-sm tracking-tight">
+                  <h1 className="font-extrabold text-white text-xs sm:text-sm tracking-tight drop-shadow-sm">
                     {t('nav.logoTitle')}
                   </h1>
-                  <span className="hidden sm:inline-block text-[10px] bg-sky-500/10 text-sky-700 font-bold px-2 py-0.5 rounded-full border border-sky-500/20">
+                  <span className="hidden sm:inline-block text-[10px] bg-sky-400/20 text-sky-200 font-bold px-2 py-0.5 rounded-full border border-sky-400/30">
                     {t('nav.logoSub')}
                   </span>
                 </div>
-                <p className="text-[9px] sm:text-[10px] text-sky-800 font-semibold leading-tight">
+                <p className="text-[9px] sm:text-[10px] text-sky-200/90 font-semibold leading-tight drop-shadow-sm">
                   مؤسسة النور المتحدة للوقود
                 </p>
               </div>
@@ -94,13 +94,13 @@ export const Navbar: React.FC<Props> = ({
             <nav className="hidden md:flex items-center gap-1 sm:gap-2">
               {/* ENTERPRISE MODULE SWITCHER SEGMENTED CONTROL (SUPER ADMIN ONLY) */}
               {isSuperAdmin && (
-                <div className="flex items-center p-1 bg-white/80 backdrop-blur-xl border border-sky-100 rounded-2xl shadow-inner me-2">
+                <div className="flex items-center p-1 bg-white/10 backdrop-blur-2xl border border-white/20 rounded-2xl shadow-inner me-2">
                   <button
                     onClick={() => onSelectModule?.('audits')}
                     className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-black transition-all ${
                       activeModule === 'audits'
                         ? 'bg-gradient-to-r from-sky-600 to-blue-600 text-white shadow-md shadow-sky-600/25 ring-1 ring-sky-400/30'
-                        : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100/60'
+                        : 'text-sky-100 hover:text-white hover:bg-white/10'
                     }`}
                   >
                     <FileText className="w-3.5 h-3.5" />

@@ -276,8 +276,8 @@ export const ApprovalPanel: React.FC<Props> = ({
 
       {/* ACTION & COMMENT MODAL */}
       {actionType && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 backdrop-blur-md p-4">
-          <div className="bg-white/85 backdrop-blur-2xl border border-white/90 rounded-2xl max-w-lg w-full p-6 shadow-2xl ring-1 ring-white/60">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 backdrop-blur-md p-4">
+          <div className="bg-white/15 backdrop-blur-3xl border border-white/35 rounded-[32px] max-w-lg w-full p-6 shadow-2xl ring-1 ring-white/30">
             <h4 className="text-base font-black text-slate-900 mb-1 capitalize flex items-center gap-2">
               <MessageSquare className="w-5 h-5 text-sky-600" />
               <span>

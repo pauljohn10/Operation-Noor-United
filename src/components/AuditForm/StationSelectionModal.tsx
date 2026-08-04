@@ -92,7 +92,7 @@ export const StationSelectionModal: React.FC<Props> = ({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 backdrop-blur-md p-4 overflow-y-auto">
-      <div className="bg-white/90 backdrop-blur-2xl border border-white/90 rounded-[28px] max-w-2xl w-full p-6 shadow-2xl ring-1 ring-white/60 animate-in fade-in zoom-in-95 duration-200 flex flex-col max-h-[90vh]">
+      <div className="bg-white/15 backdrop-blur-3xl border border-white/35 rounded-[32px] max-w-2xl w-full p-6 shadow-2xl ring-1 ring-white/30 animate-in fade-in zoom-in-95 duration-200 flex flex-col max-h-[90vh]">
         
         {/* MODAL HEADER */}
         <div className="flex items-center justify-between pb-4 border-b border-sky-100 shrink-0">
