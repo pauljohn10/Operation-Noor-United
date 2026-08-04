@@ -61,40 +61,40 @@ export const AdminDashboard: React.FC<Props> = ({
 
       
       {/* SUPER ADMIN HEADER */}
-      <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 bg-white/12 backdrop-blur-3xl border border-white/25 p-6 rounded-[28px] shadow-[0_20px_50px_rgba(0,0,0,0.2)] ring-1 ring-white/20">
+      <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 bg-slate-950/80 backdrop-blur-2xl border border-slate-700/80 p-6 rounded-[28px] shadow-[0_20px_50px_rgba(0,0,0,0.4)] ring-1 ring-white/10">
         <div className="flex items-center gap-3">
-          <div className="p-3 bg-purple-500/20 text-purple-300 rounded-2xl border border-purple-400/30 shadow-sm">
+          <div className="p-3 bg-purple-600/25 text-purple-300 rounded-2xl border border-purple-400/40 shadow-md">
             <ShieldCheck className="w-8 h-8" />
           </div>
           <div>
             <h2 className="text-2xl font-black text-white tracking-tight drop-shadow-sm">{t('admin.hubTitle')}</h2>
-            <p className="text-xs text-purple-200/90 font-semibold mt-0.5 drop-shadow-sm">
+            <p className="text-xs text-purple-200 font-semibold mt-0.5 drop-shadow-sm">
               {t('admin.hubSub')}
             </p>
           </div>
         </div>
 
         <div className="flex items-center gap-3">
-          <div className="px-3.5 py-1.5 rounded-full bg-purple-500/20 border border-purple-400/30 text-purple-200 text-xs font-extrabold shadow-sm">
+          <div className="px-3.5 py-1.5 rounded-full bg-purple-500/25 border border-purple-400/40 text-purple-100 text-xs font-black shadow-sm">
             {activeUsersCount} Active Users
           </div>
-          <div className="px-3.5 py-1.5 rounded-full bg-emerald-500/20 border border-emerald-400/30 text-emerald-300 text-xs font-extrabold shadow-sm">
+          <div className="px-3.5 py-1.5 rounded-full bg-emerald-500/25 border border-emerald-400/40 text-emerald-300 text-xs font-black shadow-sm">
             {activeStationsCount} Operational Stations
           </div>
         </div>
       </div>
 
-      {/* ADMIN NAVIGATION MENUS BAR */}
-      <div className="flex items-center gap-2 overflow-x-auto p-2 bg-white/12 backdrop-blur-3xl border border-white/25 rounded-2xl shadow-lg ring-1 ring-white/20 text-xs font-bold">
+      {/* HIGH-CONTRAST ADMIN NAVIGATION MENUS BAR */}
+      <div className="flex items-center gap-2 overflow-x-auto p-2.5 bg-slate-950/85 backdrop-blur-2xl border border-slate-700/80 rounded-2xl shadow-[0_15px_35px_rgba(0,0,0,0.4)] ring-1 ring-white/10 text-xs font-bold">
         <button
           onClick={() => setActiveMenu('dashboard')}
           className={`flex items-center gap-2.5 px-4 py-2.5 rounded-xl font-bold transition-all duration-200 cursor-pointer ${
             activeMenu === 'dashboard'
-              ? 'bg-purple-600 text-white shadow-lg shadow-purple-600/40 border border-purple-400/40 ring-1 ring-white/30 font-black'
-              : 'text-sky-100/90 hover:text-white bg-white/5 hover:bg-white/15 border border-transparent hover:border-white/20'
+              ? 'bg-gradient-to-r from-purple-600 to-indigo-600 text-white shadow-lg shadow-purple-600/40 border border-purple-300/50 ring-1 ring-white/30 font-black'
+              : 'bg-slate-900/60 hover:bg-purple-950/60 text-slate-100 hover:text-white border border-slate-800 hover:border-purple-500/40 shadow-sm'
           }`}
         >
-          <LayoutDashboard className={`w-4 h-4 ${activeMenu === 'dashboard' ? 'text-white' : 'text-purple-300'}`} />
+          <LayoutDashboard className={`w-4 h-4 ${activeMenu === 'dashboard' ? 'text-white' : 'text-purple-400'}`} />
           <span>{t('nav.dashboard')}</span>
         </button>
 
@@ -102,16 +102,16 @@ export const AdminDashboard: React.FC<Props> = ({
           onClick={() => setActiveMenu('stations')}
           className={`flex items-center gap-2.5 px-4 py-2.5 rounded-xl font-bold transition-all duration-200 cursor-pointer ${
             activeMenu === 'stations'
-              ? 'bg-purple-600 text-white shadow-lg shadow-purple-600/40 border border-purple-400/40 ring-1 ring-white/30 font-black'
-              : 'text-sky-100/90 hover:text-white bg-white/5 hover:bg-white/15 border border-transparent hover:border-white/20'
+              ? 'bg-gradient-to-r from-purple-600 to-indigo-600 text-white shadow-lg shadow-purple-600/40 border border-purple-300/50 ring-1 ring-white/30 font-black'
+              : 'bg-slate-900/60 hover:bg-purple-950/60 text-slate-100 hover:text-white border border-slate-800 hover:border-purple-500/40 shadow-sm'
           }`}
         >
-          <Building className={`w-4 h-4 ${activeMenu === 'stations' ? 'text-white' : 'text-purple-300'}`} />
+          <Building className={`w-4 h-4 ${activeMenu === 'stations' ? 'text-white' : 'text-purple-400'}`} />
           <span>{t('admin.tabStations')}</span>
           <span className={`px-2 py-0.5 rounded-full text-[11px] font-black transition-colors ${
             activeMenu === 'stations'
               ? 'bg-white/25 text-white border border-white/40'
-              : 'bg-purple-500/25 text-purple-200 border border-purple-400/30'
+              : 'bg-slate-800 text-purple-200 border border-purple-400/40'
           }`}>
             {stations.length}
           </span>
@@ -121,16 +121,16 @@ export const AdminDashboard: React.FC<Props> = ({
           onClick={() => setActiveMenu('users')}
           className={`flex items-center gap-2.5 px-4 py-2.5 rounded-xl font-bold transition-all duration-200 cursor-pointer ${
             activeMenu === 'users'
-              ? 'bg-purple-600 text-white shadow-lg shadow-purple-600/40 border border-purple-400/40 ring-1 ring-white/30 font-black'
-              : 'text-sky-100/90 hover:text-white bg-white/5 hover:bg-white/15 border border-transparent hover:border-white/20'
+              ? 'bg-gradient-to-r from-purple-600 to-indigo-600 text-white shadow-lg shadow-purple-600/40 border border-purple-300/50 ring-1 ring-white/30 font-black'
+              : 'bg-slate-900/60 hover:bg-purple-950/60 text-slate-100 hover:text-white border border-slate-800 hover:border-purple-500/40 shadow-sm'
           }`}
         >
-          <Users className={`w-4 h-4 ${activeMenu === 'users' ? 'text-white' : 'text-purple-300'}`} />
+          <Users className={`w-4 h-4 ${activeMenu === 'users' ? 'text-white' : 'text-purple-400'}`} />
           <span>{t('admin.tabUsers')}</span>
           <span className={`px-2 py-0.5 rounded-full text-[11px] font-black transition-colors ${
             activeMenu === 'users'
               ? 'bg-white/25 text-white border border-white/40'
-              : 'bg-purple-500/25 text-purple-200 border border-purple-400/30'
+              : 'bg-slate-800 text-purple-200 border border-purple-400/40'
           }`}>
             {users.length}
           </span>
@@ -140,16 +140,16 @@ export const AdminDashboard: React.FC<Props> = ({
           onClick={() => setActiveMenu('audits')}
           className={`flex items-center gap-2.5 px-4 py-2.5 rounded-xl font-bold transition-all duration-200 cursor-pointer ${
             activeMenu === 'audits'
-              ? 'bg-purple-600 text-white shadow-lg shadow-purple-600/40 border border-purple-400/40 ring-1 ring-white/30 font-black'
-              : 'text-sky-100/90 hover:text-white bg-white/5 hover:bg-white/15 border border-transparent hover:border-white/20'
+              ? 'bg-gradient-to-r from-purple-600 to-indigo-600 text-white shadow-lg shadow-purple-600/40 border border-purple-300/50 ring-1 ring-white/30 font-black'
+              : 'bg-slate-900/60 hover:bg-purple-950/60 text-slate-100 hover:text-white border border-slate-800 hover:border-purple-500/40 shadow-sm'
           }`}
         >
-          <FileText className={`w-4 h-4 ${activeMenu === 'audits' ? 'text-white' : 'text-purple-300'}`} />
+          <FileText className={`w-4 h-4 ${activeMenu === 'audits' ? 'text-white' : 'text-purple-400'}`} />
           <span>{t('nav.audits')}</span>
           <span className={`px-2 py-0.5 rounded-full text-[11px] font-black transition-colors ${
             activeMenu === 'audits'
               ? 'bg-white/25 text-white border border-white/40'
-              : 'bg-purple-500/25 text-purple-200 border border-purple-400/30'
+              : 'bg-slate-800 text-purple-200 border border-purple-400/40'
           }`}>
             {audits.length}
           </span>
@@ -159,11 +159,11 @@ export const AdminDashboard: React.FC<Props> = ({
           onClick={() => setActiveMenu('reports')}
           className={`flex items-center gap-2.5 px-4 py-2.5 rounded-xl font-bold transition-all duration-200 cursor-pointer ${
             activeMenu === 'reports'
-              ? 'bg-purple-600 text-white shadow-lg shadow-purple-600/40 border border-purple-400/40 ring-1 ring-white/30 font-black'
-              : 'text-sky-100/90 hover:text-white bg-white/5 hover:bg-white/15 border border-transparent hover:border-white/20'
+              ? 'bg-gradient-to-r from-purple-600 to-indigo-600 text-white shadow-lg shadow-purple-600/40 border border-purple-300/50 ring-1 ring-white/30 font-black'
+              : 'bg-slate-900/60 hover:bg-purple-950/60 text-slate-100 hover:text-white border border-slate-800 hover:border-purple-500/40 shadow-sm'
           }`}
         >
-          <Terminal className={`w-4 h-4 ${activeMenu === 'reports' ? 'text-white' : 'text-purple-300'}`} />
+          <Terminal className={`w-4 h-4 ${activeMenu === 'reports' ? 'text-white' : 'text-purple-400'}`} />
           <span>{t('admin.tabLogs')}</span>
         </button>
 
@@ -171,11 +171,11 @@ export const AdminDashboard: React.FC<Props> = ({
           onClick={() => setActiveMenu('settings')}
           className={`flex items-center gap-2.5 px-4 py-2.5 rounded-xl font-bold transition-all duration-200 cursor-pointer ${
             activeMenu === 'settings'
-              ? 'bg-purple-600 text-white shadow-lg shadow-purple-600/40 border border-purple-400/40 ring-1 ring-white/30 font-black'
-              : 'text-sky-100/90 hover:text-white bg-white/5 hover:bg-white/15 border border-transparent hover:border-white/20'
+              ? 'bg-gradient-to-r from-purple-600 to-indigo-600 text-white shadow-lg shadow-purple-600/40 border border-purple-300/50 ring-1 ring-white/30 font-black'
+              : 'bg-slate-900/60 hover:bg-purple-950/60 text-slate-100 hover:text-white border border-slate-800 hover:border-purple-500/40 shadow-sm'
           }`}
         >
-          <Settings className={`w-4 h-4 ${activeMenu === 'settings' ? 'text-white' : 'text-purple-300'}`} />
+          <Settings className={`w-4 h-4 ${activeMenu === 'settings' ? 'text-white' : 'text-purple-400'}`} />
           <span>{t('admin.tabSettings')}</span>
         </button>
       </div>
