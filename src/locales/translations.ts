@@ -143,6 +143,7 @@ export interface TranslationDictionary {
     addPump: string;
   };
   admin: {
+    navDashboard: string;
     hubTitle: string;
     hubSub: string;
     tabUsers: string;
@@ -378,6 +379,7 @@ export const translations: Record<Language, TranslationDictionary> = {
       addPump: 'Add Pump Nozzles',
     },
     admin: {
+      navDashboard: 'Dashboard',
       hubTitle: 'Super Admin Management Suite',
       hubSub: 'Manage system users, station registry, global fuel prices, and view activity logs',
       tabUsers: 'User Management',
@@ -824,6 +826,7 @@ export const translations: Record<Language, TranslationDictionary> = {
       addPump: 'إضافة مضخات جديدة',
     },
     admin: {
+      navDashboard: 'لوحة التحكم',
       hubTitle: 'جناح إدارة النظام الرئيسي',
       hubSub: 'إدارة المستخدمين، سجل المحطات، أسعار الوقود، وسجلات النشاط',
       tabUsers: 'إدارة المستخدمين',
