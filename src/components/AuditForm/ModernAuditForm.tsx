@@ -164,99 +164,114 @@ export const ModernAuditForm: React.FC<Props> = ({
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         
         {/* Card 1: Total Sales */}
-        <div className="bg-gradient-to-br from-slate-900 via-sky-950 to-slate-900 text-white p-5 rounded-2xl shadow-xl border border-sky-500/20 relative overflow-hidden group">
-          <div className="absolute -right-6 -bottom-6 w-28 h-28 bg-sky-500/10 rounded-full blur-2xl group-hover:bg-sky-500/20 transition-all"></div>
-          <div className="flex items-center justify-between mb-2">
-            <span className="text-xs font-bold text-sky-200 uppercase tracking-wider">{t('auditForm.grandTotalSales')}</span>
-            <div className="p-2 bg-sky-500/20 rounded-xl text-sky-300">
+        <div className="relative group bg-white/10 backdrop-blur-3xl border border-white/25 rounded-[24px] p-5 shadow-[0_20px_45px_rgba(0,0,0,0.15),0_0_30px_rgba(255,255,255,0.05)] hover:shadow-[0_25px_55px_rgba(0,0,0,0.2),0_0_40px_rgba(56,189,248,0.15)] hover:bg-white/15 hover:border-white/40 hover:-translate-y-1 transition-all duration-300 overflow-hidden">
+          {/* Top Glass Specular Gloss Highlight */}
+          <div className="absolute inset-x-0 top-0 h-14 bg-gradient-to-b from-white/30 via-white/5 to-transparent rounded-t-[24px] pointer-events-none"></div>
+
+          <div className="relative z-10 flex items-center justify-between mb-2">
+            <span className="text-xs font-extrabold text-sky-100 uppercase tracking-wider drop-shadow-sm">{t('auditForm.grandTotalSales')}</span>
+            <div className="p-3 bg-sky-500/20 backdrop-blur-xl rounded-2xl border border-sky-400/30 text-sky-300 shadow-sm">
               <TrendingUp className="w-5 h-5" />
             </div>
           </div>
-          <div className="text-2xl font-black tracking-tight text-white font-mono">
-            {formatCurrency(grandTotalSales)} <span className="text-xs font-normal text-sky-300">{t('common.sar')}</span>
+          <div className="relative z-10 text-2xl sm:text-3xl font-black tracking-tight text-white font-mono drop-shadow-md">
+            {formatCurrency(grandTotalSales)} <span className="text-xs font-normal text-sky-200">{t('common.sar')}</span>
           </div>
-          <div className="mt-2 text-[11px] text-sky-300/80 font-medium">
+          <div className="relative z-10 mt-2 text-[11px] text-sky-200/90 font-bold drop-shadow-sm">
             {t('auditForm.meteredFuelRevenue')}
           </div>
         </div>
 
         {/* Card 2: Actual Cash Received */}
-        <div className="bg-white/60 backdrop-blur-xl p-5 rounded-2xl shadow-lg border border-white/90 relative group">
-          <div className="flex items-center justify-between mb-2">
-            <span className="text-xs font-bold text-slate-600 uppercase tracking-wider">{t('auditForm.cashReceived')}</span>
-            <div className="p-2 bg-emerald-500/10 text-emerald-600 rounded-xl border border-emerald-500/20">
+        <div className="relative group bg-white/10 backdrop-blur-3xl border border-white/25 rounded-[24px] p-5 shadow-[0_20px_45px_rgba(0,0,0,0.15),0_0_30px_rgba(255,255,255,0.05)] hover:shadow-[0_25px_55px_rgba(0,0,0,0.2),0_0_40px_rgba(16,185,129,0.15)] hover:bg-white/15 hover:border-white/40 hover:-translate-y-1 transition-all duration-300 overflow-hidden">
+          {/* Top Glass Specular Gloss Highlight */}
+          <div className="absolute inset-x-0 top-0 h-14 bg-gradient-to-b from-white/30 via-white/5 to-transparent rounded-t-[24px] pointer-events-none"></div>
+
+          <div className="relative z-10 flex items-center justify-between mb-2">
+            <span className="text-xs font-extrabold text-emerald-100 uppercase tracking-wider drop-shadow-sm">{t('auditForm.cashReceived')}</span>
+            <div className="p-3 bg-emerald-500/20 backdrop-blur-xl rounded-2xl border border-emerald-400/30 text-emerald-300 shadow-sm">
               <Banknote className="w-5 h-5" />
             </div>
           </div>
-          <div className="text-2xl font-black text-slate-900 font-mono">
+          <div className="relative z-10 text-2xl sm:text-3xl font-black text-emerald-300 font-mono drop-shadow-md">
             {cashReceivedVal != null ? formatCurrency(cashReceivedVal) : '0.00'}{' '}
-            <span className="text-xs font-normal text-slate-500">{t('common.sar')}</span>
+            <span className="text-xs font-normal text-emerald-200">{t('common.sar')}</span>
           </div>
-          <div className="mt-2 text-[11px] text-slate-500 font-medium">
-            {t('auditForm.expected')}: <strong className="text-slate-800 font-mono">{formatCurrency(expectedCash)} {t('common.sar')}</strong>
+          <div className="relative z-10 mt-2 text-[11px] text-emerald-200/90 font-bold drop-shadow-sm">
+            {t('auditForm.expected')}: <strong className="text-white font-mono">{formatCurrency(expectedCash)} {t('common.sar')}</strong>
           </div>
         </div>
 
         {/* Card 3: Discrepancy / Variance */}
         <div
-          className={`p-5 rounded-2xl shadow-lg border backdrop-blur-xl transition-all ${
+          className={`relative group p-5 rounded-[24px] backdrop-blur-3xl border shadow-[0_20px_45px_rgba(0,0,0,0.15),0_0_30px_rgba(255,255,255,0.05)] hover:shadow-[0_25px_55px_rgba(0,0,0,0.2)] hover:-translate-y-1 transition-all duration-300 overflow-hidden ${
             discrepancyVal < 0
-              ? 'bg-red-500/10 border-red-500/30 text-red-900'
+              ? 'bg-rose-950/30 border-rose-400/40 text-rose-100 hover:bg-rose-900/40'
               : discrepancyVal > 0
-              ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-900'
-              : 'bg-white/60 border-white/90 text-slate-900'
+              ? 'bg-emerald-950/30 border-emerald-400/40 text-emerald-100 hover:bg-emerald-900/40'
+              : 'bg-white/10 border-white/25 text-white hover:bg-white/15'
           }`}
         >
-          <div className="flex items-center justify-between mb-2">
-            <span className="text-xs font-bold uppercase tracking-wider">{t('auditForm.netDiscrepancy')}</span>
+          {/* Top Glass Specular Gloss Highlight */}
+          <div className="absolute inset-x-0 top-0 h-14 bg-gradient-to-b from-white/30 via-white/5 to-transparent rounded-t-[24px] pointer-events-none"></div>
+
+          <div className="relative z-10 flex items-center justify-between mb-2">
+            <span className="text-xs font-extrabold uppercase tracking-wider drop-shadow-sm">{t('auditForm.netDiscrepancy')}</span>
             <div
-              className={`p-2 rounded-xl border ${
+              className={`p-3 rounded-2xl border backdrop-blur-xl shadow-sm ${
                 discrepancyVal < 0
-                  ? 'bg-red-500/20 text-red-700 border-red-500/30'
-                  : 'bg-emerald-500/20 text-emerald-700 border-emerald-500/30'
+                  ? 'bg-rose-500/20 text-rose-300 border-rose-400/40'
+                  : 'bg-emerald-500/20 text-emerald-300 border-emerald-400/40'
               }`}
             >
               <AlertTriangle className="w-5 h-5" />
             </div>
           </div>
-          <div className="text-2xl font-black font-mono">
+          <div className={`relative z-10 text-2xl sm:text-3xl font-black font-mono drop-shadow-md ${
+            discrepancyVal < 0 ? 'text-rose-300' : discrepancyVal > 0 ? 'text-emerald-300' : 'text-white'
+          }`}>
             {formatCurrency(discrepancyVal)} <span className="text-xs font-normal">{t('common.sar')}</span>
           </div>
-          <div className="mt-2 text-[11px] font-bold">
+          <div className="relative z-10 mt-2 text-[11px] font-extrabold drop-shadow-sm">
             {discrepancyVal < 0 ? (
-              <span className="text-red-700 font-extrabold flex items-center gap-1">
-                <AlertTriangle className="w-3.5 h-3.5" /> {t('auditForm.cashShortage')}
+              <span className="text-rose-300 font-extrabold flex items-center gap-1">
+                <AlertTriangle className="w-3.5 h-3.5 text-rose-400" /> {t('auditForm.cashShortage')}
               </span>
             ) : discrepancyVal > 0 ? (
-              <span className="text-emerald-700 font-extrabold flex items-center gap-1">
-                <CheckCircle2 className="w-3.5 h-3.5" /> {t('auditForm.cashSurplus')}
+              <span className="text-emerald-300 font-extrabold flex items-center gap-1">
+                <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" /> {t('auditForm.cashSurplus')}
               </span>
             ) : (
-              <span className="text-slate-600 font-extrabold flex items-center gap-1">
-                <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" /> {t('auditForm.perfectlyBalanced')}
+              <span className="text-sky-200 font-extrabold flex items-center gap-1">
+                <CheckCircle2 className="w-3.5 h-3.5 text-sky-300" /> Balanced
               </span>
             )}
           </div>
         </div>
 
         {/* Card 4: Fuel Types Quick Breakdown */}
-        <div className="bg-white/60 backdrop-blur-xl p-5 rounded-2xl shadow-lg border border-white/90 flex flex-col justify-between">
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-bold text-slate-600 uppercase tracking-wider">{t('auditForm.fuelSalesSummary')}</span>
-            <Fuel className="w-4 h-4 text-sky-600" />
+        <div className="relative group bg-white/10 backdrop-blur-3xl border border-white/25 rounded-[24px] p-5 shadow-[0_20px_45px_rgba(0,0,0,0.15),0_0_30px_rgba(255,255,255,0.05)] hover:shadow-[0_25px_55px_rgba(0,0,0,0.2),0_0_40px_rgba(56,189,248,0.15)] hover:bg-white/15 hover:border-white/40 hover:-translate-y-1 transition-all duration-300 overflow-hidden flex flex-col justify-between">
+          {/* Top Glass Specular Gloss Highlight */}
+          <div className="absolute inset-x-0 top-0 h-14 bg-gradient-to-b from-white/30 via-white/5 to-transparent rounded-t-[24px] pointer-events-none"></div>
+
+          <div className="relative z-10 flex items-center justify-between">
+            <span className="text-xs font-extrabold text-sky-100 uppercase tracking-wider drop-shadow-sm">{t('auditForm.fuelSalesSummary')}</span>
+            <div className="p-2.5 bg-sky-500/20 backdrop-blur-xl rounded-2xl border border-sky-400/30 text-sky-300 shadow-sm">
+              <Fuel className="w-4 h-4" />
+            </div>
           </div>
-          <div className="grid grid-cols-3 gap-2 mt-2 text-center">
-            <div className="bg-emerald-50 border border-emerald-200/60 p-2 rounded-xl">
-              <span className="block text-[10px] font-black text-emerald-800">P91</span>
-              <span className="text-xs font-black text-emerald-900 font-mono">{formatNumber(p91Totals.total_quantity)}L</span>
+          <div className="relative z-10 grid grid-cols-3 gap-2 mt-3 text-center">
+            <div className="bg-emerald-500/20 border border-emerald-400/30 p-2 rounded-xl backdrop-blur-md shadow-sm">
+              <span className="block text-[10px] font-black text-emerald-300">P91</span>
+              <span className="text-xs font-black text-white font-mono">{formatNumber(p91Totals.total_quantity)}L</span>
             </div>
-            <div className="bg-amber-50 border border-amber-200/60 p-2 rounded-xl">
-              <span className="block text-[10px] font-black text-amber-800">P95</span>
-              <span className="text-xs font-black text-amber-900 font-mono">{formatNumber(p95Totals.total_quantity)}L</span>
+            <div className="bg-amber-500/20 border border-amber-400/30 p-2 rounded-xl backdrop-blur-md shadow-sm">
+              <span className="block text-[10px] font-black text-amber-300">P95</span>
+              <span className="text-xs font-black text-white font-mono">{formatNumber(p95Totals.total_quantity)}L</span>
             </div>
-            <div className="bg-yellow-500/10 border border-yellow-500/30 p-2 rounded-xl">
-              <span className="block text-[10px] font-black text-yellow-900">DSL</span>
-              <span className="text-xs font-black text-yellow-950 font-mono">{formatNumber(dieselTotals.total_quantity)}L</span>
+            <div className="bg-yellow-500/20 border border-yellow-400/30 p-2 rounded-xl backdrop-blur-md shadow-sm">
+              <span className="block text-[10px] font-black text-yellow-300">DSL</span>
+              <span className="text-xs font-black text-white font-mono">{formatNumber(dieselTotals.total_quantity)}L</span>
             </div>
           </div>
         </div>

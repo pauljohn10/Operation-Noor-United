@@ -70,61 +70,73 @@ export const DashboardView: React.FC<Props> = ({
         )}
       </div>
 
-      {/* 3. KPI CARDS GRID */}
+      {/* 3. PREMIUM FROSTED GLASS KPI CARDS GRID */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
 
         {/* Total Audits */}
-        <div className="bg-white/50 backdrop-blur-xl border border-white/90 p-5 rounded-2xl shadow-[0_15px_35px_rgba(14,165,233,0.10)] hover:shadow-[0_20px_45px_rgba(14,165,233,0.18)] hover:-translate-y-1 transition-all duration-300 relative group">
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-bold text-slate-600">{t('dashboard.totalAudits')}</span>
-            <div className="p-2.5 bg-sky-500/10 text-sky-600 rounded-xl border border-sky-500/20">
+        <div className="relative group bg-white/10 backdrop-blur-3xl border border-white/25 rounded-[24px] p-5 shadow-[0_20px_45px_rgba(0,0,0,0.15),0_0_30px_rgba(255,255,255,0.05)] hover:shadow-[0_25px_55px_rgba(0,0,0,0.2),0_0_40px_rgba(56,189,248,0.15)] hover:bg-white/15 hover:border-white/40 hover:-translate-y-1 transition-all duration-300 overflow-hidden">
+          {/* Top Glass Specular Gloss Highlight */}
+          <div className="absolute inset-x-0 top-0 h-14 bg-gradient-to-b from-white/30 via-white/5 to-transparent rounded-t-[24px] pointer-events-none"></div>
+
+          <div className="relative z-10 flex items-center justify-between">
+            <span className="text-xs font-extrabold text-sky-100 tracking-wide drop-shadow-sm">{t('dashboard.totalAudits')}</span>
+            <div className="p-3 bg-sky-500/20 backdrop-blur-xl rounded-2xl border border-sky-400/30 text-sky-300 shadow-sm">
               <FileText className="w-5 h-5" />
             </div>
           </div>
-          <p className="text-3xl font-black text-slate-900 mt-3">{totalAuditsCount}</p>
-          <div className="flex items-center gap-1 text-[11px] text-slate-500 mt-2 font-semibold">
+          <p className="relative z-10 text-3xl sm:text-4xl font-black text-white mt-3 tracking-tight drop-shadow-md">{totalAuditsCount}</p>
+          <div className="relative z-10 flex items-center gap-1.5 text-[11px] text-sky-200/90 mt-2 font-bold drop-shadow-sm">
             <span>{t('dashboard.repositorySize')}</span>
           </div>
         </div>
 
         {/* Pending Approvals */}
-        <div className="bg-white/50 backdrop-blur-xl border border-white/90 p-5 rounded-2xl shadow-[0_15px_35px_rgba(14,165,233,0.10)] hover:shadow-[0_20px_45px_rgba(14,165,233,0.18)] hover:-translate-y-1 transition-all duration-300 relative group">
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-bold text-slate-600">{t('dashboard.pendingApprovals')}</span>
-            <div className="p-2.5 bg-amber-500/10 text-amber-600 rounded-xl border border-amber-500/20">
+        <div className="relative group bg-white/10 backdrop-blur-3xl border border-white/25 rounded-[24px] p-5 shadow-[0_20px_45px_rgba(0,0,0,0.15),0_0_30px_rgba(255,255,255,0.05)] hover:shadow-[0_25px_55px_rgba(0,0,0,0.2),0_0_40px_rgba(245,158,11,0.15)] hover:bg-white/15 hover:border-white/40 hover:-translate-y-1 transition-all duration-300 overflow-hidden">
+          {/* Top Glass Specular Gloss Highlight */}
+          <div className="absolute inset-x-0 top-0 h-14 bg-gradient-to-b from-white/30 via-white/5 to-transparent rounded-t-[24px] pointer-events-none"></div>
+
+          <div className="relative z-10 flex items-center justify-between">
+            <span className="text-xs font-extrabold text-amber-100 tracking-wide drop-shadow-sm">{t('dashboard.pendingApprovals')}</span>
+            <div className="p-3 bg-amber-500/20 backdrop-blur-xl rounded-2xl border border-amber-400/30 text-amber-300 shadow-sm">
               <Clock className="w-5 h-5" />
             </div>
           </div>
-          <p className="text-3xl font-black text-amber-600 mt-3">{pendingApprovalsCount}</p>
-          <div className="flex items-center gap-1 text-[11px] text-amber-700 mt-2 font-semibold">
+          <p className="relative z-10 text-3xl sm:text-4xl font-black text-amber-300 mt-3 tracking-tight drop-shadow-md">{pendingApprovalsCount}</p>
+          <div className="relative z-10 flex items-center gap-1.5 text-[11px] text-amber-200/90 mt-2 font-bold drop-shadow-sm">
             <span>{t('dashboard.inReviewPipeline')}</span>
           </div>
         </div>
 
         {/* Completed Audits */}
-        <div className="bg-white/50 backdrop-blur-xl border border-white/90 p-5 rounded-2xl shadow-[0_15px_35px_rgba(14,165,233,0.10)] hover:shadow-[0_20px_45px_rgba(14,165,233,0.18)] hover:-translate-y-1 transition-all duration-300 relative group">
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-bold text-slate-600">{t('dashboard.completedAudits')}</span>
-            <div className="p-2.5 bg-emerald-500/10 text-emerald-600 rounded-xl border border-emerald-500/20">
+        <div className="relative group bg-white/10 backdrop-blur-3xl border border-white/25 rounded-[24px] p-5 shadow-[0_20px_45px_rgba(0,0,0,0.15),0_0_30px_rgba(255,255,255,0.05)] hover:shadow-[0_25px_55px_rgba(0,0,0,0.2),0_0_40px_rgba(16,185,129,0.15)] hover:bg-white/15 hover:border-white/40 hover:-translate-y-1 transition-all duration-300 overflow-hidden">
+          {/* Top Glass Specular Gloss Highlight */}
+          <div className="absolute inset-x-0 top-0 h-14 bg-gradient-to-b from-white/30 via-white/5 to-transparent rounded-t-[24px] pointer-events-none"></div>
+
+          <div className="relative z-10 flex items-center justify-between">
+            <span className="text-xs font-extrabold text-emerald-100 tracking-wide drop-shadow-sm">{t('dashboard.completedAudits')}</span>
+            <div className="p-3 bg-emerald-500/20 backdrop-blur-xl rounded-2xl border border-emerald-400/30 text-emerald-300 shadow-sm">
               <CheckCircle2 className="w-5 h-5" />
             </div>
           </div>
-          <p className="text-3xl font-black text-emerald-600 mt-3">{completedAuditsCount}</p>
-          <div className="flex items-center gap-1 text-[11px] text-emerald-700 mt-2 font-semibold">
+          <p className="relative z-10 text-3xl sm:text-4xl font-black text-emerald-300 mt-3 tracking-tight drop-shadow-md">{completedAuditsCount}</p>
+          <div className="relative z-10 flex items-center gap-1.5 text-[11px] text-emerald-200/90 mt-2 font-bold drop-shadow-sm">
             <span>{t('dashboard.fullyApproved')}</span>
           </div>
         </div>
 
         {/* Rejected Audits */}
-        <div className="bg-white/50 backdrop-blur-xl border border-white/90 p-5 rounded-2xl shadow-[0_15px_35px_rgba(14,165,233,0.10)] hover:shadow-[0_20px_45px_rgba(14,165,233,0.18)] hover:-translate-y-1 transition-all duration-300 relative group">
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-bold text-slate-600">{t('dashboard.rejectedAudits')}</span>
-            <div className="p-2.5 bg-rose-500/10 text-rose-600 rounded-xl border border-rose-500/20">
+        <div className="relative group bg-white/10 backdrop-blur-3xl border border-white/25 rounded-[24px] p-5 shadow-[0_20px_45px_rgba(0,0,0,0.15),0_0_30px_rgba(255,255,255,0.05)] hover:shadow-[0_25px_55px_rgba(0,0,0,0.2),0_0_40px_rgba(244,63,94,0.15)] hover:bg-white/15 hover:border-white/40 hover:-translate-y-1 transition-all duration-300 overflow-hidden">
+          {/* Top Glass Specular Gloss Highlight */}
+          <div className="absolute inset-x-0 top-0 h-14 bg-gradient-to-b from-white/30 via-white/5 to-transparent rounded-t-[24px] pointer-events-none"></div>
+
+          <div className="relative z-10 flex items-center justify-between">
+            <span className="text-xs font-extrabold text-rose-100 tracking-wide drop-shadow-sm">{t('dashboard.rejectedAudits')}</span>
+            <div className="p-3 bg-rose-500/20 backdrop-blur-xl rounded-2xl border border-rose-400/30 text-rose-300 shadow-sm">
               <XCircle className="w-5 h-5" />
             </div>
           </div>
-          <p className="text-3xl font-black text-rose-600 mt-3">{rejectedAuditsCount}</p>
-          <div className="flex items-center gap-1 text-[11px] text-rose-700 mt-2 font-semibold">
+          <p className="relative z-10 text-3xl sm:text-4xl font-black text-rose-300 mt-3 tracking-tight drop-shadow-md">{rejectedAuditsCount}</p>
+          <div className="relative z-10 flex items-center gap-1.5 text-[11px] text-rose-200/90 mt-2 font-bold drop-shadow-sm">
             <span>{t('dashboard.requiresAction')}</span>
           </div>
         </div>
