@@ -112,7 +112,7 @@ export const Navbar: React.FC<Props> = ({
                     className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-black transition-all ${
                       activeModule === 'station-openings'
                         ? 'bg-gradient-to-r from-amber-600 to-orange-600 text-white shadow-md shadow-amber-600/25 ring-1 ring-amber-400/30'
-                        : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100/60'
+                        : 'text-sky-100 hover:text-white hover:bg-white/15'
                     }`}
                   >
                     <Building className="w-3.5 h-3.5" />
@@ -125,13 +125,13 @@ export const Navbar: React.FC<Props> = ({
               {isSuperAdmin && (
                 <button
                   onClick={() => setActiveTab('admin')}
-                  className={`flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-bold transition-all ${
+                  className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-extrabold transition-all ${
                     activeTab === 'admin'
-                      ? 'bg-purple-600/15 text-purple-700 border border-purple-500/30 shadow-sm'
-                      : 'text-purple-600 hover:text-purple-800 hover:bg-purple-50'
+                      ? 'bg-purple-500/30 text-purple-100 border border-purple-400/40 shadow-sm ring-1 ring-purple-400/30'
+                      : 'bg-purple-500/10 text-purple-200 border border-purple-400/20 hover:bg-purple-500/20 hover:text-white'
                   }`}
                 >
-                  <ShieldCheck className="w-4 h-4" />
+                  <ShieldCheck className="w-4 h-4 text-purple-300" />
                   <span>{t('nav.adminHub')}</span>
                 </button>
               )}
@@ -143,8 +143,8 @@ export const Navbar: React.FC<Props> = ({
                     onClick={() => setActiveTab('dashboard')}
                     className={`flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-bold transition-all ${
                       activeTab === 'dashboard'
-                        ? 'bg-sky-600/15 text-sky-700 border border-sky-500/30 shadow-sm'
-                        : 'text-slate-600 hover:text-slate-900 hover:bg-white/50'
+                        ? 'bg-sky-500/25 text-white border border-sky-400/40 shadow-sm ring-1 ring-sky-400/30'
+                        : 'text-sky-100 hover:text-white hover:bg-white/15'
                     }`}
                   >
                     <LayoutDashboard className="w-4 h-4" />
@@ -155,8 +155,8 @@ export const Navbar: React.FC<Props> = ({
                     onClick={() => setActiveTab('audits')}
                     className={`flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-bold transition-all ${
                       activeTab === 'audits'
-                        ? 'bg-sky-600/15 text-sky-700 border border-sky-500/30 shadow-sm'
-                        : 'text-slate-600 hover:text-slate-900 hover:bg-white/50'
+                        ? 'bg-sky-500/25 text-white border border-sky-400/40 shadow-sm ring-1 ring-sky-400/30'
+                        : 'text-sky-100 hover:text-white hover:bg-white/15'
                     }`}
                   >
                     <FileText className="w-4 h-4" />
@@ -168,8 +168,8 @@ export const Navbar: React.FC<Props> = ({
                       onClick={() => setActiveTab('new-audit')}
                       className={`flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-extrabold transition-all ${
                         activeTab === 'new-audit'
-                          ? 'bg-gradient-to-r from-sky-600 via-blue-600 to-indigo-600 text-white shadow-md shadow-sky-600/25 ring-2 ring-sky-400/40'
-                          : 'bg-sky-500/10 text-sky-700 border border-sky-500/30 hover:bg-sky-500/20'
+                          ? 'bg-gradient-to-r from-sky-500 via-blue-600 to-indigo-600 text-white shadow-md shadow-sky-600/30 ring-2 ring-sky-400/40'
+                          : 'bg-sky-400/20 text-white border border-sky-400/30 hover:bg-sky-400/30'
                       }`}
                     >
                       <PlusCircle className="w-4 h-4" />
@@ -181,8 +181,8 @@ export const Navbar: React.FC<Props> = ({
                     onClick={() => setActiveTab('activity')}
                     className={`relative flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-bold transition-all ${
                       activeTab === 'activity'
-                        ? 'bg-sky-600/15 text-sky-700 border border-sky-500/30 shadow-sm'
-                        : 'text-slate-600 hover:text-slate-900 hover:bg-white/50'
+                        ? 'bg-sky-500/25 text-white border border-sky-400/40 shadow-sm ring-1 ring-sky-400/30'
+                        : 'text-sky-100 hover:text-white hover:bg-white/15'
                     }`}
                   >
                     <Bell className="w-4 h-4" />
@@ -203,10 +203,10 @@ export const Navbar: React.FC<Props> = ({
               {/* LANGUAGE SWITCHER TOGGLE BUTTON */}
               <button
                 onClick={toggleLanguage}
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-sky-500/30 bg-sky-500/10 hover:bg-sky-500/20 text-sky-800 font-extrabold text-xs transition-all shadow-sm min-h-[40px]"
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-white/30 bg-white/15 hover:bg-white/25 text-white font-extrabold text-xs transition-all shadow-sm min-h-[40px]"
                 title="Switch Language / تغيير اللغة"
               >
-                <Globe className="w-4 h-4 text-sky-600" />
+                <Globe className="w-4 h-4 text-sky-300" />
                 <span>{language === 'en' ? 'العربية' : 'English'}</span>
               </button>
 
@@ -214,16 +214,16 @@ export const Navbar: React.FC<Props> = ({
               <div className="relative">
                 <button
                   onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
-                  className="flex items-center gap-2 px-2.5 sm:px-3 py-1.5 rounded-xl border border-white/90 bg-white/70 hover:bg-white transition-all text-left shadow-sm min-h-[40px]"
+                  className="flex items-center gap-2 px-2.5 sm:px-3 py-1.5 rounded-xl border border-white/30 bg-white/15 hover:bg-white/25 transition-all text-left shadow-sm min-h-[40px]"
                 >
-                  <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-sky-600 via-blue-600 to-indigo-600 flex items-center justify-center text-white font-black text-xs border border-white/40 shadow-sm shrink-0">
+                  <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-sky-500 via-blue-600 to-indigo-600 flex items-center justify-center text-white font-black text-xs border border-white/40 shadow-sm shrink-0">
                     {currentUser.full_name.substring(0, 2).toUpperCase()}
                   </div>
                   <div className="hidden sm:block">
-                    <p className="text-xs font-extrabold text-slate-900 leading-tight">
+                    <p className="text-xs font-extrabold text-white leading-tight drop-shadow-sm">
                       {currentUser.full_name}
                     </p>
-                    <p className="text-[10px] text-sky-700 font-bold leading-none mt-0.5">
+                    <p className="text-[10px] text-sky-200 font-bold leading-none mt-0.5">
                       {currentUser.role}
                     </p>
                   </div>
