@@ -55,7 +55,7 @@ export const AdminDashboard: React.FC<Props> = ({
   const activeUsersCount = users.filter((u) => u.status === 'active').length;
 
   return (
-    <div className="w-full space-y-6">
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
       {/* HEADER NAVBAR */}
       <div className="bg-white/10 backdrop-blur-3xl border border-white/25 p-5 rounded-[28px] shadow-xl flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
