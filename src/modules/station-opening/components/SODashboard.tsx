@@ -71,19 +71,19 @@ export const SODashboard: React.FC<Props> = ({
   return (
     <div className="w-full px-4 sm:px-6 lg:px-8 py-6 space-y-6">
       {/* 1. WELCOME HERO GLASS BANNER */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 bg-white/45 backdrop-blur-2xl border border-white/80 p-7 rounded-[28px] shadow-[0_20px_50px_rgba(14,165,233,0.15)] ring-1 ring-white/60 relative overflow-hidden transition-all">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 bg-white/12 backdrop-blur-3xl border border-white/25 p-7 rounded-[28px] shadow-[0_20px_50px_rgba(0,0,0,0.2)] ring-1 ring-white/20 relative overflow-hidden transition-all">
         <div className="absolute -right-12 -bottom-12 w-56 h-56 bg-sky-400/20 rounded-full blur-3xl pointer-events-none"></div>
 
         <div className="relative z-10 space-y-1">
-          <div className="inline-flex items-center gap-2 px-3 py-1 bg-sky-500/10 text-sky-800 rounded-full text-xs font-extrabold border border-sky-500/20">
-            <Sparkles className="w-3.5 h-3.5 text-sky-600 animate-pulse" />
+          <div className="inline-flex items-center gap-2 px-3 py-1 bg-sky-400/20 text-sky-200 rounded-full text-xs font-extrabold border border-sky-400/30">
+            <Sparkles className="w-3.5 h-3.5 text-sky-300 animate-pulse" />
             <span>{t('dashboard.welcomeBack')}, {currentUser?.full_name || 'User'}</span>
           </div>
-          <h2 className="text-2xl font-black text-slate-900 tracking-tight flex items-center gap-2">
-            <Building className="w-6 h-6 text-sky-600" />
+          <h2 className="text-2xl font-black text-white tracking-tight flex items-center gap-2 drop-shadow-sm">
+            <Building className="w-6 h-6 text-sky-300" />
             <span>{t('so.dashboardTitle')}</span>
           </h2>
-          <p className="text-xs text-slate-600 font-medium max-w-xl">
+          <p className="text-xs text-sky-100/90 font-semibold max-w-xl drop-shadow-sm">
             {t('so.dashboardSub')} ({currentUser?.role})
           </p>
         </div>
@@ -101,15 +101,15 @@ export const SODashboard: React.FC<Props> = ({
 
       {/* 2. PENDING APPROVAL QUEUE BANNER FOR APPROVERS */}
       {pendingForUser.length > 0 && (
-        <div className="bg-gradient-to-r from-sky-500/15 via-blue-500/15 to-indigo-500/15 border-2 border-sky-500/60 p-6 rounded-[28px] shadow-lg space-y-3">
+        <div className="bg-gradient-to-r from-sky-500/20 via-blue-500/20 to-indigo-500/20 border-2 border-sky-400/50 p-6 rounded-[28px] backdrop-blur-3xl shadow-xl space-y-3">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2.5">
-              <ShieldCheck className="w-6 h-6 text-sky-600" />
+              <ShieldCheck className="w-6 h-6 text-sky-300" />
               <div>
-                <h3 className="text-sm font-black text-sky-950 uppercase tracking-wider">
+                <h3 className="text-sm font-black text-white uppercase tracking-wider drop-shadow-sm">
                   {t('so.pendingApprovals')} ({pendingForUser.length})
                 </h3>
-                <p className="text-xs text-sky-800 font-medium">
+                <p className="text-xs text-sky-200/90 font-semibold drop-shadow-sm">
                   {currentUser?.role === 'Head of Operation'
                     ? t('so.returnedFormsSub')
                     : t('so.pendingApprovalsSub')}
@@ -123,15 +123,15 @@ export const SODashboard: React.FC<Props> = ({
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 pt-2">
             {pendingForUser.map((f) => (
-              <div key={f.id} className="bg-white p-4 rounded-2xl border border-sky-200 shadow-sm space-y-2 text-xs">
+              <div key={f.id} className="bg-white/15 backdrop-blur-2xl p-4 rounded-2xl border border-white/30 shadow-md space-y-2 text-xs">
                 <div className="flex items-center justify-between">
-                  <span className="font-mono font-black text-sky-900">{f.form_number}</span>
-                  <span className="px-2 py-0.5 bg-sky-100 text-sky-800 font-bold rounded-md text-[10px]">
+                  <span className="font-mono font-black text-sky-200">{f.form_number}</span>
+                  <span className="px-2 py-0.5 bg-sky-400/20 text-sky-200 font-bold rounded-md text-[10px] border border-sky-400/30">
                     {getStatusLabel(f.current_status)}
                   </span>
                 </div>
-                <p className="font-black text-slate-900">{f.station_name}</p>
-                <p className="text-[11px] text-slate-500 font-bold">{t('so.creatorCol')}: {f.created_by_name}</p>
+                <p className="font-black text-white">{f.station_name}</p>
+                <p className="text-[11px] text-sky-200/80 font-bold">{t('so.creatorCol')}: {f.created_by_name}</p>
                 <button
                   onClick={() => onOpenForm(f.id)}
                   className="w-full mt-2 py-2 bg-sky-600 hover:bg-sky-500 text-white font-extrabold rounded-xl shadow-sm transition-all text-xs flex items-center justify-center gap-1.5"
@@ -145,84 +145,96 @@ export const SODashboard: React.FC<Props> = ({
         </div>
       )}
 
-      {/* 3. KPI METRIC SUMMARY CARDS */}
+      {/* 3. KPI METRIC SUMMARY CARDS (TRUE FROSTED GLASS) */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {/* TOTAL FORMS */}
-        <div className="bg-white/60 backdrop-blur-2xl border border-white/90 p-5 rounded-[24px] shadow-[0_15px_35px_rgba(14,165,233,0.12)] space-y-3 hover:-translate-y-1 transition-all">
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-black text-slate-500 uppercase tracking-wider">
+        <div className="relative group bg-white/10 backdrop-blur-3xl border border-white/25 rounded-[24px] p-5 shadow-[0_20px_45px_rgba(0,0,0,0.15),0_0_30px_rgba(255,255,255,0.05)] hover:shadow-[0_25px_55px_rgba(0,0,0,0.2),0_0_40px_rgba(56,189,248,0.15)] hover:bg-white/15 hover:border-white/40 hover:-translate-y-1 transition-all duration-300 overflow-hidden space-y-3">
+          {/* Top Glass Specular Gloss Highlight */}
+          <div className="absolute inset-x-0 top-0 h-14 bg-gradient-to-b from-white/30 via-white/5 to-transparent rounded-t-[24px] pointer-events-none"></div>
+
+          <div className="relative z-10 flex items-center justify-between">
+            <span className="text-xs font-extrabold text-sky-100 uppercase tracking-wider drop-shadow-sm">
               {t('so.totalForms')}
             </span>
-            <div className="p-2.5 bg-sky-500/10 text-sky-600 rounded-2xl border border-sky-500/20">
+            <div className="p-3 bg-sky-500/20 backdrop-blur-xl rounded-2xl border border-sky-400/30 text-sky-300 shadow-sm">
               <FileText className="w-5 h-5" />
             </div>
           </div>
-          <div>
-            <span className="text-3xl font-black text-slate-900 tracking-tight font-mono">
+          <div className="relative z-10">
+            <span className="text-3xl sm:text-4xl font-black text-white tracking-tight font-mono drop-shadow-md">
               {totalCount}
             </span>
-            <p className="text-[11px] text-slate-500 font-semibold mt-1">
+            <p className="text-[11px] text-sky-200/90 font-bold mt-1.5 drop-shadow-sm">
               {t('so.totalFormsSub')}
             </p>
           </div>
         </div>
 
         {/* PENDING APPROVALS */}
-        <div className="bg-white/60 backdrop-blur-2xl border border-white/90 p-5 rounded-[24px] shadow-[0_15px_35px_rgba(14,165,233,0.12)] space-y-3 hover:-translate-y-1 transition-all">
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-black text-slate-500 uppercase tracking-wider">
+        <div className="relative group bg-white/10 backdrop-blur-3xl border border-white/25 rounded-[24px] p-5 shadow-[0_20px_45px_rgba(0,0,0,0.15),0_0_30px_rgba(255,255,255,0.05)] hover:shadow-[0_25px_55px_rgba(0,0,0,0.2),0_0_40px_rgba(245,158,11,0.15)] hover:bg-white/15 hover:border-white/40 hover:-translate-y-1 transition-all duration-300 overflow-hidden space-y-3">
+          {/* Top Glass Specular Gloss Highlight */}
+          <div className="absolute inset-x-0 top-0 h-14 bg-gradient-to-b from-white/30 via-white/5 to-transparent rounded-t-[24px] pointer-events-none"></div>
+
+          <div className="relative z-10 flex items-center justify-between">
+            <span className="text-xs font-extrabold text-amber-100 uppercase tracking-wider drop-shadow-sm">
               {t('so.pendingApprovals')}
             </span>
-            <div className="p-2.5 bg-amber-500/10 text-amber-600 rounded-2xl border border-amber-500/20">
+            <div className="p-3 bg-amber-500/20 backdrop-blur-xl rounded-2xl border border-amber-400/30 text-amber-300 shadow-sm">
               <Clock className="w-5 h-5" />
             </div>
           </div>
-          <div>
-            <span className="text-3xl font-black text-slate-900 tracking-tight font-mono">
+          <div className="relative z-10">
+            <span className="text-3xl sm:text-4xl font-black text-amber-300 tracking-tight font-mono drop-shadow-md">
               {pendingCount}
             </span>
-            <p className="text-[11px] text-amber-600 font-semibold mt-1">
+            <p className="text-[11px] text-amber-200/90 font-bold mt-1.5 drop-shadow-sm">
               {t('so.pendingApprovalsSub')}
             </p>
           </div>
         </div>
 
         {/* APPROVED FORMS */}
-        <div className="bg-white/60 backdrop-blur-2xl border border-white/90 p-5 rounded-[24px] shadow-[0_15px_35px_rgba(14,165,233,0.12)] space-y-3 hover:-translate-y-1 transition-all">
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-black text-slate-500 uppercase tracking-wider">
+        <div className="relative group bg-white/10 backdrop-blur-3xl border border-white/25 rounded-[24px] p-5 shadow-[0_20px_45px_rgba(0,0,0,0.15),0_0_30px_rgba(255,255,255,0.05)] hover:shadow-[0_25px_55px_rgba(0,0,0,0.2),0_0_40px_rgba(16,185,129,0.15)] hover:bg-white/15 hover:border-white/40 hover:-translate-y-1 transition-all duration-300 overflow-hidden space-y-3">
+          {/* Top Glass Specular Gloss Highlight */}
+          <div className="absolute inset-x-0 top-0 h-14 bg-gradient-to-b from-white/30 via-white/5 to-transparent rounded-t-[24px] pointer-events-none"></div>
+
+          <div className="relative z-10 flex items-center justify-between">
+            <span className="text-xs font-extrabold text-emerald-100 uppercase tracking-wider drop-shadow-sm">
               {t('so.completedApprovals')}
             </span>
-            <div className="p-2.5 bg-emerald-500/10 text-emerald-600 rounded-2xl border border-emerald-500/20">
+            <div className="p-3 bg-emerald-500/20 backdrop-blur-xl rounded-2xl border border-emerald-400/30 text-emerald-300 shadow-sm">
               <CheckCircle2 className="w-5 h-5" />
             </div>
           </div>
-          <div>
-            <span className="text-3xl font-black text-slate-900 tracking-tight font-mono">
+          <div className="relative z-10">
+            <span className="text-3xl sm:text-4xl font-black text-emerald-300 tracking-tight font-mono drop-shadow-md">
               {approvedCount}
             </span>
-            <p className="text-[11px] text-emerald-600 font-semibold mt-1">
+            <p className="text-[11px] text-emerald-200/90 font-bold mt-1.5 drop-shadow-sm">
               {t('so.completedApprovalsSub')}
             </p>
           </div>
         </div>
 
         {/* RETURNED & REJECTED */}
-        <div className="bg-white/60 backdrop-blur-2xl border border-white/90 p-5 rounded-[24px] shadow-[0_15px_35px_rgba(14,165,233,0.12)] space-y-3 hover:-translate-y-1 transition-all">
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-black text-slate-500 uppercase tracking-wider">
+        <div className="relative group bg-white/10 backdrop-blur-3xl border border-white/25 rounded-[24px] p-5 shadow-[0_20px_45px_rgba(0,0,0,0.15),0_0_30px_rgba(255,255,255,0.05)] hover:shadow-[0_25px_55px_rgba(0,0,0,0.2),0_0_40px_rgba(244,63,94,0.15)] hover:bg-white/15 hover:border-white/40 hover:-translate-y-1 transition-all duration-300 overflow-hidden space-y-3">
+          {/* Top Glass Specular Gloss Highlight */}
+          <div className="absolute inset-x-0 top-0 h-14 bg-gradient-to-b from-white/30 via-white/5 to-transparent rounded-t-[24px] pointer-events-none"></div>
+
+          <div className="relative z-10 flex items-center justify-between">
+            <span className="text-xs font-extrabold text-rose-100 uppercase tracking-wider drop-shadow-sm">
               {t('so.returnedForms')}
             </span>
-            <div className="p-2.5 bg-rose-500/10 text-rose-600 rounded-2xl border border-rose-500/20">
+            <div className="p-3 bg-rose-500/20 backdrop-blur-xl rounded-2xl border border-rose-400/30 text-rose-300 shadow-sm">
               <RotateCcw className="w-5 h-5" />
             </div>
           </div>
-          <div>
-            <span className="text-3xl font-black text-slate-900 tracking-tight font-mono">
+          <div className="relative z-10">
+            <span className="text-3xl sm:text-4xl font-black text-rose-300 tracking-tight font-mono drop-shadow-md">
               {returnedCount + rejectedCount}
             </span>
-            <p className="text-[11px] text-rose-600 font-semibold mt-1">
-              {returnedCount} {t('so.statusReturned')} | {rejectedCount} {t('so.statusRejected')}
+            <p className="text-[11px] text-rose-200/90 font-bold mt-1.5 drop-shadow-sm">
+              {t('so.returnedFormsSub')}
             </p>
           </div>
         </div>
