@@ -384,13 +384,13 @@ function AppContent() {
       
       {/* 1. GLOBAL FULL-SCREEN BACKGROUND IMAGE (COVER, CENTERED, FIXED) */}
       <div
-        className="fixed inset-0 w-full h-full bg-cover bg-center bg-no-repeat pointer-events-none z-0 scale-105 transition-transform duration-1000"
+        className="fixed inset-0 w-full h-full bg-cover bg-center bg-no-repeat pointer-events-none z-0 transition-all duration-700"
         style={{
-          backgroundImage: `url('/app-bg.jpg')`,
+          backgroundImage: `url('/app-bg.png')`,
         }}
       ></div>
 
-      {/* 2. SUBTLE DARK OVERLAY (APPROX 60% OPACITY FOR VISIBLE GLASS REFRACTION & HIGH READABILITY) */}
+      {/* 2. SUBTLE DARK NAVY OVERLAY (60% OPACITY FOR VISIBLE ABSTRACT GRAPHIC & CRISP GLASS CONTRAST) */}
       <div className="fixed inset-0 w-full h-full bg-slate-950/60 pointer-events-none z-0"></div>
 
       {/* 3. AMBIENT GLOW ACCENT BLOBS FOR GLASS DEPTH */}
