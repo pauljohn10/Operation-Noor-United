@@ -119,7 +119,7 @@ export const AuditListView: React.FC<Props> = ({ audits, onOpenAudit }) => {
       <div className="bg-white/10 backdrop-blur-3xl border border-white/25 rounded-[28px] overflow-hidden shadow-xl">
         <div className="overflow-x-auto">
           <table className="w-full text-center text-xs">
-            <thead className="bg-white/15 text-white uppercase font-extrabold border-b border-white/25">
+            <thead className="bg-white/15 text-white uppercase font-black border-b border-white/25">
               <tr>
                 <th className="p-4 text-center">{t('auditsList.auditNo')}</th>
                 <th className="p-4 text-center">{t('auditsList.station')}</th>
@@ -133,46 +133,46 @@ export const AuditListView: React.FC<Props> = ({ audits, onOpenAudit }) => {
             <tbody className="divide-y divide-white/15 text-white">
               {filtered.length === 0 ? (
                 <tr>
-                  <td colSpan={7} className="p-8 text-center text-sky-200/80 font-medium italic">
+                  <td colSpan={7} className="p-8 text-center text-sky-200/90 font-medium italic">
                     {t('auditsList.noAuditsFound')}
                   </td>
                 </tr>
               ) : (
                 filtered.map((a) => (
-                  <tr key={a.id} className="hover:bg-white/15 transition-colors">
+                  <tr key={a.id} className="odd:bg-white/5 even:bg-white/10 hover:bg-white/20 transition-all border-b border-white/10">
                     <td className="p-4 text-center">
-                      <p className="font-extrabold text-white flex items-center justify-center gap-1.5">
+                      <p className="font-extrabold text-sky-300 flex items-center justify-center gap-1.5 drop-shadow-sm font-mono">
                         <FileText className="w-4 h-4 text-sky-300" />
                         <span>{a.audit_number}</span>
                       </p>
-                      <p className="text-[10px] text-sky-200/80 font-bold mt-0.5 flex items-center justify-center gap-1">
-                        <Calendar className="w-3 h-3 text-sky-300" />
+                      <p className="text-[11px] text-sky-200/90 font-bold mt-0.5 flex items-center justify-center gap-1">
+                        <Calendar className="w-3.5 h-3.5 text-sky-300" />
                         <span>{a.audit_date}</span>
                       </p>
                     </td>
 
                     <td className="p-4 text-center">
-                      <p className="font-bold text-white">{a.station_name}</p>
-                      <p className="text-[10px] text-sky-200/80 font-medium">{a.location}</p>
+                      <p className="font-extrabold text-white text-xs drop-shadow-sm">{a.station_name}</p>
+                      <p className="text-[11px] text-sky-200/90 font-medium">{a.location}</p>
                     </td>
 
                     <td className="p-4 text-center">
-                      <p className="text-white font-bold">{a.created_by_name || 'Operation Supervisor'}</p>
+                      <p className="text-white font-extrabold drop-shadow-sm">{a.created_by_name || 'Operation Supervisor'}</p>
                     </td>
 
                     <td className="p-4 text-center">
-                      <p className="font-black text-slate-900">{formatCurrency(a.total_sales)} {t('common.sar')}</p>
-                      <p className="text-[10px] text-slate-500 font-mono font-semibold">{formatCurrency(a.total_quantity)} {t('common.liters')}</p>
+                      <p className="font-black text-white text-sm font-mono drop-shadow-sm">{formatCurrency(a.total_sales)} {t('common.sar')}</p>
+                      <p className="text-[11px] text-sky-200/90 font-mono font-bold mt-0.5">{formatCurrency(a.total_quantity)} {t('common.liters')}</p>
                     </td>
 
                     <td className="p-4 text-center">
                       <span
-                        className={`font-black font-mono text-xs ${
+                        className={`font-black font-mono text-xs drop-shadow-sm ${
                           a.discrepancy_amount < 0
-                            ? 'text-rose-600'
+                            ? 'text-rose-300'
                             : a.discrepancy_amount > 0
-                            ? 'text-emerald-600'
-                            : 'text-slate-700'
+                            ? 'text-emerald-300'
+                            : 'text-sky-200'
                         }`}
                       >
                         {formatCurrency(a.discrepancy_amount)} {t('common.sar')}
@@ -181,14 +181,14 @@ export const AuditListView: React.FC<Props> = ({ audits, onOpenAudit }) => {
 
                     <td className="p-4 text-center">
                       <span
-                        className={`inline-block px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider ${
+                        className={`inline-block px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider shadow-sm backdrop-blur-md ${
                           a.current_status === 'approved'
-                            ? 'bg-emerald-500/10 text-emerald-700 border border-emerald-500/30'
+                            ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-400/40'
                             : a.current_status === 'rejected'
-                            ? 'bg-rose-500/10 text-rose-700 border border-rose-500/30'
+                            ? 'bg-rose-500/20 text-rose-300 border border-rose-400/40'
                             : a.current_status === 'returned_for_correction'
-                            ? 'bg-amber-500/10 text-amber-700 border border-amber-500/30'
-                            : 'bg-sky-500/10 text-sky-700 border border-sky-500/30'
+                            ? 'bg-amber-500/20 text-amber-300 border border-amber-400/40'
+                            : 'bg-sky-500/20 text-sky-200 border border-sky-400/40'
                         }`}
                       >
                         {getStatusBadgeLabel(a.current_status)}
@@ -199,7 +199,7 @@ export const AuditListView: React.FC<Props> = ({ audits, onOpenAudit }) => {
                       <div className="flex items-center justify-center gap-2">
                         <button
                           onClick={() => exportAuditToPdf(a.audit_number, a.station_name)}
-                          className="p-2 bg-white/80 hover:bg-white text-sky-700 rounded-xl border border-sky-200/80 shadow-sm transition-all"
+                          className="p-2 bg-white/15 hover:bg-white/25 text-white rounded-xl border border-white/30 shadow-sm transition-all"
                           title={t('auditsList.exportPdf')}
                         >
                           <FileDown className="w-4 h-4" />
@@ -207,7 +207,7 @@ export const AuditListView: React.FC<Props> = ({ audits, onOpenAudit }) => {
 
                         <button
                           onClick={() => onOpenAudit(a.id)}
-                          className="px-3.5 py-1.5 bg-sky-600/10 hover:bg-sky-600/20 text-sky-700 border border-sky-500/30 rounded-xl text-xs font-bold transition-all flex items-center gap-1 shadow-sm"
+                          className="px-3.5 py-1.5 bg-sky-500/20 hover:bg-sky-500/30 text-white border border-sky-400/40 rounded-xl text-xs font-extrabold transition-all flex items-center gap-1.5 shadow-sm"
                         >
                           <span>{t('auditsList.viewEdit')}</span>
                           <ExternalLink className="w-3.5 h-3.5 rtl:rotate-180" />

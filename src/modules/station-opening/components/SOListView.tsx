@@ -1,16 +1,14 @@
 import React, { useState } from 'react';
 import type { StationOpeningForm } from '../types';
-import { exportStationOpeningToPdf } from '../pdfGenerator';
 import { useLanguage } from '../../../context/LanguageContext';
 import {
   Search,
-  FileDown,
   Building,
   PlusCircle,
   Trash2,
-  ExternalLink,
   Calendar,
   FileText,
+  FileCheck,
 } from 'lucide-react';
 
 interface Props {
@@ -28,7 +26,6 @@ export const SOListView: React.FC<Props> = ({ forms, currentUser, onOpenForm, on
   const [selectedStation, setSelectedStation] = useState('ALL');
 
   const isHeadOfOp = currentUser?.role === 'Head of Operation';
-  const isSuperAdmin = currentUser?.role === 'Super Admin';
 
   const uniqueStations = Array.from(new Set(forms.map((f) => f.station_name)));
 
@@ -48,56 +45,32 @@ export const SOListView: React.FC<Props> = ({ forms, currentUser, onOpenForm, on
     switch (status) {
       case 'approved':
         return (
-          <span className="inline-block px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider bg-emerald-500/10 text-emerald-700 border border-emerald-500/30">
+          <span className="inline-block px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider bg-emerald-500/20 text-emerald-300 border border-emerald-400/40 shadow-sm backdrop-blur-md">
             {t('so.statusApproved')}
           </span>
         );
       case 'rejected':
         return (
-          <span className="inline-block px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider bg-rose-500/10 text-rose-700 border border-rose-500/30">
+          <span className="inline-block px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider bg-rose-500/20 text-rose-300 border border-rose-400/40 shadow-sm backdrop-blur-md">
             {t('so.statusRejected')}
           </span>
         );
       case 'returned':
         return (
-          <span className="inline-block px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider bg-amber-500/10 text-amber-700 border border-amber-500/30">
+          <span className="inline-block px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider bg-amber-500/20 text-amber-300 border border-amber-400/40 shadow-sm backdrop-blur-md">
             {t('so.statusReturned')}
           </span>
         );
       case 'draft':
         return (
-          <span className="inline-block px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider bg-slate-500/10 text-slate-700 border border-slate-500/30">
+          <span className="inline-block px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider bg-slate-500/20 text-slate-200 border border-slate-400/40 shadow-sm backdrop-blur-md">
             {t('so.statusDraft')}
-          </span>
-        );
-      case 'pending_safety_quality':
-        return (
-          <span className="inline-block px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider bg-sky-500/10 text-sky-700 border border-sky-500/30">
-            {t('so.statusPendingSafetyQuality')}
-          </span>
-        );
-      case 'pending_document_controller':
-        return (
-          <span className="inline-block px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider bg-sky-500/10 text-sky-700 border border-sky-500/30">
-            {t('so.statusPendingDocController')}
-          </span>
-        );
-      case 'pending_engineering':
-        return (
-          <span className="inline-block px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider bg-sky-500/10 text-sky-700 border border-sky-500/30">
-            {t('so.statusPendingEngineering')}
-          </span>
-        );
-      case 'pending_management':
-        return (
-          <span className="inline-block px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider bg-sky-500/10 text-sky-700 border border-sky-500/30">
-            {t('so.statusPendingManagement')}
           </span>
         );
       default:
         return (
-          <span className="inline-block px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider bg-sky-500/10 text-sky-700 border border-sky-500/30">
-            {status}
+          <span className="inline-block px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider bg-sky-500/20 text-sky-200 border border-sky-400/40 shadow-sm backdrop-blur-md">
+            {status.replace('pending_', '').replace(/_/g, ' ')}
           </span>
         );
     }
@@ -129,15 +102,15 @@ export const SOListView: React.FC<Props> = ({ forms, currentUser, onOpenForm, on
       </div>
 
       {/* FILTER TOOLBAR */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4 bg-white/50 backdrop-blur-xl border border-white/90 p-4 rounded-2xl shadow-[0_15px_35px_rgba(14,165,233,0.10)]">
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4 bg-white/10 backdrop-blur-3xl border border-white/25 p-4 rounded-2xl shadow-xl">
         <div className="md:col-span-2 relative">
-          <Search className="w-4 h-4 text-sky-600/70 absolute start-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+          <Search className="w-4 h-4 text-sky-300 absolute start-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
           <input
             type="text"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             placeholder={t('so.searchPlaceholder')}
-            className="w-full bg-white/70 backdrop-blur-md border border-sky-200/80 rounded-xl ps-10 pe-4 py-2.5 text-xs font-medium text-slate-900 placeholder-slate-400 focus:outline-none focus:bg-white focus:border-sky-500 focus:ring-4 focus:ring-sky-500/15 transition-all shadow-inner"
+            className="w-full bg-white/15 backdrop-blur-xl border border-white/30 rounded-xl ps-10 pe-4 py-2 text-xs font-bold text-white placeholder-sky-200/70 focus:outline-none focus:bg-white/25 focus:border-white/50 transition-all shadow-inner"
           />
         </div>
 
@@ -145,17 +118,17 @@ export const SOListView: React.FC<Props> = ({ forms, currentUser, onOpenForm, on
           <select
             value={selectedStatus}
             onChange={(e) => setSelectedStatus(e.target.value)}
-            className="w-full bg-white/70 backdrop-blur-md border border-sky-200/80 text-xs font-extrabold rounded-xl px-3 py-2.5 text-slate-900 focus:outline-none focus:bg-white focus:border-sky-500 focus:ring-4 focus:ring-sky-500/15 cursor-pointer"
+            className="w-full bg-white/15 backdrop-blur-xl border border-white/30 text-xs font-bold rounded-xl px-3 py-2 text-white focus:outline-none focus:bg-white/25 transition-all shadow-sm"
           >
-            <option value="ALL">{t('so.allStatuses')}</option>
-            <option value="draft">{t('so.statusDraft')}</option>
-            <option value="pending_safety_quality">{t('so.statusPendingSafetyQuality')}</option>
-            <option value="pending_document_controller">{t('so.statusPendingDocController')}</option>
-            <option value="pending_engineering">{t('so.statusPendingEngineering')}</option>
-            <option value="pending_management">{t('so.statusPendingManagement')}</option>
-            <option value="approved">{t('so.statusApproved')}</option>
-            <option value="returned">{t('so.statusReturned')}</option>
-            <option value="rejected">{t('so.statusRejected')}</option>
+            <option value="ALL" className="bg-slate-900 text-white">{t('so.allStatuses')}</option>
+            <option value="draft" className="bg-slate-900 text-white">{t('so.statusDraft')}</option>
+            <option value="pending_safety_quality" className="bg-slate-900 text-white">{t('so.statusPendingSafetyQuality')}</option>
+            <option value="pending_document_controller" className="bg-slate-900 text-white">{t('so.statusPendingDocController')}</option>
+            <option value="pending_engineering" className="bg-slate-900 text-white">{t('so.statusPendingEngineering')}</option>
+            <option value="pending_management" className="bg-slate-900 text-white">{t('so.statusPendingManagement')}</option>
+            <option value="approved" className="bg-slate-900 text-white">{t('so.statusApproved')}</option>
+            <option value="returned" className="bg-slate-900 text-white">{t('so.statusReturned')}</option>
+            <option value="rejected" className="bg-slate-900 text-white">{t('so.statusRejected')}</option>
           </select>
         </div>
 
@@ -163,11 +136,11 @@ export const SOListView: React.FC<Props> = ({ forms, currentUser, onOpenForm, on
           <select
             value={selectedStation}
             onChange={(e) => setSelectedStation(e.target.value)}
-            className="w-full bg-white/70 backdrop-blur-md border border-sky-200/80 text-xs font-extrabold rounded-xl px-3 py-2.5 text-slate-900 focus:outline-none focus:bg-white focus:border-sky-500 focus:ring-4 focus:ring-sky-500/15 cursor-pointer"
+            className="w-full bg-white/15 backdrop-blur-xl border border-white/30 text-xs font-bold rounded-xl px-3 py-2 text-white focus:outline-none focus:bg-white/25 transition-all shadow-sm"
           >
-            <option value="ALL">{t('auditsList.allStations')}</option>
+            <option value="ALL" className="bg-slate-900 text-white">{t('auditsList.allStations')}</option>
             {uniqueStations.map((st) => (
-              <option key={st} value={st}>
+              <option key={st} value={st} className="bg-slate-900 text-white">
                 {st}
               </option>
             ))}
@@ -176,10 +149,10 @@ export const SOListView: React.FC<Props> = ({ forms, currentUser, onOpenForm, on
       </div>
 
       {/* TABLE DATA */}
-      <div className="bg-white/50 backdrop-blur-2xl border border-white/90 rounded-[28px] overflow-hidden shadow-[0_20px_50px_rgba(14,165,233,0.12)]">
+      <div className="bg-white/10 backdrop-blur-3xl border border-white/25 rounded-[28px] overflow-hidden shadow-xl">
         <div className="overflow-x-auto">
           <table className="w-full text-center text-xs">
-            <thead className="bg-white/80 text-slate-700 uppercase font-extrabold border-b border-sky-100">
+            <thead className="bg-white/15 text-white uppercase font-black border-b border-white/25">
               <tr>
                 <th className="p-4 text-center">{t('so.formNoCol')}</th>
                 <th className="p-4 text-center">{t('so.stationCol')}</th>
@@ -189,38 +162,38 @@ export const SOListView: React.FC<Props> = ({ forms, currentUser, onOpenForm, on
                 <th className="p-4 text-center">{t('so.actionsCol')}</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-sky-100/60 text-slate-700">
+            <tbody className="divide-y divide-white/15 text-white">
               {filtered.length === 0 ? (
                 <tr>
-                  <td colSpan={6} className="p-8 text-center text-slate-500 font-medium italic">
+                  <td colSpan={6} className="p-8 text-center text-sky-200/90 font-medium italic">
                     {t('so.noFormsFound')}
                   </td>
                 </tr>
               ) : (
                 filtered.map((f) => (
-                  <tr key={f.id} className="hover:bg-sky-50/60 transition-colors">
+                  <tr key={f.id} className="odd:bg-white/5 even:bg-white/10 hover:bg-white/20 transition-all border-b border-white/10">
                     <td className="p-4 text-center">
-                      <p className="font-extrabold text-slate-900 flex items-center justify-center gap-1.5">
-                        <FileText className="w-4 h-4 text-sky-600" />
+                      <p className="font-extrabold text-sky-300 flex items-center justify-center gap-1.5 drop-shadow-sm font-mono">
+                        <FileText className="w-4 h-4 text-sky-300" />
                         <span>{f.form_number}</span>
                       </p>
-                      <p className="text-[10px] text-slate-500 font-bold mt-0.5 flex items-center justify-center gap-1">
-                        <Calendar className="w-3 h-3 text-slate-400" />
+                      <p className="text-[11px] text-sky-200/90 font-bold mt-0.5 flex items-center justify-center gap-1">
+                        <Calendar className="w-3.5 h-3.5 text-sky-300" />
                         <span>{f.date_started}</span>
                       </p>
                     </td>
 
                     <td className="p-4 text-center">
-                      <p className="font-bold text-slate-900">{f.station_name}</p>
-                      <p className="text-[10px] text-slate-500 font-medium">{f.address}</p>
+                      <p className="font-extrabold text-white text-xs drop-shadow-sm">{f.station_name}</p>
+                      <p className="text-[11px] text-sky-200/90 font-medium">{f.address}</p>
                     </td>
 
                     <td className="p-4 text-center">
-                      <p className="text-slate-900 font-bold">{f.head_of_operation_name || f.created_by_name || 'Operation Supervisor'}</p>
+                      <p className="text-white font-extrabold drop-shadow-sm">{f.head_of_operation_name || f.created_by_name || 'Operation Supervisor'}</p>
                     </td>
 
                     <td className="p-4 text-center">
-                      <p className="text-slate-900 font-bold">{f.station_supervisor_name || 'N/A'}</p>
+                      <p className="text-sky-200 font-extrabold drop-shadow-sm">{f.station_supervisor_name || 'N/A'}</p>
                     </td>
 
                     <td className="p-4 text-center">
@@ -230,25 +203,16 @@ export const SOListView: React.FC<Props> = ({ forms, currentUser, onOpenForm, on
                     <td className="p-4 text-center">
                       <div className="flex items-center justify-center gap-2">
                         <button
-                          onClick={() => exportStationOpeningToPdf(f)}
-                          className="p-2 bg-white/80 hover:bg-white text-sky-700 rounded-xl border border-sky-200/80 shadow-sm transition-all"
-                          title={t('so.pdfExport')}
-                        >
-                          <FileDown className="w-4 h-4" />
-                        </button>
-
-                        <button
                           onClick={() => onOpenForm(f.id)}
-                          className="px-3.5 py-1.5 bg-sky-600/10 hover:bg-sky-600/20 text-sky-700 border border-sky-500/30 rounded-xl text-xs font-bold transition-all flex items-center gap-1 shadow-sm"
+                          className="px-3.5 py-1.5 bg-sky-500/20 hover:bg-sky-500/30 text-white border border-sky-400/40 rounded-xl text-xs font-extrabold transition-all flex items-center gap-1.5 shadow-sm"
                         >
+                          <FileCheck className="w-3.5 h-3.5" />
                           <span>View & Process</span>
-                          <ExternalLink className="w-3.5 h-3.5 rtl:rotate-180" />
                         </button>
-
-                        {(isSuperAdmin || (f.created_by === currentUser?.id && f.current_status === 'draft')) && (
+                        {isHeadOfOp && (
                           <button
                             onClick={() => onDeleteForm(f.id)}
-                            className="p-2 bg-red-50 hover:bg-red-100 text-red-600 rounded-xl border border-red-200 shadow-sm transition-all"
+                            className="p-1.5 text-rose-300 hover:text-rose-100 hover:bg-rose-500/20 rounded-lg transition-colors border border-rose-400/30"
                             title="Delete Form"
                           >
                             <Trash2 className="w-4 h-4" />
