@@ -1,6 +1,7 @@
 import React from 'react';
 import type { StationOpeningForm } from '../types';
 import { useLanguage } from '../../../context/LanguageContext';
+import { GlassCard } from '../../../components/Common/GlassCard';
 import {
   FileText,
   CheckCircle2,
@@ -145,22 +146,19 @@ export const SODashboard: React.FC<Props> = ({
         </div>
       )}
 
-      {/* 3. KPI METRIC SUMMARY CARDS (TRUE FROSTED GLASS) */}
+      {/* 3. KPI METRIC SUMMARY CARDS (BLUE FROSTED GLASS) */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {/* TOTAL FORMS */}
-        <div className="relative group bg-white/10 backdrop-blur-3xl border border-white/25 rounded-[24px] p-5 shadow-[0_20px_45px_rgba(0,0,0,0.15),0_0_30px_rgba(255,255,255,0.05)] hover:shadow-[0_25px_55px_rgba(0,0,0,0.2),0_0_40px_rgba(56,189,248,0.15)] hover:bg-white/15 hover:border-white/40 hover:-translate-y-1 transition-all duration-300 overflow-hidden space-y-3">
-          {/* Top Glass Specular Gloss Highlight */}
-          <div className="absolute inset-x-0 top-0 h-14 bg-gradient-to-b from-white/30 via-white/5 to-transparent rounded-t-[24px] pointer-events-none"></div>
-
-          <div className="relative z-10 flex items-center justify-between">
+        <GlassCard variant="blue">
+          <div className="flex items-center justify-between">
             <span className="text-xs font-extrabold text-sky-100 uppercase tracking-wider drop-shadow-sm">
               {t('so.totalForms')}
             </span>
-            <div className="p-3 bg-sky-500/20 backdrop-blur-xl rounded-2xl border border-sky-400/30 text-sky-300 shadow-sm">
+            <div className="p-3 bg-sky-500/20 backdrop-blur-xl rounded-2xl border border-sky-400/30 text-cyan-300 shadow-sm">
               <FileText className="w-5 h-5" />
             </div>
           </div>
-          <div className="relative z-10">
+          <div className="mt-3">
             <span className="text-3xl sm:text-4xl font-black text-white tracking-tight font-mono drop-shadow-md">
               {totalCount}
             </span>
@@ -168,14 +166,11 @@ export const SODashboard: React.FC<Props> = ({
               {t('so.totalFormsSub')}
             </p>
           </div>
-        </div>
+        </GlassCard>
 
         {/* PENDING APPROVALS */}
-        <div className="relative group bg-white/10 backdrop-blur-3xl border border-white/25 rounded-[24px] p-5 shadow-[0_20px_45px_rgba(0,0,0,0.15),0_0_30px_rgba(255,255,255,0.05)] hover:shadow-[0_25px_55px_rgba(0,0,0,0.2),0_0_40px_rgba(245,158,11,0.15)] hover:bg-white/15 hover:border-white/40 hover:-translate-y-1 transition-all duration-300 overflow-hidden space-y-3">
-          {/* Top Glass Specular Gloss Highlight */}
-          <div className="absolute inset-x-0 top-0 h-14 bg-gradient-to-b from-white/30 via-white/5 to-transparent rounded-t-[24px] pointer-events-none"></div>
-
-          <div className="relative z-10 flex items-center justify-between">
+        <GlassCard variant="amber">
+          <div className="flex items-center justify-between">
             <span className="text-xs font-extrabold text-amber-100 uppercase tracking-wider drop-shadow-sm">
               {t('so.pendingApprovals')}
             </span>
@@ -183,7 +178,7 @@ export const SODashboard: React.FC<Props> = ({
               <Clock className="w-5 h-5" />
             </div>
           </div>
-          <div className="relative z-10">
+          <div className="mt-3">
             <span className="text-3xl sm:text-4xl font-black text-amber-300 tracking-tight font-mono drop-shadow-md">
               {pendingCount}
             </span>
@@ -191,14 +186,11 @@ export const SODashboard: React.FC<Props> = ({
               {t('so.pendingApprovalsSub')}
             </p>
           </div>
-        </div>
+        </GlassCard>
 
         {/* APPROVED FORMS */}
-        <div className="relative group bg-white/10 backdrop-blur-3xl border border-white/25 rounded-[24px] p-5 shadow-[0_20px_45px_rgba(0,0,0,0.15),0_0_30px_rgba(255,255,255,0.05)] hover:shadow-[0_25px_55px_rgba(0,0,0,0.2),0_0_40px_rgba(16,185,129,0.15)] hover:bg-white/15 hover:border-white/40 hover:-translate-y-1 transition-all duration-300 overflow-hidden space-y-3">
-          {/* Top Glass Specular Gloss Highlight */}
-          <div className="absolute inset-x-0 top-0 h-14 bg-gradient-to-b from-white/30 via-white/5 to-transparent rounded-t-[24px] pointer-events-none"></div>
-
-          <div className="relative z-10 flex items-center justify-between">
+        <GlassCard variant="emerald">
+          <div className="flex items-center justify-between">
             <span className="text-xs font-extrabold text-emerald-100 uppercase tracking-wider drop-shadow-sm">
               {t('so.completedApprovals')}
             </span>
@@ -206,7 +198,7 @@ export const SODashboard: React.FC<Props> = ({
               <CheckCircle2 className="w-5 h-5" />
             </div>
           </div>
-          <div className="relative z-10">
+          <div className="mt-3">
             <span className="text-3xl sm:text-4xl font-black text-emerald-300 tracking-tight font-mono drop-shadow-md">
               {approvedCount}
             </span>
@@ -214,14 +206,11 @@ export const SODashboard: React.FC<Props> = ({
               {t('so.completedApprovalsSub')}
             </p>
           </div>
-        </div>
+        </GlassCard>
 
         {/* RETURNED & REJECTED */}
-        <div className="relative group bg-white/10 backdrop-blur-3xl border border-white/25 rounded-[24px] p-5 shadow-[0_20px_45px_rgba(0,0,0,0.15),0_0_30px_rgba(255,255,255,0.05)] hover:shadow-[0_25px_55px_rgba(0,0,0,0.2),0_0_40px_rgba(244,63,94,0.15)] hover:bg-white/15 hover:border-white/40 hover:-translate-y-1 transition-all duration-300 overflow-hidden space-y-3">
-          {/* Top Glass Specular Gloss Highlight */}
-          <div className="absolute inset-x-0 top-0 h-14 bg-gradient-to-b from-white/30 via-white/5 to-transparent rounded-t-[24px] pointer-events-none"></div>
-
-          <div className="relative z-10 flex items-center justify-between">
+        <GlassCard variant="rose">
+          <div className="flex items-center justify-between">
             <span className="text-xs font-extrabold text-rose-100 uppercase tracking-wider drop-shadow-sm">
               {t('so.returnedForms')}
             </span>
@@ -229,7 +218,7 @@ export const SODashboard: React.FC<Props> = ({
               <RotateCcw className="w-5 h-5" />
             </div>
           </div>
-          <div className="relative z-10">
+          <div className="mt-3">
             <span className="text-3xl sm:text-4xl font-black text-rose-300 tracking-tight font-mono drop-shadow-md">
               {returnedCount + rejectedCount}
             </span>
@@ -237,7 +226,7 @@ export const SODashboard: React.FC<Props> = ({
               {t('so.returnedFormsSub')}
             </p>
           </div>
-        </div>
+        </GlassCard>
       </div>
     </div>
   );

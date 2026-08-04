@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import type { StationAudit, PumpReadingItem, FuelType, Station } from '../../types/audit';
 import { calculateFuelSectionTotals, formatCurrency, formatNumber, formatMeterReading } from '../../lib/calculations';
 import { useLanguage } from '../../context/LanguageContext';
+import { GlassCard } from '../Common/GlassCard';
 import {
   Building,
   Calendar,
@@ -164,58 +165,41 @@ export const ModernAuditForm: React.FC<Props> = ({
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         
         {/* Card 1: Total Sales */}
-        <div className="relative group bg-white/10 backdrop-blur-3xl border border-white/25 rounded-[24px] p-5 shadow-[0_20px_45px_rgba(0,0,0,0.15),0_0_30px_rgba(255,255,255,0.05)] hover:shadow-[0_25px_55px_rgba(0,0,0,0.2),0_0_40px_rgba(56,189,248,0.15)] hover:bg-white/15 hover:border-white/40 hover:-translate-y-1 transition-all duration-300 overflow-hidden">
-          {/* Top Glass Specular Gloss Highlight */}
-          <div className="absolute inset-x-0 top-0 h-14 bg-gradient-to-b from-white/30 via-white/5 to-transparent rounded-t-[24px] pointer-events-none"></div>
-
-          <div className="relative z-10 flex items-center justify-between mb-2">
+        <GlassCard variant="blue">
+          <div className="flex items-center justify-between mb-2">
             <span className="text-xs font-extrabold text-sky-100 uppercase tracking-wider drop-shadow-sm">{t('auditForm.grandTotalSales')}</span>
-            <div className="p-3 bg-sky-500/20 backdrop-blur-xl rounded-2xl border border-sky-400/30 text-sky-300 shadow-sm">
+            <div className="p-3 bg-sky-500/20 backdrop-blur-xl rounded-2xl border border-sky-400/30 text-cyan-300 shadow-sm">
               <TrendingUp className="w-5 h-5" />
             </div>
           </div>
-          <div className="relative z-10 text-2xl sm:text-3xl font-black tracking-tight text-white font-mono drop-shadow-md">
+          <div className="text-2xl sm:text-3xl font-black tracking-tight text-white font-mono drop-shadow-md">
             {formatCurrency(grandTotalSales)} <span className="text-xs font-normal text-sky-200">{t('common.sar')}</span>
           </div>
-          <div className="relative z-10 mt-2 text-[11px] text-sky-200/90 font-bold drop-shadow-sm">
+          <div className="mt-2 text-[11px] text-sky-200/90 font-bold drop-shadow-sm">
             {t('auditForm.meteredFuelRevenue')}
           </div>
-        </div>
+        </GlassCard>
 
         {/* Card 2: Actual Cash Received */}
-        <div className="relative group bg-white/10 backdrop-blur-3xl border border-white/25 rounded-[24px] p-5 shadow-[0_20px_45px_rgba(0,0,0,0.15),0_0_30px_rgba(255,255,255,0.05)] hover:shadow-[0_25px_55px_rgba(0,0,0,0.2),0_0_40px_rgba(16,185,129,0.15)] hover:bg-white/15 hover:border-white/40 hover:-translate-y-1 transition-all duration-300 overflow-hidden">
-          {/* Top Glass Specular Gloss Highlight */}
-          <div className="absolute inset-x-0 top-0 h-14 bg-gradient-to-b from-white/30 via-white/5 to-transparent rounded-t-[24px] pointer-events-none"></div>
-
-          <div className="relative z-10 flex items-center justify-between mb-2">
+        <GlassCard variant="emerald">
+          <div className="flex items-center justify-between mb-2">
             <span className="text-xs font-extrabold text-emerald-100 uppercase tracking-wider drop-shadow-sm">{t('auditForm.cashReceived')}</span>
             <div className="p-3 bg-emerald-500/20 backdrop-blur-xl rounded-2xl border border-emerald-400/30 text-emerald-300 shadow-sm">
               <Banknote className="w-5 h-5" />
             </div>
           </div>
-          <div className="relative z-10 text-2xl sm:text-3xl font-black text-emerald-300 font-mono drop-shadow-md">
+          <div className="text-2xl sm:text-3xl font-black text-emerald-300 font-mono drop-shadow-md">
             {cashReceivedVal != null ? formatCurrency(cashReceivedVal) : '0.00'}{' '}
             <span className="text-xs font-normal text-emerald-200">{t('common.sar')}</span>
           </div>
-          <div className="relative z-10 mt-2 text-[11px] text-emerald-200/90 font-bold drop-shadow-sm">
+          <div className="mt-2 text-[11px] text-emerald-200/90 font-bold drop-shadow-sm">
             {t('auditForm.expected')}: <strong className="text-white font-mono">{formatCurrency(expectedCash)} {t('common.sar')}</strong>
           </div>
-        </div>
+        </GlassCard>
 
         {/* Card 3: Discrepancy / Variance */}
-        <div
-          className={`relative group p-5 rounded-[24px] backdrop-blur-3xl border shadow-[0_20px_45px_rgba(0,0,0,0.15),0_0_30px_rgba(255,255,255,0.05)] hover:shadow-[0_25px_55px_rgba(0,0,0,0.2)] hover:-translate-y-1 transition-all duration-300 overflow-hidden ${
-            discrepancyVal < 0
-              ? 'bg-rose-950/30 border-rose-400/40 text-rose-100 hover:bg-rose-900/40'
-              : discrepancyVal > 0
-              ? 'bg-emerald-950/30 border-emerald-400/40 text-emerald-100 hover:bg-emerald-900/40'
-              : 'bg-white/10 border-white/25 text-white hover:bg-white/15'
-          }`}
-        >
-          {/* Top Glass Specular Gloss Highlight */}
-          <div className="absolute inset-x-0 top-0 h-14 bg-gradient-to-b from-white/30 via-white/5 to-transparent rounded-t-[24px] pointer-events-none"></div>
-
-          <div className="relative z-10 flex items-center justify-between mb-2">
+        <GlassCard variant={discrepancyVal < 0 ? 'rose' : discrepancyVal > 0 ? 'emerald' : 'blue'}>
+          <div className="flex items-center justify-between mb-2">
             <span className="text-xs font-extrabold uppercase tracking-wider drop-shadow-sm">{t('auditForm.netDiscrepancy')}</span>
             <div
               className={`p-3 rounded-2xl border backdrop-blur-xl shadow-sm ${
@@ -227,40 +211,37 @@ export const ModernAuditForm: React.FC<Props> = ({
               <AlertTriangle className="w-5 h-5" />
             </div>
           </div>
-          <div className={`relative z-10 text-2xl sm:text-3xl font-black font-mono drop-shadow-md ${
+          <div className={`text-2xl sm:text-3xl font-black font-mono drop-shadow-md ${
             discrepancyVal < 0 ? 'text-rose-300' : discrepancyVal > 0 ? 'text-emerald-300' : 'text-white'
           }`}>
             {formatCurrency(discrepancyVal)} <span className="text-xs font-normal">{t('common.sar')}</span>
           </div>
-          <div className="relative z-10 mt-2 text-[11px] font-extrabold drop-shadow-sm">
+          <div className="mt-2 text-[11px] font-extrabold drop-shadow-sm">
             {discrepancyVal < 0 ? (
               <span className="text-rose-300 font-extrabold flex items-center gap-1">
                 <AlertTriangle className="w-3.5 h-3.5 text-rose-400" /> {t('auditForm.cashShortage')}
               </span>
             ) : discrepancyVal > 0 ? (
               <span className="text-emerald-300 font-extrabold flex items-center gap-1">
-                <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" /> {t('auditForm.cashSurplus')}
+                <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" /> {t('auditForm.surplus')}
               </span>
             ) : (
               <span className="text-sky-200 font-extrabold flex items-center gap-1">
-                <CheckCircle2 className="w-3.5 h-3.5 text-sky-300" /> Balanced
+                <CheckCircle2 className="w-3.5 h-3.5 text-cyan-300" /> {t('auditForm.balanced')}
               </span>
             )}
           </div>
-        </div>
+        </GlassCard>
 
         {/* Card 4: Fuel Types Quick Breakdown */}
-        <div className="relative group bg-white/10 backdrop-blur-3xl border border-white/25 rounded-[24px] p-5 shadow-[0_20px_45px_rgba(0,0,0,0.15),0_0_30px_rgba(255,255,255,0.05)] hover:shadow-[0_25px_55px_rgba(0,0,0,0.2),0_0_40px_rgba(56,189,248,0.15)] hover:bg-white/15 hover:border-white/40 hover:-translate-y-1 transition-all duration-300 overflow-hidden flex flex-col justify-between">
-          {/* Top Glass Specular Gloss Highlight */}
-          <div className="absolute inset-x-0 top-0 h-14 bg-gradient-to-b from-white/30 via-white/5 to-transparent rounded-t-[24px] pointer-events-none"></div>
-
-          <div className="relative z-10 flex items-center justify-between">
+        <GlassCard variant="blue" className="flex flex-col justify-between">
+          <div className="flex items-center justify-between">
             <span className="text-xs font-extrabold text-sky-100 uppercase tracking-wider drop-shadow-sm">{t('auditForm.fuelSalesSummary')}</span>
-            <div className="p-2.5 bg-sky-500/20 backdrop-blur-xl rounded-2xl border border-sky-400/30 text-sky-300 shadow-sm">
+            <div className="p-2.5 bg-sky-500/20 backdrop-blur-xl rounded-2xl border border-sky-400/30 text-cyan-300 shadow-sm">
               <Fuel className="w-4 h-4" />
             </div>
           </div>
-          <div className="relative z-10 grid grid-cols-3 gap-2 mt-3 text-center">
+          <div className="grid grid-cols-3 gap-2 mt-3 text-center">
             <div className="bg-emerald-500/20 border border-emerald-400/30 p-2 rounded-xl backdrop-blur-md shadow-sm">
               <span className="block text-[10px] font-black text-emerald-300">P91</span>
               <span className="text-xs font-black text-white font-mono">{formatNumber(p91Totals.total_quantity)}L</span>
@@ -274,7 +255,7 @@ export const ModernAuditForm: React.FC<Props> = ({
               <span className="text-xs font-black text-white font-mono">{formatNumber(dieselTotals.total_quantity)}L</span>
             </div>
           </div>
-        </div>
+        </GlassCard>
       </div>
 
       {/* 3. FINANCIAL COLLECTIONS INPUT CARD */}
