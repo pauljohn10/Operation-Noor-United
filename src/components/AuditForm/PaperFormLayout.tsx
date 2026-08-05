@@ -58,8 +58,8 @@ export const PaperFormLayout: React.FC<Props> = ({
           <img
             src="/logo_transparent.png"
             alt="Al Noor United Fuel Est. Logo"
-            className="h-10 sm:h-12 w-auto object-contain max-w-[130px]"
-            style={{ background: 'transparent', filter: 'none' }}
+            className="h-14 sm:h-16 w-auto object-contain max-w-[180px]"
+            style={{ background: 'transparent', filter: 'none', maxHeight: '60px' }}
             crossOrigin="anonymous"
           />
         </div>
@@ -80,7 +80,7 @@ export const PaperFormLayout: React.FC<Props> = ({
           </h4>
         </div>
 
-        <div className="w-12"></div>
+        <div className="w-16"></div>
       </div>
 
       {/* 2. COMPACT METADATA HEADER GRID */}

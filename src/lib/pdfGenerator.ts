@@ -86,7 +86,10 @@ function prepareElementForPdfExport(element: HTMLElement): { clone: HTMLElement;
 
   const logo = clone.querySelector('.paper-header img') as HTMLElement;
   if (logo) {
-    logo.style.maxHeight = '38px';
+    logo.style.maxHeight = '60px';
+    logo.style.height = '60px';
+    logo.style.width = 'auto';
+    logo.style.objectFit = 'contain';
   }
 
   // Make fuel sections and wrappers ultra-compact without card margins or shadows
