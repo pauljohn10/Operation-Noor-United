@@ -219,7 +219,7 @@ export const ModernAuditForm: React.FC<Props> = ({
               </span>
             ) : discrepancyVal > 0 ? (
               <span className="text-emerald-300 font-extrabold flex items-center gap-1">
-                <CheckCircle2 className="w-3 h-3 text-emerald-400" /> {t('auditForm.surplus')}
+                <CheckCircle2 className="w-3 h-3 text-emerald-400" /> {t('auditForm.cashSurplus')}
               </span>
             ) : (
               <span className="text-sky-200 font-extrabold flex items-center gap-1">

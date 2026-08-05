@@ -94,6 +94,7 @@ export interface TranslationDictionary {
     netDiscrepancy: string;
     cashShortage: string;
     cashSurplus: string;
+    balanced: string;
     perfectlyBalanced: string;
     fuelSalesSummary: string;
     auditInfoTitle: string;
@@ -330,8 +331,9 @@ export const translations: Record<Language, TranslationDictionary> = {
       cashReceived: 'Cash Received',
       expected: 'Expected:',
       netDiscrepancy: 'Net Discrepancy',
-      cashShortage: 'Cash Shortage Detected',
-      cashSurplus: 'Cash Surplus Recorded',
+      cashShortage: 'Cash Shortage',
+      cashSurplus: 'Cash Surplus',
+      balanced: 'Balanced',
       perfectlyBalanced: 'Perfectly Balanced',
       fuelSalesSummary: 'Fuel Sales Summary',
       auditInfoTitle: 'Audit Information & Location',
@@ -779,8 +781,9 @@ export const translations: Record<Language, TranslationDictionary> = {
       cashReceived: 'النقد المستلم',
       expected: 'المتوقع:',
       netDiscrepancy: 'صافي الفروقات',
-      cashShortage: 'تم اكتشاف عجز نقدي',
-      cashSurplus: 'تم تسجيل فائض نقدي',
+      cashShortage: 'عجز نقدي',
+      cashSurplus: 'فائض نقدي',
+      balanced: 'متوازن',
       perfectlyBalanced: 'متوازن تماماً',
       fuelSalesSummary: 'ملخص مبيعات الوقود',
       auditInfoTitle: 'معلومات التدقيق والموقع',
