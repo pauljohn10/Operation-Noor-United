@@ -256,15 +256,30 @@ export const ApprovalPanel: React.FC<Props> = ({
 
       {/* ACTION BUTTONS (AUTHORIZED APPROVER ONLY) */}
       {canActionCurrentStep && audit.current_status !== 'approved' && audit.current_status !== 'rejected' && audit.current_status !== 'draft' && (
-        <div className="p-4 bg-sky-500/10 border border-sky-500/20 rounded-2xl flex flex-col md:flex-row items-center justify-between gap-4 backdrop-blur-md">
+        <div className={`p-4 rounded-2xl flex flex-col md:flex-row items-center justify-between gap-4 backdrop-blur-md ${
+          (currentUser?.role === 'Management' || currentUser?.role === 'Super Admin') && (audit.current_status === 'pending_accountant' || audit.current_status === 'pending_account_manager')
+            ? 'bg-purple-500/15 border border-purple-400/40'
+            : 'bg-sky-500/10 border border-sky-500/20'
+        }`}>
           <div className="flex items-center gap-3">
-            <ShieldAlert className="w-6 h-6 text-sky-600 shrink-0" />
+            <ShieldAlert className={`w-6 h-6 shrink-0 ${
+              (currentUser?.role === 'Management' || currentUser?.role === 'Super Admin') && (audit.current_status === 'pending_accountant' || audit.current_status === 'pending_account_manager')
+                ? 'text-purple-600'
+                : 'text-sky-600'
+            }`} />
             <div>
-              <p className="text-sm font-extrabold text-slate-900">
-                Action Required: Logged in as <span className="text-sky-700">{currentUser?.role}</span>
+              <p className="text-sm font-extrabold text-slate-900 flex items-center gap-2">
+                <span>Action Required: Logged in as <span className="text-sky-700">{currentUser?.role}</span></span>
+                {(currentUser?.role === 'Management' || currentUser?.role === 'Super Admin') && (audit.current_status === 'pending_accountant' || audit.current_status === 'pending_account_manager') && (
+                  <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black bg-purple-600 text-white uppercase tracking-wider shadow-2xs">
+                    Override Authority Active
+                  </span>
+                )}
               </p>
               <p className="text-xs text-slate-600 font-medium">
-                You are authorized to sign and approve this audit at step #{currentIndex + 1}.
+                {(currentUser?.role === 'Management' || currentUser?.role === 'Super Admin') && (audit.current_status === 'pending_accountant' || audit.current_status === 'pending_account_manager')
+                  ? 'As Management Executive, you have override authority to finalize & approve this audit directly at any stage.'
+                  : `You are authorized to sign and approve this audit at step #${currentIndex + 1}.`}
               </p>
             </div>
           </div>
@@ -273,10 +288,18 @@ export const ApprovalPanel: React.FC<Props> = ({
             <button
               type="button"
               onClick={() => onApprove()}
-              className="flex items-center gap-1.5 px-4 py-2 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-extrabold text-xs rounded-xl shadow-lg shadow-emerald-600/25 transition-all"
+              className={`flex items-center gap-1.5 px-4 py-2 text-white font-extrabold text-xs rounded-xl shadow-lg transition-all ${
+                (currentUser?.role === 'Management' || currentUser?.role === 'Super Admin') && (audit.current_status === 'pending_accountant' || audit.current_status === 'pending_account_manager')
+                  ? 'bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 shadow-purple-600/25 ring-1 ring-purple-400/40'
+                  : 'bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 shadow-emerald-600/25'
+              }`}
             >
               <CheckCircle2 className="w-4 h-4" />
-              <span>Sign & Approve Audit</span>
+              <span>
+                {(currentUser?.role === 'Management' || currentUser?.role === 'Super Admin') && (audit.current_status === 'pending_accountant' || audit.current_status === 'pending_account_manager')
+                  ? 'Approve Audit (Management Override)'
+                  : 'Sign & Approve Audit'}
+              </span>
             </button>
 
             <button

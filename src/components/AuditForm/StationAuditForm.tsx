@@ -522,13 +522,22 @@ export const StationAuditForm: React.FC<Props> = ({
   };
 
   const handleWorkflowApprove = (comment?: string, customSignatureUrl?: string, roleOverrideKey?: string) => {
+    const isManagementOverride =
+      (currentUser?.role === 'Management' || currentUser?.role === 'Super Admin') &&
+      (currentStatus === 'pending_accountant' || currentStatus === 'pending_account_manager');
+
     let nextStatus: any = 'approved';
 
-    if (currentStatus === 'pending_accountant') {
-      nextStatus = 'pending_account_manager';
-    } else if (currentStatus === 'pending_account_manager') {
-      nextStatus = 'pending_management';
-    } else if (currentStatus === 'pending_management') {
+    if (!isManagementOverride) {
+      if (currentStatus === 'pending_accountant') {
+        nextStatus = 'pending_account_manager';
+      } else if (currentStatus === 'pending_account_manager') {
+        nextStatus = 'pending_management';
+      } else if (currentStatus === 'pending_management') {
+        nextStatus = 'approved';
+      }
+    } else {
+      // Management Executive override authority immediately finalizes the audit
       nextStatus = 'approved';
     }
 
@@ -536,21 +545,25 @@ export const StationAuditForm: React.FC<Props> = ({
 
     const approvalRoleKey =
       roleOverrideKey ||
-      (currentStatus === 'pending_accountant'
+      (currentUser?.role === 'Management'
+        ? 'management'
+        : currentStatus === 'pending_accountant'
         ? 'accountant'
         : currentStatus === 'pending_account_manager'
         ? 'account_manager'
         : 'management');
 
     currentAuditObj.approvals = currentAuditObj.approvals.map((app) => {
-      if (app.role === approvalRoleKey) {
+      if (app.role === 'management' || app.role === approvalRoleKey) {
         return {
           ...app,
           approver_id: isValidUuid(currentUser?.id) ? currentUser.id : null,
           approver_name: currentUser.full_name,
           approver_position: currentUser.position,
           status: 'approved',
-          comments: comment || app.comments || 'Approved fuel audit.',
+          comments: isManagementOverride
+            ? `Approved by Management Executive using override authority${comment ? `: ${comment}` : ''}`
+            : comment || app.comments || 'Approved fuel audit.',
           action_timestamp: new Date().toISOString(),
           digital_signature_code: `SIG-${currentUser.role.substring(0, 3).toUpperCase()}-${Math.floor(100000 + Math.random() * 900000)}`,
           signature_url: customSignatureUrl || app.signature_url || currentUser.signature_url,
@@ -559,14 +572,20 @@ export const StationAuditForm: React.FC<Props> = ({
       return app;
     });
 
-    if (comment) {
+    const overrideCommentText = isManagementOverride
+      ? `Approved by Management Executive (${currentUser.full_name}) using override authority.${comment ? ` Notes: ${comment}` : ''}`
+      : comment
+      ? `[Approved] ${comment}`
+      : null;
+
+    if (overrideCommentText) {
       currentAuditObj.comments.unshift({
         id: generateUUID(),
         audit_id: currentAuditObj.id,
         user_id: isValidUuid(currentUser?.id) ? currentUser.id : '00000000-0000-0000-0000-000000000001',
         user_name: currentUser.full_name,
         user_role: currentUser.role,
-        comment_text: `[Approved] ${comment}`,
+        comment_text: overrideCommentText,
         created_at: new Date().toISOString(),
       });
     }

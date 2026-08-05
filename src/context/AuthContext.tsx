@@ -114,13 +114,22 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     if (!currentUser) return false;
     if (currentUser.role === 'Super Admin') return true;
 
+    // Management Executive override authority: can approve at any pending workflow stage
+    if (currentUser.role === 'Management') {
+      return (
+        status === 'pending_accountant' ||
+        status === 'pending_account_manager' ||
+        status === 'pending_management'
+      );
+    }
+
     switch (status) {
       case 'pending_accountant':
         return currentUser.role === 'Accountant';
       case 'pending_account_manager':
         return currentUser.role === 'Account Manager';
       case 'pending_management':
-        return currentUser.role === 'Management';
+        return true;
       case 'returned_for_correction':
       case 'draft':
         return currentUser.role === 'Operation Supervisor';
