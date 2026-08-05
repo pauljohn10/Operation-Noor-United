@@ -104,7 +104,7 @@ export const MobileEntryModal: React.FC<Props> = ({
         category: 'PUMP',
         fuelType: ft,
         pumpNo: 15,
-        fieldName: `${fuelName} — Total Opening Reading (Manual Entry)`,
+        fieldName: `${fuelName} — Total Start Reading (Manual Entry)`,
         fieldKey: 'start_reading',
         currentValue: totalItem?.start_reading || 0,
       });

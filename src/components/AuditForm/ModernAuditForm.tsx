@@ -567,7 +567,7 @@ export const ModernAuditForm: React.FC<Props> = ({
                             {/* Opening Reading */}
                             <div>
                               <label className="block text-[11px] font-extrabold text-slate-700 mb-1">
-                                {t('auditForm.openingReading')} (L)
+                                {t('auditForm.openingReading')}
                               </label>
                               {isReadOnly ? (
                                 <div className="w-full min-h-[44px] bg-slate-100 border border-slate-300 rounded-xl px-3 py-2.5 text-sm font-black text-end text-slate-900 font-mono flex items-center justify-end">
@@ -596,7 +596,7 @@ export const ModernAuditForm: React.FC<Props> = ({
                             {/* Closing Reading */}
                             <div>
                               <label className="block text-[11px] font-extrabold text-slate-700 mb-1">
-                                {t('auditForm.closingReading')} (L)
+                                {t('auditForm.closingReading')}
                               </label>
                               {isReadOnly ? (
                                 <div className="w-full min-h-[44px] bg-slate-100 border border-slate-300 rounded-xl px-3 py-2.5 text-sm font-black text-end text-slate-900 font-mono flex items-center justify-end">
@@ -716,8 +716,8 @@ export const ModernAuditForm: React.FC<Props> = ({
                     <thead>
                       <tr className="bg-slate-100/80 text-slate-700 font-extrabold uppercase text-[11px] border-b border-slate-200">
                         <th className="p-3 w-16 text-center">{t('auditForm.pumpNo')}</th>
-                        <th className="p-3">{t('auditForm.openingReading')} (L)</th>
-                        <th className="p-3">{t('auditForm.closingReading')} (L)</th>
+                        <th className="p-3">{t('auditForm.openingReading')}</th>
+                        <th className="p-3">{t('auditForm.closingReading')}</th>
                         <th className="p-3 text-right">{t('auditForm.quantitySold')} (L)</th>
                         <th className="p-3 text-center">{t('auditForm.unitPrice')}</th>
                         <th className="p-3 text-right">{t('auditForm.totalAmount')}</th>
