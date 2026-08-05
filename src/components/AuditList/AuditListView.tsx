@@ -18,7 +18,7 @@ interface Props {
 }
 
 export const AuditListView: React.FC<Props> = ({ audits, onOpenAudit }) => {
-  const { t } = useLanguage();
+  const { t, isRTL } = useLanguage();
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedStatus, setSelectedStatus] = useState('ALL');
   const [selectedStation, setSelectedStation] = useState('ALL');
@@ -39,6 +39,69 @@ export const AuditListView: React.FC<Props> = ({ audits, onOpenAudit }) => {
     return matchesSearch && matchesStatus && matchesStation;
   });
 
+  // Date Group Header Label Helper
+  const getGroupHeaderLabel = (dateStr: string) => {
+    if (!dateStr) return isRTL ? 'تاريخ غير معروف' : 'Unknown Date';
+
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = String(now.getMonth() + 1).padStart(2, '0');
+    const day = String(now.getDate()).padStart(2, '0');
+    const todayStr = `${year}-${month}-${day}`;
+
+    const yesterdayDate = new Date(now);
+    yesterdayDate.setDate(yesterdayDate.getDate() - 1);
+    const yYear = yesterdayDate.getFullYear();
+    const yMonth = String(yesterdayDate.getMonth() + 1).padStart(2, '0');
+    const yDay = String(yesterdayDate.getDate()).padStart(2, '0');
+    const yesterdayStr = `${yYear}-${yMonth}-${yDay}`;
+
+    if (dateStr === todayStr) {
+      return isRTL ? 'اليوم' : 'Today';
+    } else if (dateStr === yesterdayStr) {
+      return isRTL ? 'أمس' : 'Yesterday';
+    } else {
+      try {
+        const parts = dateStr.split('-');
+        if (parts.length === 3) {
+          const y = parseInt(parts[0], 10);
+          const mIdx = parseInt(parts[1], 10) - 1;
+          const d = parseInt(parts[2], 10);
+          const dateObj = new Date(y, mIdx, d);
+
+          const dayFormatted = String(d).padStart(2, '0');
+          const monthFormatted = dateObj.toLocaleString(isRTL ? 'ar-SA' : 'en-US', { month: 'short' });
+          return `${dayFormatted} ${monthFormatted} ${y}`;
+        }
+      } catch (e) {
+        // fallback
+      }
+      return dateStr;
+    }
+  };
+
+  // Group filtered audits by Audit Date
+  const groupedAuditsMap = filtered.reduce((acc, audit) => {
+    const dateKey = audit.audit_date || 'Unknown Date';
+    if (!acc[dateKey]) {
+      acc[dateKey] = [];
+    }
+    acc[dateKey].push(audit);
+    return acc;
+  }, {} as Record<string, StationAudit[]>);
+
+  // Sort group date keys descending (newest date first)
+  const sortedDateKeys = Object.keys(groupedAuditsMap).sort((a, b) => b.localeCompare(a));
+
+  const groupedAudits = sortedDateKeys.map((dateKey) => {
+    const auditsInGroup = [...groupedAuditsMap[dateKey]].sort((a, b) => b.audit_number.localeCompare(a.audit_number));
+    return {
+      dateKey,
+      displayLabel: getGroupHeaderLabel(dateKey),
+      audits: auditsInGroup,
+    };
+  });
+
   const getStatusBadgeLabel = (status: string) => {
     switch (status) {
       case 'draft': return t('auditsList.statusDraft');
@@ -54,8 +117,6 @@ export const AuditListView: React.FC<Props> = ({ audits, onOpenAudit }) => {
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
-
-
 
       {/* PAGE HEADER */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white/45 backdrop-blur-2xl border border-white/80 p-6 rounded-[28px] shadow-[0_20px_50px_rgba(14,165,233,0.15)] ring-1 ring-white/60">
@@ -138,83 +199,102 @@ export const AuditListView: React.FC<Props> = ({ audits, onOpenAudit }) => {
                   </td>
                 </tr>
               ) : (
-                filtered.map((a) => (
-                  <tr key={a.id} className="odd:bg-white/5 even:bg-white/10 hover:bg-white/20 transition-all border-b border-white/10">
-                    <td className="p-4 text-center">
-                      <p className="font-extrabold text-sky-300 flex items-center justify-center gap-1.5 drop-shadow-sm font-mono">
-                        <FileText className="w-4 h-4 text-sky-300" />
-                        <span>{a.audit_number}</span>
-                      </p>
-                      <p className="text-[11px] text-sky-200/90 font-bold mt-0.5 flex items-center justify-center gap-1">
-                        <Calendar className="w-3.5 h-3.5 text-sky-300" />
-                        <span>{a.audit_date}</span>
-                      </p>
-                    </td>
+                groupedAudits.map((group) => (
+                  <React.Fragment key={group.dateKey}>
+                    {/* DATE GROUP HEADER ROW */}
+                    <tr className="bg-slate-950/40 backdrop-blur-xl border-y border-white/20">
+                      <td colSpan={7} className="px-5 py-3 text-start">
+                        <div className="flex items-center gap-2.5">
+                          <div className="p-1.5 bg-sky-500/20 text-sky-300 rounded-lg border border-sky-400/30">
+                            <Calendar className="w-4 h-4" />
+                          </div>
+                          <span className="text-sm font-black text-white tracking-wide drop-shadow-sm">
+                            {group.displayLabel}
+                          </span>
+                          <span className="text-[11px] font-bold text-sky-200/90 bg-white/10 px-2.5 py-0.5 rounded-full border border-white/15">
+                            {group.audits.length} {group.audits.length === 1 ? 'Audit' : 'Audits'}
+                          </span>
+                          <div className="flex-1 h-[1px] bg-gradient-to-r from-sky-400/30 via-white/15 to-transparent ms-2"></div>
+                        </div>
+                      </td>
+                    </tr>
 
-                    <td className="p-4 text-center">
-                      <p className="font-extrabold text-white text-xs drop-shadow-sm">{a.station_name}</p>
-                      <p className="text-[11px] text-sky-200/90 font-medium">{a.location}</p>
-                    </td>
+                    {/* AUDIT ROWS IN THIS GROUP */}
+                    {group.audits.map((a) => (
+                      <tr key={a.id} className="odd:bg-white/5 even:bg-white/10 hover:bg-white/20 transition-all border-b border-white/10">
+                        <td className="p-4 text-center">
+                          <p className="font-extrabold text-sky-300 flex items-center justify-center gap-1.5 drop-shadow-sm font-mono text-xs">
+                            <FileText className="w-4 h-4 text-sky-300" />
+                            <span>{a.audit_number}</span>
+                          </p>
+                        </td>
 
-                    <td className="p-4 text-center">
-                      <p className="text-white font-extrabold drop-shadow-sm">{a.created_by_name || 'Operation Supervisor'}</p>
-                    </td>
+                        <td className="p-4 text-center">
+                          <p className="font-extrabold text-white text-xs drop-shadow-sm">{a.station_name}</p>
+                          <p className="text-[11px] text-sky-200/90 font-medium">{a.location}</p>
+                        </td>
 
-                    <td className="p-4 text-center">
-                      <p className="font-black text-white text-sm font-mono drop-shadow-sm">{formatCurrency(a.total_sales)} {t('common.sar')}</p>
-                      <p className="text-[11px] text-sky-200/90 font-mono font-bold mt-0.5">{formatCurrency(a.total_quantity)} {t('common.liters')}</p>
-                    </td>
+                        <td className="p-4 text-center">
+                          <p className="text-white font-extrabold drop-shadow-sm">{a.created_by_name || 'Operation Supervisor'}</p>
+                        </td>
 
-                    <td className="p-4 text-center">
-                      <span
-                        className={`font-black font-mono text-xs drop-shadow-sm ${
-                          a.discrepancy_amount < 0
-                            ? 'text-rose-300'
-                            : a.discrepancy_amount > 0
-                            ? 'text-emerald-300'
-                            : 'text-sky-200'
-                        }`}
-                      >
-                        {formatCurrency(a.discrepancy_amount)} {t('common.sar')}
-                      </span>
-                    </td>
+                        <td className="p-4 text-center">
+                          <p className="font-black text-white text-sm font-mono drop-shadow-sm">{formatCurrency(a.total_sales)} {t('common.sar')}</p>
+                          <p className="text-[11px] text-sky-200/90 font-mono font-bold mt-0.5">{formatCurrency(a.total_quantity)} {t('common.liters')}</p>
+                        </td>
 
-                    <td className="p-4 text-center">
-                      <span
-                        className={`inline-block px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider shadow-sm backdrop-blur-md ${
-                          a.current_status === 'approved'
-                            ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-400/40'
-                            : a.current_status === 'rejected'
-                            ? 'bg-rose-500/20 text-rose-300 border border-rose-400/40'
-                            : a.current_status === 'returned_for_correction'
-                            ? 'bg-amber-500/20 text-amber-300 border border-amber-400/40'
-                            : 'bg-sky-500/20 text-sky-200 border border-sky-400/40'
-                        }`}
-                      >
-                        {getStatusBadgeLabel(a.current_status)}
-                      </span>
-                    </td>
+                        <td className="p-4 text-center">
+                          <span
+                            className={`font-black font-mono text-xs drop-shadow-sm ${
+                              a.discrepancy_amount < 0
+                                ? 'text-rose-300'
+                                : a.discrepancy_amount > 0
+                                ? 'text-emerald-300'
+                                : 'text-sky-200'
+                            }`}
+                          >
+                            {formatCurrency(a.discrepancy_amount)} {t('common.sar')}
+                          </span>
+                        </td>
 
-                    <td className="p-4 text-center">
-                      <div className="flex items-center justify-center gap-2">
-                        <button
-                          onClick={() => exportAuditToPdf(a.audit_number, a.station_name)}
-                          className="p-2 bg-white/15 hover:bg-white/25 text-white rounded-xl border border-white/30 shadow-sm transition-all"
-                          title={t('auditsList.exportPdf')}
-                        >
-                          <FileDown className="w-4 h-4" />
-                        </button>
+                        <td className="p-4 text-center">
+                          <span
+                            className={`inline-block px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider shadow-sm backdrop-blur-md ${
+                              a.current_status === 'approved'
+                                ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-400/40'
+                                : a.current_status === 'rejected'
+                                ? 'bg-rose-500/20 text-rose-300 border border-rose-400/40'
+                                : a.current_status === 'returned_for_correction'
+                                ? 'bg-amber-500/20 text-amber-300 border border-amber-400/40'
+                                : 'bg-sky-500/20 text-sky-200 border border-sky-400/40'
+                            }`}
+                          >
+                            {getStatusBadgeLabel(a.current_status)}
+                          </span>
+                        </td>
 
-                        <button
-                          onClick={() => onOpenAudit(a.id)}
-                          className="px-3.5 py-1.5 bg-sky-500/20 hover:bg-sky-500/30 text-white border border-sky-400/40 rounded-xl text-xs font-extrabold transition-all flex items-center gap-1.5 shadow-sm"
-                        >
-                          <span>{t('auditsList.viewEdit')}</span>
-                          <ExternalLink className="w-3.5 h-3.5 rtl:rotate-180" />
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
+                        <td className="p-4 text-center">
+                          <div className="flex items-center justify-center gap-2">
+                            <button
+                              onClick={() => exportAuditToPdf(a.audit_number, a.station_name)}
+                              className="p-2 bg-white/15 hover:bg-white/25 text-white rounded-xl border border-white/30 shadow-sm transition-all"
+                              title={t('auditsList.exportPdf')}
+                            >
+                              <FileDown className="w-4 h-4" />
+                            </button>
+
+                            <button
+                              onClick={() => onOpenAudit(a.id)}
+                              className="px-3.5 py-1.5 bg-sky-500/20 hover:bg-sky-500/30 text-white border border-sky-400/40 rounded-xl text-xs font-extrabold transition-all flex items-center gap-1.5 shadow-sm"
+                            >
+                              <span>{t('auditsList.viewEdit')}</span>
+                              <ExternalLink className="w-3.5 h-3.5 rtl:rotate-180" />
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </React.Fragment>
                 ))
               )}
             </tbody>
