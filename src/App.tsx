@@ -29,6 +29,8 @@ import {
   deleteUser as deleteUserFromStorage,
   saveSettings as saveSettingsToStorage,
   markNotificationAsRead as markNotifReadInStorage,
+  markAllNotificationsAsRead,
+  deleteNotificationFromStorage,
   saveNotification as saveNotifToStorage,
   logActivity,
   createUserAccount,
@@ -209,12 +211,21 @@ function AppContent() {
     return true; // Super Admin & Approval Roles see system/pipeline audits
   });
 
-  // Filter notifications so Operation Supervisors only see alerts for their own audits
+  // Filter notifications so each user sees alerts targeted to ALL, their role, or sent by them
   const visibleNotifications = notifications.filter((notif) => {
+    if (currentUser.role === 'Super Admin') return true;
     if (currentUser.role === 'Operation Supervisor') {
-      return notif.recipient_role === 'ALL' || notif.sender_name === currentUser.full_name;
+      return (
+        notif.recipient_role === 'ALL' ||
+        notif.recipient_role === 'Operation Supervisor' ||
+        notif.sender_name === currentUser.full_name
+      );
     }
-    return true;
+    return (
+      notif.recipient_role === 'ALL' ||
+      notif.recipient_role === currentUser.role ||
+      notif.sender_name === currentUser.full_name
+    );
   });
 
   const handleSaveStation = async (station: Station) => {
@@ -369,6 +380,20 @@ function AppContent() {
     setNotifications((prev) =>
       prev.map((n) => (n.id === id ? { ...n, is_read: true } : n))
     );
+  };
+
+  const handleMarkAllNotifsRead = async () => {
+    const unreadIds = visibleNotifications.filter((n) => !n.is_read).map((n) => n.id);
+    if (unreadIds.length === 0) return;
+    await markAllNotificationsAsRead(unreadIds);
+    setNotifications((prev) =>
+      prev.map((n) => (unreadIds.includes(n.id) ? { ...n, is_read: true } : n))
+    );
+  };
+
+  const handleDeleteNotif = async (id: string) => {
+    await deleteNotificationFromStorage(id);
+    setNotifications((prev) => prev.filter((n) => n.id !== id));
   };
 
   const selectedAudit = audits.find((a) => a.id === selectedAuditId) || null;
@@ -534,6 +559,8 @@ function AppContent() {
           <NotificationCenter
             notifications={visibleNotifications}
             onMarkAsRead={handleMarkNotifRead}
+            onMarkAllAsRead={handleMarkAllNotifsRead}
+            onDeleteNotification={handleDeleteNotif}
             onOpenAudit={handleOpenAudit}
           />
         )}

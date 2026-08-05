@@ -916,6 +916,33 @@ export async function markNotificationAsRead(id: string): Promise<void> {
   }
 }
 
+export async function markAllNotificationsAsRead(ids: string[]): Promise<void> {
+  if (ids.length === 0) return;
+  if (isSupabaseConfigured && supabase) {
+    try {
+      await supabase
+        .from('station_audit_notifications')
+        .update({ is_read: true })
+        .in('id', ids);
+    } catch (e) {
+      console.warn('Supabase markAllNotificationsAsRead error:', e);
+    }
+  }
+}
+
+export async function deleteNotificationFromStorage(id: string): Promise<void> {
+  if (isSupabaseConfigured && supabase) {
+    try {
+      await supabase
+        .from('station_audit_notifications')
+        .delete()
+        .eq('id', id);
+    } catch (e) {
+      console.warn('Supabase deleteNotificationFromStorage error:', e);
+    }
+  }
+}
+
 // --- AUDIT LOGS ---
 
 export async function fetchAuditLogs(): Promise<AuditLog[]> {
