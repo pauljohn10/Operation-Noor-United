@@ -223,9 +223,13 @@ export const AuditListView: React.FC<Props> = ({ audits, onOpenAudit }) => {
                     {group.audits.map((a) => (
                       <tr key={a.id} className="odd:bg-white/5 even:bg-white/10 hover:bg-white/20 transition-all border-b border-white/10">
                         <td className="p-4 text-center">
-                          <p className="font-extrabold text-sky-300 flex items-center justify-center gap-1.5 drop-shadow-sm font-mono text-xs">
+                          <p className="font-black text-sky-300 flex items-center justify-center gap-1.5 drop-shadow-sm font-mono text-xs">
                             <FileText className="w-4 h-4 text-sky-300" />
                             <span>{a.audit_number}</span>
+                          </p>
+                          <p className="text-[11px] text-sky-200/90 font-bold mt-0.5 flex items-center justify-center gap-1">
+                            <Calendar className="w-3.5 h-3.5 text-sky-300" />
+                            <span>{a.audit_date}</span>
                           </p>
                         </td>
 
