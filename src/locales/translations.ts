@@ -99,7 +99,9 @@ export interface TranslationDictionary {
     auditInfoTitle: string;
     auditInfoSub: string;
     selectStation: string;
+    stationLabel: string;
     auditDate: string;
+    selectAuditDate: string;
     cityLocation: string;
     opSupervisor: string;
     collectionsTitle: string;
@@ -335,7 +337,9 @@ export const translations: Record<Language, TranslationDictionary> = {
       auditInfoTitle: 'Audit Information & Location',
       auditInfoSub: 'Select station and date to perform data entry',
       selectStation: 'Select Station',
+      stationLabel: 'Station',
       auditDate: 'Audit Date',
+      selectAuditDate: 'Select Audit Date',
       cityLocation: 'City / Location',
       opSupervisor: 'Operation Supervisor',
       collectionsTitle: 'Collections & Cash Input',
@@ -782,7 +786,9 @@ export const translations: Record<Language, TranslationDictionary> = {
       auditInfoTitle: 'معلومات التدقيق والموقع',
       auditInfoSub: 'اختر المحطة والتاريخ لإدخال البيانات',
       selectStation: 'اختر المحطة',
+      stationLabel: 'المحطة',
       auditDate: 'تاريخ التدقيق',
+      selectAuditDate: 'اختر تاريخ التدقيق',
       cityLocation: 'المدينة / الموقع',
       opSupervisor: 'مشرف العمليات',
       collectionsTitle: 'إدخال التحصيلات والنقد',
