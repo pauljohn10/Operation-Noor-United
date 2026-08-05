@@ -7,14 +7,12 @@ import {
   PlusCircle,
   Bell,
   ShieldCheck,
-  User as UserIcon,
   LogOut,
   Menu,
   X,
   Globe,
+  Building,
 } from 'lucide-react';
-import { UserProfileModal } from '../Profile/UserProfileModal';
-import { Building } from 'lucide-react';
 
 interface Props {
   activeTab: 'dashboard' | 'audits' | 'new-audit' | 'activity' | 'admin';
@@ -33,7 +31,6 @@ export const Navbar: React.FC<Props> = ({
 }) => {
   const { currentUser, logout, canCreateAudit } = useAuth();
   const { language, setLanguage, t } = useLanguage();
-  const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   const [isMobileDrawerOpen, setIsMobileDrawerOpen] = useState(false);
 
@@ -242,17 +239,6 @@ export const Navbar: React.FC<Props> = ({
 
                     <button
                       onClick={() => {
-                        setIsUserMenuOpen(false);
-                        setIsProfileModalOpen(true);
-                      }}
-                      className="w-full px-4 py-2 text-start text-xs font-bold text-slate-700 hover:bg-sky-50 hover:text-sky-800 flex items-center gap-2 transition-colors"
-                    >
-                      <UserIcon className="w-4 h-4 text-sky-600" />
-                      <span>{t('nav.editProfile')}</span>
-                    </button>
-
-                    <button
-                      onClick={() => {
                         toggleLanguage();
                       }}
                       className="w-full px-4 py-2 text-start text-xs font-bold text-slate-700 hover:bg-sky-50 hover:text-sky-800 flex items-center gap-2 transition-colors"
@@ -423,12 +409,6 @@ export const Navbar: React.FC<Props> = ({
           </div>
         )}
       </header>
-
-      {/* User Profile Modal */}
-      <UserProfileModal
-        isOpen={isProfileModalOpen}
-        onClose={() => setIsProfileModalOpen(false)}
-      />
     </>
   );
 };
