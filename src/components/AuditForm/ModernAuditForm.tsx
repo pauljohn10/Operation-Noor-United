@@ -167,7 +167,7 @@ export const ModernAuditForm: React.FC<Props> = ({
       </div>
 
       {/* 2. EXECUTIVE METRICS KPI SUMMARY CARDS */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         
         {/* Card 1: Total Sales */}
         <GlassCard variant="blue">
@@ -237,30 +237,87 @@ export const ModernAuditForm: React.FC<Props> = ({
             )}
           </div>
         </GlassCard>
+      </div>
 
-        {/* Card 4: Fuel Types Quick Breakdown */}
-        <GlassCard variant="blue" className="flex flex-col justify-between">
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-extrabold text-sky-100 uppercase tracking-wider drop-shadow-sm">{t('auditForm.fuelSalesSummary')}</span>
-            <div className="p-2.5 bg-sky-500/20 backdrop-blur-xl rounded-2xl border border-sky-400/30 text-cyan-300 shadow-sm">
-              <Fuel className="w-4 h-4" />
+      {/* FUEL SUMMARY KPI CARDS (COLOR-CODED GLASSMORPHISM BY FUEL TYPE) */}
+      <div className="space-y-3">
+        <div className="flex items-center gap-2 text-white px-1">
+          <Fuel className="w-4 h-4 text-sky-300" />
+          <h4 className="text-xs font-black uppercase tracking-wider text-sky-100">{t('auditForm.fuelSalesSummary')}</h4>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          {/* Petrol 91 KPI Card - Premium Green Glass */}
+          <GlassCard variant="emerald" className="hover:shadow-[0_25px_55px_rgba(0,0,0,0.25),0_0_45px_rgba(16,185,129,0.3)]">
+            <div className="flex items-center justify-between mb-3">
+              <div className="flex items-center gap-2">
+                <div className="p-2 bg-emerald-500/20 backdrop-blur-xl rounded-xl border border-emerald-400/40 text-emerald-300 shadow-sm">
+                  <Fuel className="w-4 h-4" />
+                </div>
+                <span className="text-xs font-black text-emerald-200 uppercase tracking-wider drop-shadow-sm">
+                  🟢 {t('auditForm.petrol91')}
+                </span>
+              </div>
+              <span className="text-[10px] font-mono font-bold text-emerald-200 bg-emerald-500/20 px-2.5 py-0.5 rounded-full border border-emerald-400/30">
+                {prices.PETROL_91.toFixed(2)} SAR/L
+              </span>
             </div>
-          </div>
-          <div className="grid grid-cols-3 gap-2 mt-3 text-center">
-            <div className="bg-emerald-500/20 border border-emerald-400/30 p-2 rounded-xl backdrop-blur-md shadow-sm">
-              <span className="block text-[10px] font-black text-emerald-300">P91</span>
-              <span className="text-xs font-black text-white font-mono">{formatNumber(p91Totals.total_quantity)}L</span>
+            <div className="text-xl sm:text-2xl font-black text-white font-mono tracking-tight drop-shadow-md">
+              {formatCurrency(p91Totals.total_sales)} <span className="text-xs font-normal text-emerald-200">{t('common.sar')}</span>
             </div>
-            <div className="bg-amber-500/20 border border-amber-400/30 p-2 rounded-xl backdrop-blur-md shadow-sm">
-              <span className="block text-[10px] font-black text-amber-300">P95</span>
-              <span className="text-xs font-black text-white font-mono">{formatNumber(p95Totals.total_quantity)}L</span>
+            <div className="mt-2 flex items-center justify-between text-[11px] font-bold text-emerald-200/90 border-t border-emerald-400/20 pt-2">
+              <span>Volume Sold:</span>
+              <span className="font-mono text-white text-xs">{formatNumber(p91Totals.total_quantity)} Liters</span>
             </div>
-            <div className="bg-yellow-500/20 border border-yellow-400/30 p-2 rounded-xl backdrop-blur-md shadow-sm">
-              <span className="block text-[10px] font-black text-yellow-300">DSL</span>
-              <span className="text-xs font-black text-white font-mono">{formatNumber(dieselTotals.total_quantity)}L</span>
+          </GlassCard>
+
+          {/* Petrol 95 KPI Card - Premium Red Glass */}
+          <GlassCard variant="rose" className="hover:shadow-[0_25px_55px_rgba(0,0,0,0.25),0_0_45px_rgba(244,63,94,0.3)]">
+            <div className="flex items-center justify-between mb-3">
+              <div className="flex items-center gap-2">
+                <div className="p-2 bg-rose-500/20 backdrop-blur-xl rounded-xl border border-rose-400/40 text-rose-300 shadow-sm">
+                  <Fuel className="w-4 h-4" />
+                </div>
+                <span className="text-xs font-black text-rose-200 uppercase tracking-wider drop-shadow-sm">
+                  🔴 {t('auditForm.petrol95')}
+                </span>
+              </div>
+              <span className="text-[10px] font-mono font-bold text-rose-200 bg-rose-500/20 px-2.5 py-0.5 rounded-full border border-rose-400/30">
+                {prices.PETROL_95.toFixed(2)} SAR/L
+              </span>
             </div>
-          </div>
-        </GlassCard>
+            <div className="text-xl sm:text-2xl font-black text-white font-mono tracking-tight drop-shadow-md">
+              {formatCurrency(p95Totals.total_sales)} <span className="text-xs font-normal text-rose-200">{t('common.sar')}</span>
+            </div>
+            <div className="mt-2 flex items-center justify-between text-[11px] font-bold text-rose-200/90 border-t border-rose-400/20 pt-2">
+              <span>Volume Sold:</span>
+              <span className="font-mono text-white text-xs">{formatNumber(p95Totals.total_quantity)} Liters</span>
+            </div>
+          </GlassCard>
+
+          {/* Diesel KPI Card - Premium Amber/Yellow Glass */}
+          <GlassCard variant="amber" className="hover:shadow-[0_25px_55px_rgba(0,0,0,0.25),0_0_45px_rgba(245,158,11,0.3)]">
+            <div className="flex items-center justify-between mb-3">
+              <div className="flex items-center gap-2">
+                <div className="p-2 bg-amber-500/20 backdrop-blur-xl rounded-xl border border-amber-400/40 text-amber-300 shadow-sm">
+                  <Fuel className="w-4 h-4" />
+                </div>
+                <span className="text-xs font-black text-amber-200 uppercase tracking-wider drop-shadow-sm">
+                  🟡 {t('auditForm.diesel')}
+                </span>
+              </div>
+              <span className="text-[10px] font-mono font-bold text-amber-200 bg-amber-500/20 px-2.5 py-0.5 rounded-full border border-amber-400/30">
+                {prices.DIESEL.toFixed(2)} SAR/L
+              </span>
+            </div>
+            <div className="text-xl sm:text-2xl font-black text-white font-mono tracking-tight drop-shadow-md">
+              {formatCurrency(dieselTotals.total_sales)} <span className="text-xs font-normal text-amber-200">{t('common.sar')}</span>
+            </div>
+            <div className="mt-2 flex items-center justify-between text-[11px] font-bold text-amber-200/90 border-t border-amber-400/20 pt-2">
+              <span>Volume Sold:</span>
+              <span className="font-mono text-white text-xs">{formatNumber(dieselTotals.total_quantity)} Liters</span>
+            </div>
+          </GlassCard>
+        </div>
       </div>
 
       {/* 3. FINANCIAL COLLECTIONS INPUT CARD */}
@@ -389,8 +446,8 @@ export const ModernAuditForm: React.FC<Props> = ({
         {
           key: 'PETROL_95',
           title: t('auditForm.petrol95'),
-          colorClass: 'bg-amber-600 text-white',
-          headerBg: 'bg-amber-500/10 text-amber-900 border-amber-500/20',
+          colorClass: 'bg-rose-600 text-white',
+          headerBg: 'bg-rose-500/10 text-rose-900 border-rose-500/20',
           totals: p95Totals,
           price: prices.PETROL_95,
         },
