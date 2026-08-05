@@ -154,6 +154,16 @@ export const ApprovalPanel: React.FC<Props> = ({
     setActionType(null);
   };
 
+  // Hide the Sequential Approval Chain when the audit has reached final approval or completion
+  const currentStatus = audit.current_status as string;
+  if (
+    currentStatus === 'approved' ||
+    currentStatus === 'completed' ||
+    currentStatus === 'archived'
+  ) {
+    return null;
+  }
+
   return (
     <div className="bg-white/45 backdrop-blur-2xl border border-white/80 rounded-[28px] p-6 shadow-[0_20px_50px_rgba(14,165,233,0.15)] ring-1 ring-white/60 mb-6">
       {/* HEADER */}
