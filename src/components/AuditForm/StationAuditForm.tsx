@@ -72,8 +72,16 @@ export const StationAuditForm: React.FC<Props> = ({
   );
 
 
+  const getTodayLocalDateString = (): string => {
+    const d = new Date();
+    const year = d.getFullYear();
+    const month = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  };
+
   const [auditDate, setAuditDate] = useState<string>(
-    initialAudit?.audit_date || new Date().toISOString().split('T')[0]
+    initialAudit?.audit_date || getTodayLocalDateString()
   );
   const [supervisorName, setSupervisorName] = useState<string>(
     initialAudit?.station_supervisor_name || ''

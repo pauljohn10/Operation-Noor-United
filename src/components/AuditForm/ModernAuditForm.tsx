@@ -128,24 +128,15 @@ export const ModernAuditForm: React.FC<Props> = ({
             )}
           </div>
 
-          {/* Audit Date Field */}
+          {/* Audit Date Field (Read-only, automatically set to today's date for new audits) */}
           <div>
             <label className="block text-[11px] font-extrabold text-slate-700 mb-0.5 flex items-center gap-1">
               <Calendar className="w-3 h-3 text-sky-600" />
-              <span>{isCreatingNewAudit ? t('auditForm.selectAuditDate') : t('auditForm.auditDate')}</span>
+              <span>{t('auditForm.auditDate')}</span>
             </label>
-            {isCreatingNewAudit && !isReadOnly ? (
-              <input
-                type="date"
-                value={audit.audit_date || ''}
-                onChange={(e) => onMetaChange('audit_date', e.target.value)}
-                className="w-full bg-white/90 border border-slate-300 rounded-xl px-3 py-1.5 text-xs font-extrabold text-slate-900 focus:ring-2 focus:ring-sky-500 focus:border-sky-500 shadow-2xs min-h-[36px]"
-              />
-            ) : (
-              <div className="w-full bg-slate-100/80 border border-slate-300/90 rounded-xl px-3 py-1.5 text-xs font-bold text-slate-900 min-h-[36px] flex items-center font-mono shadow-2xs">
-                {audit.audit_date}
-              </div>
-            )}
+            <div className="w-full bg-slate-100/80 border border-slate-300/90 rounded-xl px-3 py-1.5 text-xs font-bold text-slate-900 min-h-[36px] flex items-center font-mono shadow-2xs">
+              {audit.audit_date}
+            </div>
           </div>
 
           {/* City / Location */}
