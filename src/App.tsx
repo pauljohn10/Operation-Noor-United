@@ -542,7 +542,7 @@ function AppContent() {
       </main>
 
       {/* FOOTER */}
-      <footer className="border-t border-white/80 bg-white/45 backdrop-blur-md py-4 text-center text-xs text-slate-600 font-semibold shadow-inner relative z-10 w-full">
+      <footer className="border-t border-white/80 bg-white/45 backdrop-blur-md py-3 text-center text-[10.5px] text-slate-600 font-semibold shadow-inner relative z-10 w-full">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <p>
             © 2026 Al Noor United Fuel Est. (مؤسسة النور المتحدة للوقود) — Enterprise Station Audit Management System
