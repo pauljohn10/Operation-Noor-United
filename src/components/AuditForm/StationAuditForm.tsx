@@ -848,6 +848,7 @@ export const StationAuditForm: React.FC<Props> = ({
           onMetaChange={handleMetaChange}
           onSignatoryClick={handleSignatoryClick}
           isReadOnly={isReadOnly}
+          isNewAudit={!initialAudit}
         />
       </div>
 

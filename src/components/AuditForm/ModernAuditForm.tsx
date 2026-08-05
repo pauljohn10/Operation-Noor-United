@@ -34,6 +34,7 @@ interface Props {
   onMetaChange: (field: string, value: any) => void;
   onSignatoryClick: (roleKey: string) => void;
   isReadOnly: boolean;
+  isNewAudit?: boolean;
 }
 
 export const ModernAuditForm: React.FC<Props> = ({
@@ -48,6 +49,7 @@ export const ModernAuditForm: React.FC<Props> = ({
   onMetaChange,
   onSignatoryClick,
   isReadOnly,
+  isNewAudit,
 }) => {
   const { t } = useLanguage();
 
@@ -78,88 +80,93 @@ export const ModernAuditForm: React.FC<Props> = ({
   const approvals = audit.approvals || [];
   const getApproval = (role: string) => approvals.find((a) => a.role === role);
 
+  // Section 1 ("Audit Information & Location") appears ONLY when creating a NEW audit.
+  const showAuditInfoSection = isNewAudit ?? (!audit.id || audit.audit_number === 'NEW AUDIT');
+
   return (
     <div className="space-y-6">
       
-      {/* 1. AUDIT & STATION METADATA CARD */}
-      <div className="bg-white/60 backdrop-blur-2xl border border-white/90 p-5 sm:p-6 rounded-[28px] shadow-[0_15px_35px_rgba(14,165,233,0.10)] space-y-4">
-        <div className="flex items-center justify-between border-b border-sky-100 pb-3">
-          <div className="flex items-center gap-2.5">
-            <div className="p-2.5 bg-sky-500/10 text-sky-600 rounded-xl border border-sky-500/20">
-              <Building className="w-5 h-5" />
+      {/* 1. AUDIT & STATION METADATA CARD (NEW AUDIT CREATION ONLY) */}
+      {showAuditInfoSection && (
+        <div className="bg-white/60 backdrop-blur-2xl border border-white/90 p-5 sm:p-6 rounded-[28px] shadow-[0_15px_35px_rgba(14,165,233,0.10)] space-y-4">
+          <div className="flex items-center justify-between border-b border-sky-100 pb-3">
+            <div className="flex items-center gap-2.5">
+              <div className="p-2.5 bg-sky-500/10 text-sky-600 rounded-xl border border-sky-500/20">
+                <Building className="w-5 h-5" />
+              </div>
+              <div>
+                <h3 className="text-base font-black text-slate-900">{t('auditForm.auditInfoTitle')}</h3>
+              </div>
             </div>
+            <span className="text-xs font-mono font-bold text-sky-800 bg-sky-50 px-3 py-1 rounded-full border border-sky-200">
+              {audit.audit_number || 'NEW AUDIT'}
+            </span>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            {/* Station Selection Dropdown */}
             <div>
-              <h3 className="text-base font-black text-slate-900">{t('auditForm.auditInfoTitle')}</h3>
+              <label className="block text-xs font-extrabold text-slate-700 mb-1 flex items-center gap-1.5">
+                <Building className="w-3.5 h-3.5 text-sky-600" />
+                <span>{t('auditForm.selectStation')}</span>
+              </label>
+              {isReadOnly ? (
+                <div className="w-full bg-slate-100 border border-slate-300 rounded-xl px-3.5 py-2.5 text-xs font-bold text-slate-900 min-h-[44px] flex items-center">
+                  {selectedStation.station_no} - {selectedStation.name}
+                </div>
+              ) : (
+                <select
+                  value={selectedStation.id}
+                  onChange={(e) => onMetaChange('station_id', e.target.value)}
+                  className="w-full bg-white/90 border border-slate-300 rounded-xl px-3.5 py-2.5 text-xs font-extrabold text-slate-900 focus:ring-2 focus:ring-sky-500 focus:border-sky-500 shadow-sm min-h-[44px]"
+                >
+                  {stations.map((s) => (
+                    <option key={s.id} value={s.id}>
+                      {s.station_no} - {s.name} ({s.location})
+                    </option>
+                  ))}
+                </select>
+              )}
             </div>
-          </div>
-          <span className="text-xs font-mono font-bold text-sky-800 bg-sky-50 px-3 py-1 rounded-full border border-sky-200">
-            {audit.audit_number || 'NEW AUDIT'}
-          </span>
-        </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          {/* Station Selection Dropdown */}
-          <div>
-            <label className="block text-xs font-extrabold text-slate-700 mb-1 flex items-center gap-1.5">
-              <Building className="w-3.5 h-3.5 text-sky-600" />
-              <span>{t('auditForm.selectStation')}</span>
-            </label>
-            {isReadOnly ? (
-              <div className="w-full bg-slate-100 border border-slate-300 rounded-xl px-3.5 py-2.5 text-xs font-bold text-slate-900 min-h-[44px] flex items-center">
-                {selectedStation.station_no} - {selectedStation.name}
-              </div>
-            ) : (
-              <select
-                value={selectedStation.id}
-                onChange={(e) => onMetaChange('station_id', e.target.value)}
-                className="w-full bg-white/90 border border-slate-300 rounded-xl px-3.5 py-2.5 text-xs font-extrabold text-slate-900 focus:ring-2 focus:ring-sky-500 focus:border-sky-500 shadow-sm min-h-[44px]"
-              >
-                {stations.map((s) => (
-                  <option key={s.id} value={s.id}>
-                    {s.station_no} - {s.name} ({s.location})
-                  </option>
-                ))}
-              </select>
-            )}
-          </div>
-
-          {/* Audit Date Picker */}
-          <div>
-            <label className="block text-xs font-extrabold text-slate-700 mb-1 flex items-center gap-1.5">
-              <Calendar className="w-3.5 h-3.5 text-sky-600" />
-              <span>{t('auditForm.auditDate')}</span>
-            </label>
-            {isReadOnly ? (
-              <div className="w-full bg-slate-100 border border-slate-300 rounded-xl px-3.5 py-2.5 text-xs font-bold text-slate-900 min-h-[44px] flex items-center font-mono">
-                {audit.audit_date}
-              </div>
-            ) : (
-              <input
-                type="date"
-                value={audit.audit_date || ''}
-                onChange={(e) => onMetaChange('audit_date', e.target.value)}
-                className="w-full bg-white/90 border border-slate-300 rounded-xl px-3.5 py-2.5 text-xs font-extrabold text-slate-900 focus:ring-2 focus:ring-sky-500 focus:border-sky-500 shadow-sm min-h-[44px]"
-              />
-            )}
-          </div>
-
-          {/* City / Location */}
-          <div>
-            <label className="block text-xs font-extrabold text-slate-700 mb-1">{t('auditForm.cityLocation')}</label>
-            <div className="w-full bg-slate-100/70 border border-slate-300/80 rounded-xl px-3.5 py-2.5 text-xs font-bold text-slate-800 min-h-[44px] flex items-center">
-              {selectedStation.location || 'Riyadh'}
+            {/* Audit Date Picker */}
+            <div>
+              <label className="block text-xs font-extrabold text-slate-700 mb-1 flex items-center gap-1.5">
+                <Calendar className="w-3.5 h-3.5 text-sky-600" />
+                <span>{t('auditForm.auditDate')}</span>
+              </label>
+              {isReadOnly ? (
+                <div className="w-full bg-slate-100 border border-slate-300 rounded-xl px-3.5 py-2.5 text-xs font-bold text-slate-900 min-h-[44px] flex items-center font-mono">
+                  {audit.audit_date}
+                </div>
+              ) : (
+                <input
+                  type="date"
+                  value={audit.audit_date || ''}
+                  onChange={(e) => onMetaChange('audit_date', e.target.value)}
+                  className="w-full bg-white/90 border border-slate-300 rounded-xl px-3.5 py-2.5 text-xs font-extrabold text-slate-900 focus:ring-2 focus:ring-sky-500 focus:border-sky-500 shadow-sm min-h-[44px]"
+                />
+              )}
             </div>
-          </div>
 
-          {/* Assigned Supervisor */}
-          <div>
-            <label className="block text-xs font-extrabold text-slate-700 mb-1">{t('auditForm.opSupervisor')}</label>
-            <div className="w-full bg-slate-100/70 border border-slate-300/80 rounded-xl px-3.5 py-2.5 text-xs font-bold text-slate-800 min-h-[44px] flex items-center font-sans">
-              {audit.created_by_name || (selectedStation.operation_supervisor_name && selectedStation.operation_supervisor_name !== 'Unassigned' ? selectedStation.operation_supervisor_name : null) || 'Operation Supervisor'}
+            {/* City / Location */}
+            <div>
+              <label className="block text-xs font-extrabold text-slate-700 mb-1">{t('auditForm.cityLocation')}</label>
+              <div className="w-full bg-slate-100/70 border border-slate-300/80 rounded-xl px-3.5 py-2.5 text-xs font-bold text-slate-800 min-h-[44px] flex items-center">
+                {selectedStation.location || 'Riyadh'}
+              </div>
+            </div>
+
+            {/* Assigned Supervisor */}
+            <div>
+              <label className="block text-xs font-extrabold text-slate-700 mb-1">{t('auditForm.opSupervisor')}</label>
+              <div className="w-full bg-slate-100/70 border border-slate-300/80 rounded-xl px-3.5 py-2.5 text-xs font-bold text-slate-800 min-h-[44px] flex items-center font-sans">
+                {audit.created_by_name || (selectedStation.operation_supervisor_name && selectedStation.operation_supervisor_name !== 'Unassigned' ? selectedStation.operation_supervisor_name : null) || 'Operation Supervisor'}
+              </div>
             </div>
           </div>
         </div>
-      </div>
+      )}
 
       {/* 2. EXECUTIVE METRICS KPI SUMMARY CARDS */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
