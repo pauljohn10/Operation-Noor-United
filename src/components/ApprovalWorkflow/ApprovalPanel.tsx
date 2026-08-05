@@ -165,31 +165,45 @@ export const ApprovalPanel: React.FC<Props> = ({
   }
 
   return (
-    <div className="bg-white/45 backdrop-blur-2xl border border-white/80 rounded-[28px] p-6 shadow-[0_20px_50px_rgba(14,165,233,0.15)] ring-1 ring-white/60 mb-6">
+    <div className="bg-white/85 backdrop-blur-2xl border border-white rounded-[28px] p-6 sm:p-7 shadow-[0_20px_50px_rgba(14,165,233,0.15)] ring-1 ring-white/60 mb-6">
       {/* HEADER */}
-      <div className="flex items-center justify-between pb-4 border-b border-sky-100 mb-5">
+      <div className="flex items-center justify-between pb-4 border-b border-sky-200/60 mb-5 flex-wrap gap-3">
         <div>
-          <h3 className="text-base font-black text-slate-900 flex items-center gap-2">
+          <h3 className="text-base sm:text-lg font-black text-slate-900 flex items-center gap-2">
             <UserCheck className="w-5 h-5 text-sky-600" />
             <span>Sequential Approval Chain</span>
           </h3>
-          <p className="text-xs text-slate-600 font-medium mt-0.5">
-            Operation Supervisor → Accountant → Account Manager → Management Executive
-          </p>
+          <div className="flex flex-wrap items-center gap-1.5 mt-2 font-bold text-xs">
+            <span className="px-2.5 py-1 bg-sky-100/90 text-sky-900 rounded-lg border border-sky-300/80 font-black shadow-2xs">
+              Operation Supervisor
+            </span>
+            <span className="text-sky-600 font-black text-xs">→</span>
+            <span className="px-2.5 py-1 bg-sky-100/90 text-sky-900 rounded-lg border border-sky-300/80 font-black shadow-2xs">
+              Accountant
+            </span>
+            <span className="text-sky-600 font-black text-xs">→</span>
+            <span className="px-2.5 py-1 bg-sky-100/90 text-sky-900 rounded-lg border border-sky-300/80 font-black shadow-2xs">
+              Account Manager
+            </span>
+            <span className="text-sky-600 font-black text-xs">→</span>
+            <span className="px-2.5 py-1 bg-sky-100/90 text-sky-900 rounded-lg border border-sky-300/80 font-black shadow-2xs">
+              Management Executive
+            </span>
+          </div>
         </div>
 
         {/* Audit Status Badge */}
         <div className="flex items-center gap-2">
-          <span className="text-xs text-slate-500 font-bold">Status:</span>
+          <span className="text-xs text-slate-700 font-extrabold">Status:</span>
           <span
-            className={`px-3.5 py-1 rounded-full text-xs font-black uppercase tracking-wider ${
+            className={`px-3.5 py-1 rounded-full text-xs font-black uppercase tracking-wider shadow-xs ${
               audit.current_status === 'approved'
-                ? 'bg-emerald-500/10 text-emerald-700 border border-emerald-500/30'
+                ? 'bg-emerald-600 text-white border border-emerald-500'
                 : audit.current_status === 'rejected'
-                ? 'bg-rose-500/10 text-rose-700 border border-rose-500/30'
+                ? 'bg-rose-600 text-white border border-rose-500'
                 : audit.current_status === 'returned_for_correction'
-                ? 'bg-amber-500/10 text-amber-700 border border-amber-500/30'
-                : 'bg-sky-500/10 text-sky-700 border border-sky-500/30 animate-pulse'
+                ? 'bg-amber-600 text-white border border-amber-500'
+                : 'bg-sky-600 text-white border border-sky-500 animate-pulse'
             }`}
           >
             {audit.current_status.replace(/_/g, ' ')}
@@ -200,11 +214,11 @@ export const ApprovalPanel: React.FC<Props> = ({
       {/* STEP PROGRESSION BAR */}
       <div className="relative flex items-center justify-between mb-6 px-4 overflow-x-auto py-3">
         {/* Background Track */}
-        <div className="absolute top-1/2 left-10 right-10 h-1 bg-sky-200/80 -translate-y-1/2 -z-0"></div>
+        <div className="absolute top-1/2 left-10 right-10 h-1.5 bg-sky-200 -translate-y-1/2 -z-0 rounded-full"></div>
 
         {/* Filled Progress Bar */}
         <div
-          className="absolute top-1/2 left-10 h-1 bg-emerald-500 transition-all duration-500 -translate-y-1/2 -z-0"
+          className="absolute top-1/2 left-10 h-1.5 bg-emerald-500 transition-all duration-500 -translate-y-1/2 -z-0 rounded-full"
           style={{ width: `calc(${progressPercent}% - 40px)` }}
         ></div>
 
@@ -218,19 +232,19 @@ export const ApprovalPanel: React.FC<Props> = ({
               <div
                 className={`w-10 h-10 rounded-full flex items-center justify-center font-black text-xs transition-all shadow-md ${
                   isPassed
-                    ? 'bg-emerald-500 text-white ring-4 ring-emerald-500/20'
+                    ? 'bg-emerald-600 text-white ring-4 ring-emerald-500/20'
                     : isCurrent
                     ? isRejected
-                      ? 'bg-rose-500 text-white ring-4 ring-rose-500/20'
+                      ? 'bg-rose-600 text-white ring-4 ring-rose-500/20'
                       : 'bg-sky-600 text-white ring-4 ring-sky-500/30 scale-110 animate-pulse'
-                    : 'bg-white/80 text-slate-400 border border-sky-200'
+                    : 'bg-slate-200 text-slate-700 border-2 border-slate-300 font-black'
                 }`}
               >
                 {isPassed ? <CheckCircle2 className="w-5 h-5" /> : idx + 1}
               </div>
               <span
-                className={`text-[11px] font-bold mt-2 text-center max-w-[110px] ${
-                  isPassed ? 'text-emerald-700 font-extrabold' : isCurrent ? 'text-sky-700 font-extrabold' : 'text-slate-500'
+                className={`text-xs font-black mt-2 text-center max-w-[110px] ${
+                  isPassed ? 'text-emerald-900' : isCurrent ? 'text-sky-900 font-black' : 'text-slate-700 font-bold'
                 }`}
               >
                 {step.label}
