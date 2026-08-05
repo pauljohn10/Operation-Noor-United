@@ -300,9 +300,9 @@ export const ApprovalPanel: React.FC<Props> = ({
 
       {/* ACTION & COMMENT MODAL */}
       {actionType && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 backdrop-blur-md p-4">
-          <div className="bg-white/15 backdrop-blur-3xl border border-white/35 rounded-[32px] max-w-lg w-full p-6 shadow-2xl ring-1 ring-white/30">
-            <h4 className="text-base font-black text-slate-900 mb-1 capitalize flex items-center gap-2">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-md p-4">
+          <div className="bg-white border border-slate-200 rounded-[28px] max-w-lg w-full p-6 sm:p-7 shadow-2xl animate-in fade-in zoom-in-95 duration-200">
+            <h4 className="text-lg font-black text-slate-900 mb-1 capitalize flex items-center gap-2">
               <MessageSquare className="w-5 h-5 text-sky-600" />
               <span>
                 {actionType === 'approve'
@@ -314,7 +314,7 @@ export const ApprovalPanel: React.FC<Props> = ({
                   : 'Add Comment'}
               </span>
             </h4>
-            <p className="text-xs text-slate-600 font-medium mb-4">
+            <p className="text-xs text-slate-700 font-semibold mb-4">
               Add your review notes or comments to be logged in the permanent audit trail.
             </p>
 
@@ -323,23 +323,23 @@ export const ApprovalPanel: React.FC<Props> = ({
               value={commentText}
               onChange={(e) => setCommentText(e.target.value)}
               placeholder="Enter your approval comments or return notes here..."
-              className="w-full bg-white border border-sky-200 rounded-xl p-3 text-xs font-medium text-slate-900 placeholder-slate-400 focus:outline-none focus:border-sky-500 focus:ring-4 focus:ring-sky-500/15 mb-4"
+              className="w-full bg-slate-50 border border-slate-300 rounded-xl p-3.5 text-xs font-bold text-slate-900 placeholder-slate-400 focus:outline-none focus:bg-white focus:border-sky-500 focus:ring-4 focus:ring-sky-500/15 mb-5 shadow-inner"
             />
 
-            <div className="flex items-center justify-end gap-3">
+            <div className="flex items-center justify-end gap-3 pt-3 border-t border-slate-100">
               <button
                 onClick={() => setActionType(null)}
-                className="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-xs rounded-xl transition-colors"
+                className="px-4.5 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-extrabold text-xs rounded-xl transition-colors"
               >
                 Cancel
               </button>
               <button
                 onClick={handleModalSubmit}
-                className={`flex items-center gap-1.5 px-5 py-2 font-extrabold text-xs text-white rounded-xl shadow-lg transition-all ${
+                className={`flex items-center gap-1.5 px-5 py-2.5 font-black text-xs text-white rounded-xl shadow-lg transition-all ${
                   actionType === 'approve'
-                    ? 'bg-gradient-to-r from-emerald-600 to-teal-600'
+                    ? 'bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500'
                     : actionType === 'reject'
-                    ? 'bg-gradient-to-r from-rose-600 to-red-600'
+                    ? 'bg-gradient-to-r from-rose-600 to-red-600 hover:from-rose-500 hover:to-red-500'
                     : 'bg-amber-600 hover:bg-amber-500'
                 }`}
               >

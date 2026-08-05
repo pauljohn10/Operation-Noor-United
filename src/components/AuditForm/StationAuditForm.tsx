@@ -929,29 +929,31 @@ export const StationAuditForm: React.FC<Props> = ({
 
       {/* EXPLICIT WORKFLOW APPROVAL CONFIRMATION DIALOG */}
       {pendingApprovalConfirmation && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 backdrop-blur-md p-4">
-          <div className="bg-white/15 backdrop-blur-3xl border border-white/35 rounded-[32px] max-w-md w-full p-6 shadow-2xl ring-1 ring-white/30 animate-in fade-in zoom-in-95 duration-200">
-            <div className="flex items-center gap-3 mb-4">
-              <div className="p-3 bg-emerald-500/10 text-emerald-600 rounded-2xl border border-emerald-500/20">
-                <CheckCircle2 className="w-6 h-6" />
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-md p-4">
+          <div className="bg-white border border-slate-200 rounded-[28px] max-w-md w-full p-6 sm:p-7 shadow-2xl animate-in fade-in zoom-in-95 duration-200">
+            <div className="flex items-center gap-3.5 mb-4">
+              <div className="p-3 bg-emerald-500/10 text-emerald-600 rounded-2xl border border-emerald-500/20 shadow-xs">
+                <CheckCircle2 className="w-6 h-6 text-emerald-600" />
               </div>
               <div>
-                <h3 className="text-base font-black text-slate-900">Confirm Approval</h3>
-                <p className="text-xs text-sky-700 font-extrabold">
+                <h3 className="text-lg font-black text-slate-900 leading-tight">Confirm Approval</h3>
+                <span className="inline-block mt-1 px-2.5 py-0.5 bg-sky-100 text-sky-900 text-[11px] font-black rounded-lg border border-sky-300 uppercase tracking-wider">
                   {pendingApprovalConfirmation.roleKey.replace(/_/g, ' ').toUpperCase()} Stage
-                </p>
+                </span>
               </div>
             </div>
 
-            <p className="text-xs text-slate-700 font-medium leading-relaxed mb-6">
-              Are you sure you want to approve this audit? After approval, this action cannot be undone.
-            </p>
+            <div className="p-4 bg-slate-50 rounded-2xl border border-slate-200/80 mb-6">
+              <p className="text-xs text-slate-800 font-bold leading-relaxed">
+                Are you sure you want to approve this audit? After approval, this action cannot be undone.
+              </p>
+            </div>
 
-            <div className="flex items-center justify-end gap-3 pt-3 border-t border-sky-100">
+            <div className="flex items-center justify-end gap-3 pt-3 border-t border-slate-100">
               <button
                 type="button"
                 onClick={() => setPendingApprovalConfirmation(null)}
-                className="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-xs rounded-xl transition-colors"
+                className="px-4.5 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-extrabold text-xs rounded-xl transition-colors"
               >
                 Cancel
               </button>
@@ -962,7 +964,7 @@ export const StationAuditForm: React.FC<Props> = ({
                   setPendingApprovalConfirmation(null);
                   await handleWorkflowApprove(undefined, pending.dataUrl, pending.roleKey);
                 }}
-                className="px-5 py-2.5 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-extrabold text-xs rounded-2xl shadow-lg shadow-emerald-600/30 transition-all flex items-center gap-1.5"
+                className="px-5 py-2.5 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-black text-xs rounded-xl shadow-lg shadow-emerald-600/30 transition-all flex items-center gap-1.5"
               >
                 <CheckCircle2 className="w-4 h-4" />
                 <span>Confirm Approval</span>
