@@ -283,7 +283,7 @@ export const translations: Record<Language, TranslationDictionary> = {
     dashboard: {
       welcomeBack: 'Welcome back, {name}',
       title: 'Operations & Compliance Executive Dashboard',
-      loggedInAs: 'Logged in as {role} ({position}). Key operational metrics and compliance overview.',
+      loggedInAs: 'Logged in as {role} ({position}).',
       totalAudits: 'Total Audits',
       repositorySize: 'Audit Repository Size',
       pendingApprovals: 'Pending Approvals',
@@ -732,7 +732,7 @@ export const translations: Record<Language, TranslationDictionary> = {
     dashboard: {
       welcomeBack: 'مرحباً بعودتك، {name}',
       title: 'لوحة تحكم العمليات والامتثال التنفيذية',
-      loggedInAs: 'تم تسجيل الدخول بصفتك {role} ({position}). نظرة عامة على المقاييس التشغيلية والامتثال.',
+      loggedInAs: 'تم تسجيل الدخول بصفتك {role} ({position}).',
       totalAudits: 'إجمالي التدقيقات',
       repositorySize: 'حجم سجل التدقيقات',
       pendingApprovals: 'الموافقات المعلقة',
