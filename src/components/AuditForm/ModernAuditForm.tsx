@@ -352,13 +352,15 @@ export const ModernAuditForm: React.FC<Props> = ({
         </div>
       </div>
 
-      {/* 4. FUEL METER READINGS SECTIONS */}
+      {/* 4. FUEL METER READINGS SECTIONS (COLOR-CODED GLASSMORPHISM CARDS BY FUEL TYPE) */}
       {([
         {
           key: 'PETROL_91',
           title: t('auditForm.petrol91'),
           colorClass: 'bg-emerald-600 text-white',
-          headerBg: 'bg-emerald-500/10 text-emerald-900 border-emerald-500/20',
+          cardClass: 'bg-emerald-950/20 backdrop-blur-2xl border border-emerald-400/40 shadow-[0_20px_50px_rgba(16,185,129,0.15)] hover:shadow-[0_25px_60px_rgba(16,185,129,0.25)]',
+          headerBg: 'bg-emerald-500/15 text-white border-emerald-400/30',
+          textColor: 'text-emerald-200',
           totals: p91Totals,
           price: prices.PETROL_91,
         },
@@ -366,15 +368,19 @@ export const ModernAuditForm: React.FC<Props> = ({
           key: 'PETROL_95',
           title: t('auditForm.petrol95'),
           colorClass: 'bg-rose-600 text-white',
-          headerBg: 'bg-rose-500/10 text-rose-900 border-rose-500/20',
+          cardClass: 'bg-rose-950/20 backdrop-blur-2xl border border-rose-400/40 shadow-[0_20px_50px_rgba(244,63,94,0.15)] hover:shadow-[0_25px_60px_rgba(244,63,94,0.25)]',
+          headerBg: 'bg-rose-500/15 text-white border-rose-400/30',
+          textColor: 'text-rose-200',
           totals: p95Totals,
           price: prices.PETROL_95,
         },
         {
           key: 'DIESEL',
           title: t('auditForm.diesel'),
-          colorClass: 'bg-yellow-600 text-white',
-          headerBg: 'bg-yellow-500/10 text-yellow-900 border-yellow-500/20',
+          colorClass: 'bg-amber-600 text-white',
+          cardClass: 'bg-amber-950/20 backdrop-blur-2xl border border-amber-400/40 shadow-[0_20px_50px_rgba(245,158,11,0.15)] hover:shadow-[0_25px_60px_rgba(245,158,11,0.25)]',
+          headerBg: 'bg-amber-500/15 text-white border-amber-400/30',
+          textColor: 'text-amber-200',
           totals: dieselTotals,
           price: prices.DIESEL,
         },
@@ -386,12 +392,12 @@ export const ModernAuditForm: React.FC<Props> = ({
         return (
           <div
             key={fuelType}
-            className="bg-white/60 backdrop-blur-2xl border border-white/90 rounded-[28px] overflow-hidden shadow-[0_20px_50px_rgba(14,165,233,0.12)] transition-all"
+            className={`rounded-[28px] overflow-hidden transition-all ${sec.cardClass}`}
           >
             {/* Section Header Bar (Collapsible Accordion Header) */}
             <div
               onClick={() => toggleSection(fuelType)}
-              className={`p-4 sm:p-5 flex flex-wrap items-center justify-between gap-3 border-b cursor-pointer select-none transition-colors hover:brightness-95 ${sec.headerBg}`}
+              className={`p-4 sm:p-5 flex flex-wrap items-center justify-between gap-3 border-b cursor-pointer select-none transition-all hover:brightness-110 ${sec.headerBg}`}
             >
               <div className="flex items-center gap-3 flex-wrap">
                 {/* Accordion Expand/Collapse Indicator Icon */}
@@ -407,7 +413,7 @@ export const ModernAuditForm: React.FC<Props> = ({
                 </div>
 
                 {/* Fuel Price Tag */}
-                <div className="flex items-center gap-1.5 bg-white/90 px-3 py-1.5 rounded-xl border border-slate-300/80 shadow-xs text-xs font-extrabold text-slate-800" onClick={(e) => e.stopPropagation()}>
+                <div className="flex items-center gap-1.5 bg-white/95 px-3 py-1.5 rounded-xl border border-white/50 shadow-xs text-xs font-extrabold text-slate-900" onClick={(e) => e.stopPropagation()}>
                   <span className="text-slate-500 font-bold">{t('auditForm.unitPrice')}:</span>
                   {isReadOnly ? (
                     <span className="font-mono text-slate-900 font-black">{sec.price.toFixed(2)} SAR/Liter</span>
@@ -427,7 +433,7 @@ export const ModernAuditForm: React.FC<Props> = ({
                 </div>
 
                 {/* Pump Count Badge */}
-                <div className="bg-white/80 px-2.5 py-1.5 rounded-xl border border-slate-200/90 text-[11px] font-black text-slate-700 shadow-xs flex items-center gap-1">
+                <div className="bg-white/90 px-2.5 py-1.5 rounded-xl border border-white/40 text-[11px] font-black text-slate-800 shadow-xs flex items-center gap-1">
                   <Fuel className="w-3.5 h-3.5 text-sky-600" />
                   <span>{fuelItems.filter((i) => i.pump_no !== 15).length} Pumps</span>
                 </div>
@@ -436,13 +442,13 @@ export const ModernAuditForm: React.FC<Props> = ({
               {/* Section Totals & Summary */}
               <div className="flex items-center gap-3">
                 <div className="text-right">
-                  <span className="block text-[10px] font-bold text-slate-500 uppercase tracking-wider">{t('auditForm.quantitySold')}</span>
-                  <span className="text-xs font-black font-mono text-slate-800">{formatNumber(sec.totals.total_quantity)} L</span>
+                  <span className="block text-[10px] font-bold text-white/80 uppercase tracking-wider">{t('auditForm.quantitySold')}</span>
+                  <span className="text-xs sm:text-sm font-black font-mono text-white drop-shadow-sm">{formatNumber(sec.totals.total_quantity)} L</span>
                 </div>
 
-                <div className="text-right bg-white/90 px-3.5 py-1.5 rounded-xl border border-slate-300/80 font-mono shadow-xs">
-                  <span className="block text-[9px] font-bold text-slate-500 uppercase tracking-wider">{t('auditForm.fuelSalesSummary')}</span>
-                  <span className="text-xs font-black text-sky-900">{formatCurrency(sec.totals.total_sales)} SAR</span>
+                <div className="text-right bg-white/95 px-3.5 py-1.5 rounded-xl border border-white/50 font-mono shadow-xs">
+                  <span className="block text-[9px] font-extrabold text-slate-500 uppercase tracking-wider">{t('auditForm.fuelSalesSummary')}</span>
+                  <span className="text-xs sm:text-sm font-black text-slate-900">{formatCurrency(sec.totals.total_sales)} SAR</span>
                 </div>
               </div>
             </div>
