@@ -697,15 +697,15 @@ export const StationAuditForm: React.FC<Props> = ({
   const currentAuditData = buildAuditObject();
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
+    <div className="max-w-7xl mx-auto px-3 sm:px-5 lg:px-6 py-3 sm:py-4 space-y-3.5">
 
       {/* TOOLBAR */}
-      <div className="relative z-10 mb-6 bg-white/80 backdrop-blur-xl border border-white/90 p-4 rounded-2xl shadow-sm flex flex-wrap items-center justify-between gap-4">
+      <div className="relative z-10 mb-3 bg-white/85 backdrop-blur-xl border border-white/90 p-2.5 sm:p-3 rounded-xl shadow-xs flex flex-wrap items-center justify-between gap-2.5">
         <button
           onClick={onBack}
-          className="flex items-center gap-2 px-4 py-2 bg-white hover:bg-slate-50 text-slate-700 font-extrabold text-xs rounded-xl transition-all border border-sky-200/80 shadow-xs"
+          className="flex items-center gap-1.5 px-3 py-1.5 bg-white hover:bg-slate-50 text-slate-700 font-extrabold text-xs rounded-lg transition-all border border-sky-200/80 shadow-xs"
         >
-          <ArrowLeft className="w-4 h-4" />
+          <ArrowLeft className="w-3.5 h-3.5" />
           <span>Back to List</span>
         </button>
 
@@ -713,9 +713,9 @@ export const StationAuditForm: React.FC<Props> = ({
 
           <button
             onClick={() => window.print()}
-            className="flex items-center gap-1.5 px-4 py-2 bg-white/80 hover:bg-white text-slate-700 font-extrabold text-xs rounded-xl transition-all border border-sky-200/80 shadow-sm"
+            className="flex items-center gap-1.5 px-3 py-1.5 bg-white/80 hover:bg-white text-slate-700 font-extrabold text-xs rounded-lg transition-all border border-sky-200/80 shadow-xs"
           >
-            <Printer className="w-4 h-4 text-sky-600" />
+            <Printer className="w-3.5 h-3.5 text-sky-600" />
             <span>{t('auditForm.printPreview')}</span>
           </button>
 
@@ -726,18 +726,18 @@ export const StationAuditForm: React.FC<Props> = ({
                 currentAuditData.station_name
               )
             }
-            className="flex items-center gap-1.5 px-4 py-2 bg-white/80 hover:bg-white text-slate-700 font-extrabold text-xs rounded-xl transition-all border border-sky-200/80 shadow-sm"
+            className="flex items-center gap-1.5 px-3 py-1.5 bg-white/80 hover:bg-white text-slate-700 font-extrabold text-xs rounded-lg transition-all border border-sky-200/80 shadow-xs"
           >
-            <FileDown className="w-4 h-4 text-sky-600" />
+            <FileDown className="w-3.5 h-3.5 text-sky-600" />
             <span>{t('auditForm.pdfExport')}</span>
           </button>
 
           {currentStatus === 'draft' && (currentUser.role === 'Operation Supervisor' || currentUser.role === 'Super Admin') && (
             <button
               onClick={handleSaveDraft}
-              className="flex items-center gap-1.5 px-4 py-2 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-700 font-extrabold text-xs rounded-xl transition-all border border-emerald-500/30 shadow-sm"
+              className="flex items-center gap-1.5 px-3 py-1.5 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-700 font-extrabold text-xs rounded-lg transition-all border border-emerald-500/30 shadow-xs"
             >
-              <Save className="w-4 h-4 text-emerald-600" />
+              <Save className="w-3.5 h-3.5 text-emerald-600" />
               <span>{t('auditForm.saveDraft')}</span>
             </button>
           )}
@@ -745,9 +745,9 @@ export const StationAuditForm: React.FC<Props> = ({
           {currentStatus === 'draft' && (currentUser.role === 'Operation Supervisor' || currentUser.role === 'Super Admin') && (
             <button
               onClick={handleSubmitForApproval}
-              className="flex items-center gap-1.5 px-5 py-2 bg-gradient-to-r from-sky-600 via-blue-600 to-indigo-600 hover:from-sky-500 hover:to-indigo-500 text-white font-extrabold text-xs rounded-xl shadow-lg shadow-sky-600/30 hover:shadow-sky-600/40 hover:-translate-y-0.5 transition-all"
+              className="flex items-center gap-1.5 px-4 py-1.5 bg-gradient-to-r from-sky-600 via-blue-600 to-indigo-600 hover:from-sky-500 hover:to-indigo-500 text-white font-extrabold text-xs rounded-lg shadow-md shadow-sky-600/20 transition-all"
             >
-              <Send className="w-4 h-4 rtl:rotate-180" />
+              <Send className="w-3.5 h-3.5 rtl:rotate-180" />
               <span>{t('auditForm.submitAudit')}</span>
             </button>
           )}
@@ -755,9 +755,9 @@ export const StationAuditForm: React.FC<Props> = ({
           {(currentStatus === 'returned_for_correction' || currentStatus === 'rejected') && (currentUser.role === 'Operation Supervisor' || currentUser.role === 'Super Admin') && (
             <button
               onClick={handleResubmitAudit}
-              className="flex items-center gap-1.5 px-5 py-2 bg-gradient-to-r from-emerald-600 via-teal-600 to-indigo-600 hover:from-emerald-500 hover:to-indigo-500 text-white font-black text-xs rounded-xl shadow-lg shadow-emerald-600/30 hover:shadow-emerald-600/40 hover:-translate-y-0.5 transition-all animate-pulse"
+              className="flex items-center gap-1.5 px-4 py-1.5 bg-gradient-to-r from-emerald-600 via-teal-600 to-indigo-600 hover:from-emerald-500 hover:to-indigo-500 text-white font-black text-xs rounded-lg shadow-md shadow-emerald-600/20 transition-all animate-pulse"
             >
-              <RotateCcw className="w-4 h-4" />
+              <RotateCcw className="w-3.5 h-3.5" />
               <span>{t('auditForm.submitAudit')}</span>
             </button>
           )}
@@ -766,7 +766,7 @@ export const StationAuditForm: React.FC<Props> = ({
       </div>
 
       {(currentStatus === 'returned_for_correction' || currentStatus === 'rejected') && (
-        <div className="mb-6 p-4 bg-rose-500/10 border border-rose-500/30 rounded-[24px] backdrop-blur-md shadow-lg flex items-start gap-3.5 no-print">
+        <div className="mb-3.5 p-3.5 bg-rose-500/10 border border-rose-500/30 rounded-2xl backdrop-blur-md shadow-sm flex items-start gap-3 no-print">
           <div className="p-2.5 bg-rose-500/20 text-rose-700 rounded-2xl border border-rose-500/30 shrink-0">
             <AlertTriangle className="w-6 h-6" />
           </div>
@@ -868,35 +868,35 @@ export const StationAuditForm: React.FC<Props> = ({
       </div>
 
       {/* COMMENTS THREAD SECTION */}
-      <div className="mt-8 bg-white/45 backdrop-blur-2xl border border-white/80 rounded-[28px] p-7 shadow-[0_20px_50px_rgba(14,165,233,0.15)] ring-1 ring-white/60">
-        <h3 className="text-base font-extrabold text-slate-900 mb-4 flex items-center gap-2">
-          <MessageSquare className="w-5 h-5 text-sky-600" />
+      <div className="mt-4 bg-white/70 backdrop-blur-2xl border border-white/80 rounded-2xl p-4 sm:p-5 shadow-md ring-1 ring-white/60">
+        <h3 className="text-sm font-black text-slate-900 mb-3 flex items-center gap-2">
+          <MessageSquare className="w-4 h-4 text-sky-600" />
           <span>Audit Discussion & Review History</span>
         </h3>
 
-        <div className="flex gap-2 mb-6">
+        <div className="flex gap-2 mb-3.5">
           <input
             type="text"
             value={newCommentInput}
             onChange={(e) => setNewCommentInput(e.target.value)}
             placeholder="Add a comment or query regarding this audit..."
-            className="flex-1 bg-white/70 backdrop-blur-md border border-sky-200/80 rounded-xl px-4 py-2.5 text-xs font-medium text-slate-900 placeholder-slate-400 focus:outline-none focus:bg-white focus:border-sky-500 focus:ring-4 focus:ring-sky-500/15 transition-all shadow-inner"
+            className="flex-1 bg-white/90 backdrop-blur-md border border-sky-200/80 rounded-xl px-3.5 py-2 text-xs font-medium text-slate-900 placeholder-slate-400 focus:outline-none focus:bg-white focus:border-sky-500 focus:ring-2 focus:ring-sky-500/15 transition-all shadow-inner"
           />
           <button
             onClick={handleAddThreadComment}
-            className="px-5 py-2.5 bg-gradient-to-r from-sky-600 via-blue-600 to-indigo-600 hover:from-sky-500 hover:to-indigo-500 text-white font-extrabold text-xs rounded-xl shadow-lg shadow-sky-600/30 hover:shadow-sky-600/40 hover:-translate-y-0.5 transition-all flex items-center gap-1.5"
+            className="px-4 py-2 bg-gradient-to-r from-sky-600 via-blue-600 to-indigo-600 hover:from-sky-500 hover:to-indigo-500 text-white font-extrabold text-xs rounded-xl shadow-md transition-all flex items-center gap-1.5"
           >
             <Send className="w-3.5 h-3.5" />
             <span>Post</span>
           </button>
         </div>
 
-        <div className="space-y-3 max-h-60 overflow-y-auto pr-1">
+        <div className="space-y-2.5 max-h-52 overflow-y-auto pr-1">
           {comments.length === 0 ? (
             <p className="text-xs text-slate-500 italic font-medium">No comments recorded yet.</p>
           ) : (
             comments.map((c) => (
-              <div key={c.id} className="p-3.5 bg-white/60 backdrop-blur-md border border-white/90 rounded-xl shadow-sm">
+              <div key={c.id} className="p-2.5 bg-white/80 backdrop-blur-md border border-slate-200/80 rounded-xl shadow-xs">
                 <div className="flex items-center justify-between mb-1">
                   <div className="flex items-center gap-2">
                     <span className="font-extrabold text-slate-900 text-xs">{c.user_name}</span>

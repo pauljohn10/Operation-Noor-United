@@ -165,38 +165,38 @@ export const ApprovalPanel: React.FC<Props> = ({
   }
 
   return (
-    <div className="bg-white/85 backdrop-blur-2xl border border-white rounded-[28px] p-6 sm:p-7 shadow-[0_20px_50px_rgba(14,165,233,0.15)] ring-1 ring-white/60 mb-6">
+    <div className="bg-white/85 backdrop-blur-2xl border border-white rounded-2xl p-4 sm:p-4.5 shadow-[0_10px_25px_rgba(14,165,233,0.10)] ring-1 ring-white/60 mb-3.5">
       {/* HEADER */}
-      <div className="flex items-center justify-between pb-4 border-b border-sky-200/60 mb-5 flex-wrap gap-3">
+      <div className="flex items-center justify-between pb-2.5 border-b border-sky-200/60 mb-3 flex-wrap gap-2">
         <div>
-          <h3 className="text-base sm:text-lg font-black text-slate-900 flex items-center gap-2">
-            <UserCheck className="w-5 h-5 text-sky-600" />
+          <h3 className="text-sm font-black text-slate-900 flex items-center gap-1.5">
+            <UserCheck className="w-4 h-4 text-sky-600" />
             <span>Sequential Approval Chain</span>
           </h3>
-          <div className="flex flex-wrap items-center gap-1.5 mt-2 font-bold text-xs">
-            <span className="px-2.5 py-1 bg-sky-100/90 text-sky-900 rounded-lg border border-sky-300/80 font-black shadow-2xs">
+          <div className="flex flex-wrap items-center gap-1 mt-1.5 font-bold text-[11px]">
+            <span className="px-2 py-0.5 bg-sky-100/90 text-sky-900 rounded-md border border-sky-300/80 font-black shadow-2xs">
               Operation Supervisor
             </span>
-            <span className="text-sky-600 font-black text-xs">→</span>
-            <span className="px-2.5 py-1 bg-sky-100/90 text-sky-900 rounded-lg border border-sky-300/80 font-black shadow-2xs">
+            <span className="text-sky-600 font-black text-[11px]">→</span>
+            <span className="px-2 py-0.5 bg-sky-100/90 text-sky-900 rounded-md border border-sky-300/80 font-black shadow-2xs">
               Accountant
             </span>
-            <span className="text-sky-600 font-black text-xs">→</span>
-            <span className="px-2.5 py-1 bg-sky-100/90 text-sky-900 rounded-lg border border-sky-300/80 font-black shadow-2xs">
+            <span className="text-sky-600 font-black text-[11px]">→</span>
+            <span className="px-2 py-0.5 bg-sky-100/90 text-sky-900 rounded-md border border-sky-300/80 font-black shadow-2xs">
               Account Manager
             </span>
-            <span className="text-sky-600 font-black text-xs">→</span>
-            <span className="px-2.5 py-1 bg-sky-100/90 text-sky-900 rounded-lg border border-sky-300/80 font-black shadow-2xs">
+            <span className="text-sky-600 font-black text-[11px]">→</span>
+            <span className="px-2 py-0.5 bg-sky-100/90 text-sky-900 rounded-md border border-sky-300/80 font-black shadow-2xs">
               Management Executive
             </span>
           </div>
         </div>
 
         {/* Audit Status Badge */}
-        <div className="flex items-center gap-2">
-          <span className="text-xs text-slate-700 font-extrabold">Status:</span>
+        <div className="flex items-center gap-1.5">
+          <span className="text-[11px] text-slate-700 font-extrabold">Status:</span>
           <span
-            className={`px-3.5 py-1 rounded-full text-xs font-black uppercase tracking-wider shadow-xs ${
+            className={`px-3 py-0.5 rounded-full text-[11px] font-black uppercase tracking-wider shadow-2xs ${
               audit.current_status === 'approved'
                 ? 'bg-emerald-600 text-white border border-emerald-500'
                 : audit.current_status === 'rejected'
@@ -212,7 +212,7 @@ export const ApprovalPanel: React.FC<Props> = ({
       </div>
 
       {/* STEP PROGRESSION BAR */}
-      <div className="relative flex items-center justify-between mb-6 px-4 overflow-x-auto py-3">
+      <div className="relative flex items-center justify-between mb-3 px-3 overflow-x-auto py-2">
         {/* Background Track */}
         <div className="absolute top-1/2 left-10 right-10 h-1.5 bg-sky-200 -translate-y-1/2 -z-0 rounded-full"></div>
 
