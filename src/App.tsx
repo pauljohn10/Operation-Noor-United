@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { LanguageProvider } from './context/LanguageContext';
+import type { UserRole } from './types/audit';
 
 
 import { Navbar } from './components/Navigation/Navbar';
@@ -211,21 +212,10 @@ function AppContent() {
     return true; // Super Admin & Approval Roles see system/pipeline audits
   });
 
-  // Filter notifications so each user sees alerts targeted to ALL, their role, or sent by them
+  // Filter notifications so each user only sees activity alerts targeted to their current workflow stage
   const visibleNotifications = notifications.filter((notif) => {
     if (currentUser.role === 'Super Admin') return true;
-    if (currentUser.role === 'Operation Supervisor') {
-      return (
-        notif.recipient_role === 'ALL' ||
-        notif.recipient_role === 'Operation Supervisor' ||
-        notif.sender_name === currentUser.full_name
-      );
-    }
-    return (
-      notif.recipient_role === 'ALL' ||
-      notif.recipient_role === currentUser.role ||
-      notif.sender_name === currentUser.full_name
-    );
+    return notif.recipient_role === 'ALL' || notif.recipient_role === currentUser.role;
   });
 
   const handleSaveStation = async (station: Station) => {
@@ -309,31 +299,46 @@ function AppContent() {
       const updatedAudits = await fetchAudits();
       setAudits(updatedAudits);
 
-      const notifRole =
-        audit.current_status === 'pending_accountant'
-          ? 'Accountant'
-          : audit.current_status === 'pending_account_manager'
-          ? 'Account Manager'
-          : audit.current_status === 'pending_management'
-          ? 'Management'
-          : 'ALL';
+      let notifRole: UserRole | 'ALL' = 'ALL';
+      let actionType: AuditNotification['action_type'] = 'submitted';
+      let message = '';
+
+      if (audit.current_status === 'pending_accountant') {
+        notifRole = 'Accountant';
+        actionType = 'submitted';
+        message = `New Audit #${audit.audit_number} for ${audit.station_name} submitted by ${currentUser.full_name} for Accountant review`;
+      } else if (audit.current_status === 'pending_account_manager') {
+        notifRole = 'Account Manager';
+        actionType = 'approved';
+        message = `Audit #${audit.audit_number} for ${audit.station_name} approved by Accountant ${currentUser.full_name} — pending Account Manager review`;
+      } else if (audit.current_status === 'pending_management') {
+        notifRole = 'Management';
+        actionType = 'approved';
+        message = `Audit #${audit.audit_number} for ${audit.station_name} approved by Account Manager ${currentUser.full_name} — pending Management Executive review`;
+      } else if (audit.current_status === 'approved') {
+        notifRole = 'Operation Supervisor';
+        actionType = 'approved';
+        message = `Audit #${audit.audit_number} for ${audit.station_name} fully approved & completed by Management Executive ${currentUser.full_name}`;
+      } else if (audit.current_status === 'returned_for_correction') {
+        notifRole = 'Operation Supervisor';
+        actionType = 'returned';
+        message = `Audit #${audit.audit_number} for ${audit.station_name} returned for correction by ${currentUser.full_name} (${currentUser.role})`;
+      } else if (audit.current_status === 'rejected') {
+        notifRole = 'Operation Supervisor';
+        actionType = 'rejected';
+        message = `Audit #${audit.audit_number} for ${audit.station_name} rejected by ${currentUser.full_name} (${currentUser.role})`;
+      }
 
       const newNotif: AuditNotification = {
         id: generateUUID(),
         audit_id: isValidUuid(audit.id) ? audit.id : generateUUID(),
         audit_number: audit.audit_number,
         station_name: audit.station_name,
-        recipient_role: notifRole as any,
+        audit_date: audit.audit_date,
+        recipient_role: notifRole,
         sender_name: currentUser.full_name,
-        action_type:
-          audit.current_status === 'approved'
-            ? 'approved'
-            : audit.current_status === 'returned_for_correction'
-            ? 'returned'
-            : audit.current_status === 'rejected'
-            ? 'rejected'
-            : 'submitted',
-        message: `Audit ${audit.audit_number} for ${audit.station_name} updated to ${audit.current_status.replace(/_/g, ' ').toUpperCase()}`,
+        action_type: actionType,
+        message,
         is_read: false,
         created_at: new Date().toISOString(),
       };

@@ -149,18 +149,39 @@ export const NotificationCenter: React.FC<Props> = ({
                 </div>
 
                 <div>
-                  <div className="flex items-center gap-2 flex-wrap">
-                    <span className="font-black text-sky-700 text-xs font-mono">{notif.audit_number}</span>
+                  <div className="flex items-center gap-2 flex-wrap mb-1">
+                    <span className="px-2.5 py-0.5 rounded-lg bg-sky-100/90 text-sky-900 font-black text-xs font-mono border border-sky-300 shadow-2xs">
+                      #{notif.audit_number}
+                    </span>
                     <span className="font-extrabold text-slate-900 text-xs">{notif.station_name}</span>
-                    <span className="text-[10px] text-slate-500 font-mono font-semibold">
-                      {new Date(notif.created_at).toLocaleString()}
+                    {notif.audit_date && (
+                      <span className="text-[11px] font-bold text-slate-700 bg-slate-100 px-2 py-0.5 rounded-md border border-slate-200">
+                        Date: {notif.audit_date}
+                      </span>
+                    )}
+                    <span
+                      className={`px-2.5 py-0.5 rounded-md text-[10px] font-black uppercase tracking-wider ${
+                        notif.action_type === 'approved'
+                          ? 'bg-emerald-100 text-emerald-800 border border-emerald-300'
+                          : notif.action_type === 'rejected'
+                          ? 'bg-rose-100 text-rose-800 border border-rose-300'
+                          : notif.action_type === 'returned'
+                          ? 'bg-amber-100 text-amber-800 border border-amber-300'
+                          : 'bg-sky-100 text-sky-800 border border-sky-300'
+                      }`}
+                    >
+                      {notif.action_type}
                     </span>
                   </div>
 
-                  <p className="text-xs text-slate-800 font-medium mt-1 leading-relaxed">{notif.message}</p>
+                  <p className="text-xs text-slate-800 font-extrabold leading-relaxed mt-1">{notif.message}</p>
 
-                  <div className="flex items-center gap-2 mt-1.5 text-[11px] text-slate-500 font-semibold">
-                    <span>Sender: <strong className="text-slate-800">{notif.sender_name}</strong></span>
+                  <div className="flex items-center gap-3 mt-2 text-[11px] text-slate-600 font-semibold flex-wrap">
+                    <span>Performed By: <strong className="text-slate-900 font-black">{notif.sender_name}</strong></span>
+                    <span className="text-slate-300">•</span>
+                    <span className="text-slate-500 font-mono">
+                      {new Date(notif.created_at).toLocaleString()}
+                    </span>
                   </div>
                 </div>
               </div>

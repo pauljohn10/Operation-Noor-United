@@ -882,6 +882,7 @@ export async function saveNotification(notif: AuditNotification): Promise<AuditN
         audit_id: validAuditId,
         audit_number: notif.audit_number,
         station_name: notif.station_name,
+        audit_date: notif.audit_date,
         recipient_role: notif.recipient_role,
         sender_name: notif.sender_name,
         action_type: notif.action_type,

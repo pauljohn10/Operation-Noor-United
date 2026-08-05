@@ -111,6 +111,7 @@ export interface AuditNotification {
   audit_id: string;
   audit_number: string;
   station_name: string;
+  audit_date?: string;
   recipient_role: UserRole | 'ALL';
   sender_name: string;
   action_type: 'submitted' | 'approved' | 'rejected' | 'returned' | 'commented';
