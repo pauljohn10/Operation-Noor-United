@@ -124,12 +124,19 @@ export const StationManagement: React.FC<Props> = ({
                   </td>
                 </tr>
               ) : (
-                filtered.map((st) => (
+                filtered.map((st, index) => (
                   <tr key={st.id} className="hover:bg-white/15 transition-colors">
-                    <td className="p-4 font-black text-sky-300 font-mono">{st.station_no}</td>
-                    <td className="p-4 font-bold text-white flex items-center gap-2">
-                      <Building className="w-4 h-4 text-sky-300" />
-                      <span>{st.name}</span>
+                    <td className="p-4 font-black text-sky-300 font-mono text-center">{index + 1}</td>
+                    <td className="p-4 font-bold text-white">
+                      <div className="flex items-center gap-2">
+                        <Building className="w-4 h-4 text-sky-300 shrink-0" />
+                        <div>
+                          <span className="block font-black text-white text-xs">{st.name}</span>
+                          <span className="inline-block text-[10px] text-sky-200/80 font-mono font-semibold bg-white/10 px-2 py-0.5 rounded-md border border-white/20 mt-0.5">
+                            Code: {st.station_no}
+                          </span>
+                        </div>
+                      </div>
                     </td>
                     <td className="p-4">
                       <p className="text-white font-bold">{st.location}</p>
