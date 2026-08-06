@@ -212,10 +212,12 @@ function AppContent() {
     return true; // Super Admin & Approval Roles see system/pipeline audits
   });
 
-  // Filter notifications so each user only sees activity alerts targeted to their current workflow stage
+  // Filter notifications so each user sees workflow alerts & activity notifications
   const visibleNotifications = notifications.filter((notif) => {
     if (currentUser.role === 'Super Admin') return true;
-    return notif.recipient_role === 'ALL' || notif.recipient_role === currentUser.role;
+    if (notif.recipient_role === 'ALL' || notif.recipient_role === currentUser.role) return true;
+    if (currentUser.role === 'Operation Supervisor') return true; // Operation Supervisors see audit activity notifications
+    return false;
   });
 
   const handleSaveStation = async (station: Station) => {
@@ -246,28 +248,20 @@ function AppContent() {
         alert(`Error creating user account: ${res.error}`);
         return;
       }
-      // createUserAccount already calls saveUser internally with the correct Auth UUID
     } else {
       // --- UPDATE: Save profile to public.users, then atomically sync auth.users ---
-
-      // 1. Fetch the CURRENT email stored in auth.users before making any changes
       const newEmail = user.email.trim().toLowerCase();
       const newPass  = (user.password_hash || '').trim();
 
-      // 2. Save profile fields to public.users (password_hash column is not used for auth)
       await saveUserToStorage({ ...user, password_hash: '', email: newEmail });
 
-      // 3. Sync BOTH email and optional password to auth.users in a single API call.
-      //    This is the critical step that was missing — without it, changing the email
-      //    in public.users causes a mismatch with auth.users, breaking username login.
       const authUpdates: { email?: string; password?: string } = {};
-      authUpdates.email = newEmail;           // always sync email (no-op if unchanged)
-      if (newPass) authUpdates.password = newPass; // only if admin explicitly set a new password
+      authUpdates.email = newEmail;
+      if (newPass) authUpdates.password = newPass;
 
       try {
         await syncAuthProfile(user.id, authUpdates);
       } catch (err: any) {
-        // Profile was already saved — alert but don't block
         alert(`Profile saved. Auth sync warning: ${err.message}`);
       }
     }
@@ -295,7 +289,7 @@ function AppContent() {
 
   const handleSaveAudit = async (audit: StationAudit) => {
     try {
-      await saveAuditToStorage(audit);
+      const savedAudit = await saveAuditToStorage(audit);
       const updatedAudits = await fetchAudits();
       setAudits(updatedAudits);
 
@@ -303,53 +297,60 @@ function AppContent() {
       let actionType: AuditNotification['action_type'] = 'submitted';
       let message = '';
 
-      if (audit.current_status === 'pending_accountant') {
+      const isManagementOverride = audit.comments?.some((c) => c.comment_text?.includes('override authority'));
+
+      if (savedAudit.current_status === 'pending_accountant') {
         notifRole = 'Accountant';
         actionType = 'submitted';
-        message = `New Audit #${audit.audit_number} for ${audit.station_name} submitted by ${currentUser.full_name} for Accountant review`;
-      } else if (audit.current_status === 'pending_account_manager') {
+        message = `New Audit #${savedAudit.audit_number} for ${savedAudit.station_name} (${savedAudit.audit_date}) submitted by ${currentUser.full_name} for Accountant review.`;
+      } else if (savedAudit.current_status === 'pending_account_manager') {
         notifRole = 'Account Manager';
         actionType = 'approved';
-        message = `Audit #${audit.audit_number} for ${audit.station_name} approved by Accountant ${currentUser.full_name} — pending Account Manager review`;
-      } else if (audit.current_status === 'pending_management') {
+        message = `Audit #${savedAudit.audit_number} for ${savedAudit.station_name} (${savedAudit.audit_date}) approved by Accountant ${currentUser.full_name} — pending Account Manager review.`;
+      } else if (savedAudit.current_status === 'pending_management') {
         notifRole = 'Management';
         actionType = 'approved';
-        message = `Audit #${audit.audit_number} for ${audit.station_name} approved by Account Manager ${currentUser.full_name} — pending Management Executive review`;
-      } else if (audit.current_status === 'approved') {
+        message = `Audit #${savedAudit.audit_number} for ${savedAudit.station_name} (${savedAudit.audit_date}) approved by Account Manager ${currentUser.full_name} — pending Management Executive review.`;
+      } else if (savedAudit.current_status === 'approved') {
         notifRole = 'Operation Supervisor';
         actionType = 'approved';
-        message = `Audit #${audit.audit_number} for ${audit.station_name} fully approved & completed by Management Executive ${currentUser.full_name}`;
-      } else if (audit.current_status === 'returned_for_correction') {
+        message = isManagementOverride
+          ? `Audit #${savedAudit.audit_number} for ${savedAudit.station_name} (${savedAudit.audit_date}) approved & finalized by Management Executive ${currentUser.full_name} using override authority.`
+          : `Audit #${savedAudit.audit_number} for ${savedAudit.station_name} (${savedAudit.audit_date}) fully approved & completed by Management Executive ${currentUser.full_name}.`;
+      } else if (savedAudit.current_status === 'returned_for_correction') {
         notifRole = 'Operation Supervisor';
         actionType = 'returned';
-        message = `Audit #${audit.audit_number} for ${audit.station_name} returned for correction by ${currentUser.full_name} (${currentUser.role})`;
-      } else if (audit.current_status === 'rejected') {
+        message = `Audit #${savedAudit.audit_number} for ${savedAudit.station_name} (${savedAudit.audit_date}) returned for correction by ${currentUser.full_name} (${currentUser.role}).`;
+      } else if (savedAudit.current_status === 'rejected') {
         notifRole = 'Operation Supervisor';
         actionType = 'rejected';
-        message = `Audit #${audit.audit_number} for ${audit.station_name} rejected by ${currentUser.full_name} (${currentUser.role})`;
+        message = `Audit #${savedAudit.audit_number} for ${savedAudit.station_name} (${savedAudit.audit_date}) rejected by ${currentUser.full_name} (${currentUser.role}).`;
       }
 
-      const newNotif: AuditNotification = {
-        id: generateUUID(),
-        audit_id: isValidUuid(audit.id) ? audit.id : generateUUID(),
-        audit_number: audit.audit_number,
-        station_name: audit.station_name,
-        audit_date: audit.audit_date,
-        recipient_role: notifRole,
-        sender_name: currentUser.full_name,
-        action_type: actionType,
-        message,
-        is_read: false,
-        created_at: new Date().toISOString(),
-      };
-      await saveNotifToStorage(newNotif);
-      setNotifications(await fetchNotifications());
+      if (message) {
+        const newNotif: AuditNotification = {
+          id: generateUUID(),
+          audit_id: savedAudit.id,
+          audit_number: savedAudit.audit_number,
+          station_name: savedAudit.station_name,
+          audit_date: savedAudit.audit_date,
+          recipient_role: notifRole,
+          sender_name: currentUser.full_name,
+          action_type: actionType,
+          message,
+          is_read: false,
+          created_at: new Date().toISOString(),
+        };
+        await saveNotifToStorage(newNotif);
+        const updatedNotifs = await fetchNotifications();
+        setNotifications(updatedNotifs);
+      }
 
       await logActivity(
         currentUser.id,
         currentUser.full_name,
         'AUDIT_SAVE',
-        `Saved audit ${audit.audit_number} with status ${audit.current_status}`
+        `Saved audit ${savedAudit.audit_number} with status ${savedAudit.current_status}`
       );
 
       navigateTo('audits');
