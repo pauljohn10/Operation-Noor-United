@@ -29,10 +29,25 @@ export const StationManagement: React.FC<Props> = ({
       s.location.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
+  const getNextStationCode = (): string => {
+    let maxCode = 0;
+    stations.forEach((s) => {
+      if (s.station_no) {
+        const rawDigits = s.station_no.replace(/\D/g, '');
+        const num = parseInt(rawDigits, 10);
+        if (!isNaN(num) && num > maxCode) {
+          maxCode = num;
+        }
+      }
+    });
+    return (maxCode + 1).toString();
+  };
+
   const handleOpenAdd = () => {
+    const nextCode = getNextStationCode();
     setEditingStation({
       id: generateUUID(),
-      station_no: `ST-${Math.floor(100 + Math.random() * 900)}`,
+      station_no: nextCode,
       name: '',
       location: '',
       region: 'Central Region',
@@ -108,7 +123,7 @@ export const StationManagement: React.FC<Props> = ({
           <table className="w-full text-left text-xs">
             <thead className="bg-white/15 text-white uppercase font-extrabold border-b border-white/25">
               <tr>
-                <th className="p-4">Station #</th>
+                <th className="p-4 text-center w-16">Station #</th>
                 <th className="p-4">Station Name</th>
                 <th className="p-4">Location & Region</th>
                 <th className="p-4">Operation Supervisor</th>
@@ -132,8 +147,8 @@ export const StationManagement: React.FC<Props> = ({
                         <Building className="w-4 h-4 text-sky-300 shrink-0" />
                         <div>
                           <span className="block font-black text-white text-xs">{st.name}</span>
-                          <span className="inline-block text-[10px] text-sky-200/80 font-mono font-semibold bg-white/10 px-2 py-0.5 rounded-md border border-white/20 mt-0.5">
-                            Code: {st.station_no}
+                          <span className="inline-block text-[10px] text-sky-200/90 font-mono font-extrabold bg-white/10 px-2 py-0.5 rounded-md border border-white/20 mt-0.5">
+                            Code: {st.station_no.replace(/^ST-0*/i, '').replace(/^ST-/i, '')}
                           </span>
                         </div>
                       </div>
@@ -210,7 +225,7 @@ export const StationManagement: React.FC<Props> = ({
             <form onSubmit={handleSubmit} className="space-y-4 text-xs">
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-slate-700 font-bold mb-1">Station # Code</label>
+                  <label className="block text-slate-700 font-bold mb-1">Station Code (Sequential)</label>
                   <input
                     type="text"
                     required

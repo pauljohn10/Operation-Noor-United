@@ -92,7 +92,7 @@ export const INITIAL_USERS: User[] = [
 export const INITIAL_STATIONS: Station[] = [
   {
     id: 'st-001',
-    station_no: 'ST-101',
+    station_no: '1',
     name: 'Al Malaz Fuel Station',
     location: 'Riyadh - Al Malaz District',
     region: 'Central Region',
@@ -102,7 +102,7 @@ export const INITIAL_STATIONS: Station[] = [
   },
   {
     id: 'st-002',
-    station_no: 'ST-102',
+    station_no: '2',
     name: 'Al Olaya Grand Station',
     location: 'Riyadh - King Fahd Rd',
     region: 'Central Region',
@@ -112,7 +112,7 @@ export const INITIAL_STATIONS: Station[] = [
   },
   {
     id: 'st-003',
-    station_no: 'ST-201',
+    station_no: '3',
     name: 'Corniche Central Station',
     location: 'Jeddah - North Corniche',
     region: 'Western Region',
@@ -122,7 +122,7 @@ export const INITIAL_STATIONS: Station[] = [
   },
   {
     id: 'st-004',
-    station_no: 'ST-301',
+    station_no: '4',
     name: 'Al Shafa Highway Station',
     location: 'Taif - Al Shafa Main Road',
     region: 'Western Region',
@@ -132,7 +132,7 @@ export const INITIAL_STATIONS: Station[] = [
   },
   {
     id: 'st-005',
-    station_no: 'ST-401',
+    station_no: '5',
     name: 'Dammam Port Station',
     location: 'Dammam - Coastal Highway',
     region: 'Eastern Region',
