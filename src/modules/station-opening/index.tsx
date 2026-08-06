@@ -75,6 +75,9 @@ export const StationOpeningModule: React.FC<Props> = ({ currentUser, stations })
       alert('Access Denied: Only the Operation Supervisor can create new Station Opening Forms.');
       return;
     }
+    if (tab !== 'form') {
+      setUnsubmittedNewForm(null);
+    }
     setActiveTab(tab);
     let newHash = '#station-opening';
     if (tab === 'repository') newHash = '#station-opening/forms';
@@ -117,7 +120,12 @@ export const StationOpeningModule: React.FC<Props> = ({ currentUser, stations })
     loadData();
   }, []);
 
-  const activeForm = forms.find((f) => f.id === currentFormId) || null;
+  const [unsubmittedNewForm, setUnsubmittedNewForm] = useState<StationOpeningForm | null>(null);
+
+  const activeForm =
+    unsubmittedNewForm && unsubmittedNewForm.id === currentFormId
+      ? unsubmittedNewForm
+      : forms.find((f) => f.id === currentFormId) || null;
 
   // Handlers
   const handleOpenStationModal = () => {
@@ -128,14 +136,14 @@ export const StationOpeningModule: React.FC<Props> = ({ currentUser, stations })
     setIsStationModalOpen(true);
   };
 
-  const handleStationSelected = async (selectedStation: Station) => {
+  const handleStationSelected = (selectedStation: Station) => {
     if (currentUser.role !== 'Head of Operation') {
       alert('Access Denied: Only the Operation Supervisor can create new Station Opening Forms.');
       return;
     }
     setIsStationModalOpen(false);
 
-    // Create a clean blank form with ONLY station information loaded
+    // Create a clean blank form in component memory only (NO database record created until submitted)
     const newForm = createEmptyStationOpeningForm(
       selectedStation.id || '',
       selectedStation.station_no || 'ST-101',
@@ -146,37 +154,14 @@ export const StationOpeningModule: React.FC<Props> = ({ currentUser, stations })
       currentUser.role
     );
 
-    const saved = await saveStationOpeningForm(newForm, currentUser.role);
-    setForms((prev) => [saved, ...prev]);
-    setCurrentFormId(saved.id);
-
-    // Record activity log for creation
-    const creationLog: StationOpeningActivityLog = {
-      id: generateUuidV4(),
-      form_id: saved.id,
-      form_number: saved.form_number,
-      station_id: saved.station_id,
-      station_name: saved.station_name,
-      action_type: 'created',
-      action_title: 'New Station Opening Form Created',
-      action_description: `Station Opening Form initialized for ${saved.station_name} (${saved.station_no}). All technical fields clean and pending manual entry.`,
-      status_at_time: 'pending_safety_quality',
-      actor_id: currentUser.id,
-      actor_name: currentUser.full_name,
-      actor_role: currentUser.role,
-      form_creator_id: currentUser.id,
-      created_at: new Date().toISOString(),
-    };
-
-    await addStationOpeningActivityLog(creationLog);
-    setActivityLogs((prev) => [creationLog, ...prev]);
-
-    setActiveTab('form');
+    setUnsubmittedNewForm(newForm);
+    setCurrentFormId(newForm.id);
+    changeTab('form');
   };
 
   const handleOpenForm = (id: string) => {
     setCurrentFormId(id);
-    setActiveTab('form');
+    changeTab('form');
   };
 
   const handleSaveForm = async (updated: StationOpeningForm) => {
@@ -209,14 +194,25 @@ export const StationOpeningModule: React.FC<Props> = ({ currentUser, stations })
 
   const handleSubmitForm = async (updated: StationOpeningForm) => {
     const isResubmission = updated.current_status === 'returned';
+    const isBrandNew = !forms.some((f) => f.id === updated.id);
 
     const formToSubmit: StationOpeningForm = {
       ...updated,
       current_status: 'pending_safety_quality',
       current_approver_role: 'safety_quality',
+      created_at: updated.created_at || new Date().toISOString(),
     };
-    const saved = await saveStationOpeningForm(formToSubmit);
-    setForms((prev) => prev.map((f) => (f.id === saved.id ? saved : f)));
+
+    // Create database record ONLY now upon explicit user submission
+    const saved = await saveStationOpeningForm(formToSubmit, currentUser.role);
+
+    if (isBrandNew) {
+      setForms((prev) => [saved, ...prev]);
+    } else {
+      setForms((prev) => prev.map((f) => (f.id === saved.id ? saved : f)));
+    }
+
+    setUnsubmittedNewForm(null);
 
     // Send targeted notification to Safety & Quality Control
     await addStationOpeningNotification({
@@ -255,7 +251,7 @@ export const StationOpeningModule: React.FC<Props> = ({ currentUser, stations })
     setActivityLogs((prev) => [submitLog, ...prev]);
 
     alert(`Station Opening Form ${saved.form_number} submitted to Safety & Quality Control!`);
-    setActiveTab('repository');
+    changeTab('repository');
   };
 
   const handleDeleteForm = async (id: string) => {
