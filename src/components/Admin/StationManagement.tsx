@@ -22,7 +22,13 @@ export const StationManagement: React.FC<Props> = ({
 
   const operationSupervisors = users.filter((u) => u.role === 'Operation Supervisor' || u.role === 'Super Admin');
 
-  const filtered = stations.filter(
+  const sortedStations = [...stations].sort((a, b) => {
+    const numA = parseInt(a.station_no.replace(/\D/g, ''), 10) || 0;
+    const numB = parseInt(b.station_no.replace(/\D/g, ''), 10) || 0;
+    return numA - numB;
+  });
+
+  const filtered = sortedStations.filter(
     (s) =>
       s.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       s.station_no.toLowerCase().includes(searchTerm.toLowerCase()) ||

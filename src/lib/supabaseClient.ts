@@ -561,13 +561,61 @@ export function loadSession(): User | null {
   return null;
 }
 
-// --- STATIONS MANAGEMENT ---
+export async function normalizeStationCodes(stationList: Station[]): Promise<Station[]> {
+  // Sort stations deterministically by creation time or name
+  const sorted = [...stationList].sort((a, b) => {
+    const timeA = new Date(a.created_at || 0).getTime();
+    const timeB = new Date(b.created_at || 0).getTime();
+    if (timeA !== timeB) return timeA - timeB;
+    return a.name.localeCompare(b.name);
+  });
+
+  const normalizedList: Station[] = [];
+  let updatedInDbCount = 0;
+
+  for (let i = 0; i < sorted.length; i++) {
+    const expectedCode = (i + 1).toString();
+    const st = sorted[i];
+
+    if (st.station_no !== expectedCode) {
+      const updatedSt: Station = { ...st, station_no: expectedCode };
+      normalizedList.push(updatedSt);
+
+      if (isSupabaseConfigured && supabase) {
+        try {
+          await supabase
+            .from('stations')
+            .update({ station_no: expectedCode })
+            .eq('id', st.id);
+          updatedInDbCount++;
+        } catch (err) {
+          console.warn(`[NORMALIZE STATIONS] Failed to update station_no for ${st.name}:`, err);
+        }
+      }
+    } else {
+      normalizedList.push(st);
+    }
+  }
+
+  if (updatedInDbCount > 0) {
+    console.log(`[NORMALIZE STATIONS] Successfully reindexed ${updatedInDbCount} station codes to sequential order 1..${sorted.length}`);
+  }
+
+  return normalizedList;
+}
 
 export async function fetchStations(): Promise<Station[]> {
   if (isSupabaseConfigured && supabase) {
     try {
-      const { data, error } = await supabase.from('stations').select('*').order('name');
-      if (!error && data) return data as Station[];
+      const { data, error } = await supabase
+        .from('stations')
+        .select('*')
+        .order('created_at', { ascending: true });
+      if (!error && data && data.length > 0) {
+        const rawStations = data as Station[];
+        const normalized = await normalizeStationCodes(rawStations);
+        return normalized;
+      }
     } catch (e) {
       console.warn('Supabase fetchStations error:', e);
     }
