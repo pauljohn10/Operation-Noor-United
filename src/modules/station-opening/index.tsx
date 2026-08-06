@@ -160,7 +160,7 @@ export const StationOpeningModule: React.FC<Props> = ({ currentUser, stations })
       action_type: 'created',
       action_title: 'New Station Opening Form Created',
       action_description: `Station Opening Form initialized for ${saved.station_name} (${saved.station_no}). All technical fields clean and pending manual entry.`,
-      status_at_time: 'draft',
+      status_at_time: 'pending_safety_quality',
       actor_id: currentUser.id,
       actor_name: currentUser.full_name,
       actor_role: currentUser.role,
@@ -190,9 +190,9 @@ export const StationOpeningModule: React.FC<Props> = ({ currentUser, stations })
       form_number: saved.form_number,
       station_id: saved.station_id,
       station_name: saved.station_name,
-      action_type: 'draft_saved',
-      action_title: 'Draft Saved',
-      action_description: `Station Opening Form draft updated by ${currentUser.full_name}.`,
+      action_type: 'updated',
+      action_title: 'Form Updated',
+      action_description: `Station Opening Form updated by ${currentUser.full_name}.`,
       status_at_time: saved.current_status,
       actor_id: currentUser.id,
       actor_name: currentUser.full_name,
@@ -204,7 +204,7 @@ export const StationOpeningModule: React.FC<Props> = ({ currentUser, stations })
     await addStationOpeningActivityLog(saveLog);
     setActivityLogs((prev) => [saveLog, ...prev]);
 
-    alert('Station Opening Form draft saved successfully.');
+    alert('Station Opening Form saved successfully.');
   };
 
   const handleSubmitForm = async (updated: StationOpeningForm) => {

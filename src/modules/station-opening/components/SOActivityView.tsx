@@ -90,12 +90,6 @@ export const SOActivityView: React.FC<Props> = ({
           bg: 'bg-sky-500/10 text-sky-700 border-sky-500/20',
           label: t('so.actCreated'),
         };
-      case 'draft_saved':
-        return {
-          icon: <FileEdit className="w-4 h-4 text-slate-600" />,
-          bg: 'bg-slate-500/10 text-slate-700 border-slate-500/20',
-          label: t('so.actDraftSaved'),
-        };
       case 'updated':
         return {
           icon: <FileEdit className="w-4 h-4 text-blue-600" />,
@@ -149,8 +143,6 @@ export const SOActivityView: React.FC<Props> = ({
 
   const getStatusBadge = (status: StationOpeningStatus) => {
     switch (status) {
-      case 'draft':
-        return 'bg-slate-100 text-slate-700 border-slate-200';
       case 'pending_safety_quality':
       case 'pending_document_controller':
       case 'pending_engineering':
@@ -233,7 +225,6 @@ export const SOActivityView: React.FC<Props> = ({
           >
             <option value="ALL">{t('so.allActionTypes')}</option>
             <option value="created">{t('so.actCreated')}</option>
-            <option value="draft_saved">{t('so.actDraftSaved')}</option>
             <option value="updated">{t('so.actUpdated')}</option>
             <option value="submitted">{t('so.actSubmitted')}</option>
             <option value="returned">{t('so.actReturned')}</option>

@@ -130,8 +130,8 @@ export function createEmptyStationOpeningForm(
       others_text: '',
     },
 
-    current_status: 'draft',
-    current_approver_role: null,
+    current_status: 'pending_safety_quality',
+    current_approver_role: 'safety_quality',
     returned_by_role: null,
     return_reason: null,
 

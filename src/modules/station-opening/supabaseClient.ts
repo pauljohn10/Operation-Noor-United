@@ -493,7 +493,7 @@ export async function fetchStationOpeningActivityLogs(actorId?: string, userRole
           action_type: log.action_type || 'created',
           action_title: log.action_title || 'Form Action',
           action_description: log.action_description || '',
-          status_at_time: log.status_at_time || 'draft',
+          status_at_time: log.status_at_time || 'pending_safety_quality',
           actor_id: log.actor_id || '',
           actor_name: log.actor_name || 'System User',
           actor_role: log.actor_role || 'Head of Operation',

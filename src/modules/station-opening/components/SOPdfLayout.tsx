@@ -91,7 +91,6 @@ export const SOPdfLayout: React.FC<Props> = ({ form }) => {
 
   const getFormStatusLabel = (status: string) => {
     switch (status) {
-      case 'draft': return { label: 'DRAFT FORM', bg: '#F1F5F9', color: '#475569', border: '#CBD5E1' };
       case 'pending_safety_quality': return { label: 'PENDING SAFETY & QUALITY', bg: '#FEF3C7', color: '#92400E', border: '#FDE68A' };
       case 'pending_document_controller': return { label: 'PENDING DOC CONTROLLER', bg: '#FEF3C7', color: '#92400E', border: '#FDE68A' };
       case 'pending_engineering': return { label: 'PENDING ENGINEERING', bg: '#FEF3C7', color: '#92400E', border: '#FDE68A' };
@@ -103,7 +102,7 @@ export const SOPdfLayout: React.FC<Props> = ({ form }) => {
     }
   };
 
-  const statusBadge = getFormStatusLabel(form.current_status || 'draft');
+  const statusBadge = getFormStatusLabel(form.current_status || 'pending_safety_quality');
 
   return (
     <div

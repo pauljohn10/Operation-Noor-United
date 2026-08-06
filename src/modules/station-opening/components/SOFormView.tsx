@@ -10,7 +10,6 @@ import {
   Fuel,
   ShieldCheck,
   FileDown,
-  Save,
   Send,
   PenTool,
   RotateCcw,
@@ -23,7 +22,7 @@ interface Props {
   form: StationOpeningForm;
   stations: Station[];
   currentUser: any;
-  onSave: (updatedForm: StationOpeningForm) => void;
+  onSave?: (updatedForm: StationOpeningForm) => void;
   onSubmit: (updatedForm: StationOpeningForm) => void;
   onApprove: (formId: string, role: any, comments: string, signatureUrl?: string) => void;
   onReturn: (formId: string, role: any, comments: string) => void;
@@ -34,7 +33,7 @@ export const SOFormView: React.FC<Props> = ({
   form: initialForm,
   stations,
   currentUser,
-  onSave,
+  onSave: _onSave,
   onSubmit,
   onApprove,
   onReturn,
@@ -61,7 +60,7 @@ export const SOFormView: React.FC<Props> = ({
   const [isApprovalPanelOpen, setIsApprovalPanelOpen] = useState(false);
 
   const isHeadOfOperation = currentUser?.role === 'Head of Operation';
-  const isDraftOrReturned = isHeadOfOperation && (form.current_status === 'draft' || form.current_status === 'returned');
+  const isDraftOrReturned = isHeadOfOperation && (form.current_status === 'pending_safety_quality' || form.current_status === 'returned' || !form.created_at);
 
   const activeStageRole = form.current_approver_role;
   const isCurrentStageApprover =
@@ -132,7 +131,6 @@ export const SOFormView: React.FC<Props> = ({
 
   const getStatusLabel = (status: string) => {
     switch (status) {
-      case 'draft': return t('so.statusDraft');
       case 'pending_safety_quality': return t('so.statusPendingSafetyQuality');
       case 'pending_document_controller': return t('so.statusPendingDocController');
       case 'pending_engineering': return t('so.statusPendingEngineering');
@@ -187,41 +185,31 @@ export const SOFormView: React.FC<Props> = ({
           )}
 
           {isDraftOrReturned && (
-            <>
-              <button
-                onClick={() => onSave(form)}
-                className="px-4 py-2 bg-white/90 border border-sky-200/80 hover:bg-slate-50 text-slate-800 font-extrabold text-xs rounded-xl shadow-sm transition-all flex items-center gap-1.5"
-              >
-                <Save className="w-4 h-4 text-sky-600" />
-                <span>{t('so.saveDraft')}</span>
-              </button>
-
-              <button
-                onClick={() => {
-                  if (!form.station_supervisor_name || !form.station_supervisor_name.trim()) {
-                    alert('Please enter the Station Supervisor Name before submitting.');
-                    return;
-                  }
-                  if (!form.station_supervisor_signature_url) {
-                    alert('Please capture the Station Supervisor on-site signature before submitting.');
-                    return;
-                  }
-                  if (!form.head_of_operation_name || !form.head_of_operation_name.trim()) {
-                    alert('Please enter the Operation Supervisor Name before submitting.');
-                    return;
-                  }
-                  if (!form.head_of_operation_signature_url) {
-                    alert('Please sign as Operation Supervisor before submitting.');
-                    return;
-                  }
-                  onSubmit(form);
-                }}
-                className="px-5 py-2.5 bg-gradient-to-r from-sky-600 via-blue-600 to-indigo-600 hover:from-sky-500 hover:to-indigo-500 text-white font-black text-xs rounded-xl shadow-md shadow-sky-600/20 transition-all flex items-center gap-1.5"
-              >
-                <Send className="w-4 h-4" />
-                <span>{form.current_status === 'returned' ? t('so.resubmitForm') : t('so.submitForm')}</span>
-              </button>
-            </>
+            <button
+              onClick={() => {
+                if (!form.station_supervisor_name || !form.station_supervisor_name.trim()) {
+                  alert('Please enter the Station Supervisor Name before submitting.');
+                  return;
+                }
+                if (!form.station_supervisor_signature_url) {
+                  alert('Please capture the Station Supervisor on-site signature before submitting.');
+                  return;
+                }
+                if (!form.head_of_operation_name || !form.head_of_operation_name.trim()) {
+                  alert('Please enter the Operation Supervisor Name before submitting.');
+                  return;
+                }
+                if (!form.head_of_operation_signature_url) {
+                  alert('Please sign as Operation Supervisor before submitting.');
+                  return;
+                }
+                onSubmit(form);
+              }}
+              className="px-5 py-2.5 bg-gradient-to-r from-sky-600 via-blue-600 to-indigo-600 hover:from-sky-500 hover:to-indigo-500 text-white font-black text-xs rounded-xl shadow-md shadow-sky-600/20 transition-all flex items-center gap-1.5"
+            >
+              <Send className="w-4 h-4" />
+              <span>{form.current_status === 'returned' ? t('so.resubmitForm') : t('so.submitForm')}</span>
+            </button>
           )}
         </div>
       </div>

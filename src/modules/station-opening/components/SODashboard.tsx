@@ -50,14 +50,13 @@ export const SODashboard: React.FC<Props> = ({
   } else if (currentUser?.role === 'Al Noor United Management') {
     pendingForUser = forms.filter((f) => f.current_status === 'pending_management');
   } else if (currentUser?.role === 'Head of Operation') {
-    pendingForUser = forms.filter((f) => f.current_status === 'draft' || f.current_status === 'returned');
+    pendingForUser = forms.filter((f) => f.current_status === 'returned');
   } else if (currentUser?.role === 'Super Admin') {
     pendingForUser = forms.filter((f) => f.current_status.startsWith('pending_'));
   }
 
   const getStatusLabel = (status: string) => {
     switch (status) {
-      case 'draft': return t('so.statusDraft');
       case 'pending_safety_quality': return t('so.statusPendingSafetyQuality');
       case 'pending_document_controller': return t('so.statusPendingDocController');
       case 'pending_engineering': return t('so.statusPendingEngineering');

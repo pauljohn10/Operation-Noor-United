@@ -61,12 +61,6 @@ export const SOListView: React.FC<Props> = ({ forms, currentUser, onOpenForm, on
             {t('so.statusReturned')}
           </span>
         );
-      case 'draft':
-        return (
-          <span className="inline-block px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider bg-slate-500/20 text-slate-200 border border-slate-400/40 shadow-sm backdrop-blur-md">
-            {t('so.statusDraft')}
-          </span>
-        );
       default:
         return (
           <span className="inline-block px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider bg-sky-500/20 text-sky-200 border border-sky-400/40 shadow-sm backdrop-blur-md">
@@ -121,7 +115,6 @@ export const SOListView: React.FC<Props> = ({ forms, currentUser, onOpenForm, on
             className="w-full bg-white/15 backdrop-blur-xl border border-white/30 text-xs font-bold rounded-xl px-3 py-2 text-white focus:outline-none focus:bg-white/25 transition-all shadow-sm"
           >
             <option value="ALL" className="bg-slate-900 text-white">{t('so.allStatuses')}</option>
-            <option value="draft" className="bg-slate-900 text-white">{t('so.statusDraft')}</option>
             <option value="pending_safety_quality" className="bg-slate-900 text-white">{t('so.statusPendingSafetyQuality')}</option>
             <option value="pending_document_controller" className="bg-slate-900 text-white">{t('so.statusPendingDocController')}</option>
             <option value="pending_engineering" className="bg-slate-900 text-white">{t('so.statusPendingEngineering')}</option>

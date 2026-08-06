@@ -1,7 +1,6 @@
 import type { UserRole } from '../../types/audit';
 
 export type StationOpeningStatus =
-  | 'draft'
   | 'pending_safety_quality'
   | 'pending_document_controller'
   | 'pending_engineering'
@@ -190,7 +189,6 @@ export interface StationOpeningForm {
 
 export type StationOpeningActivityActionType =
   | 'created'
-  | 'draft_saved'
   | 'updated'
   | 'submitted'
   | 'returned'
