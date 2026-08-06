@@ -689,7 +689,19 @@ export async function fetchAudits(): Promise<StationAudit[]> {
         `)
         .order('created_at', { ascending: false });
 
-      if (!error && data) return data as StationAudit[];
+      if (!error && data) {
+        const formatted = data.map((aud: any) => ({
+          ...aud,
+          approvals: (aud.approvals || []).map((app: any) => ({
+            ...app,
+            status:
+              app.comments?.includes('Bypassed') || app.comments?.includes('skipped')
+                ? 'skipped'
+                : app.status,
+          })),
+        }));
+        return formatted as StationAudit[];
+      }
     } catch (e) {
       console.warn('Supabase fetchAudits error:', e);
     }
@@ -853,7 +865,7 @@ export async function saveAudit(audit: StationAudit): Promise<StationAudit> {
       approver_id: isValidUuid(a.approver_id) ? a.approver_id : null,
       approver_name: a.approver_name || null,
       approver_position: a.approver_position || null,
-      status: a.status || 'pending',
+      status: (a.status === 'skipped' || a.status === 'bypassed') ? 'pending' : (a.status || 'pending'),
       comments: a.comments || null,
       action_timestamp: a.action_timestamp || null,
       digital_signature_code: a.digital_signature_code || null,
@@ -963,10 +975,11 @@ export async function saveNotification(notif: AuditNotification): Promise<AuditN
     console.warn('LocalStorage saveNotification error:', e);
   }
 
-  // Also upsert to Supabase
+  // Also upsert to Supabase (Omit audit_date which is omitted in database schema)
   if (isSupabaseConfigured && supabase) {
     try {
-      const { error } = await supabase.from('station_audit_notifications').upsert(notifPayload, { onConflict: 'id' });
+      const { audit_date, ...supabasePayload } = notifPayload;
+      const { error } = await supabase.from('station_audit_notifications').upsert(supabasePayload, { onConflict: 'id' });
       if (error) {
         console.error(`[SAVE NOTIFICATION ERROR] Code: ${error.code} | Message: ${error.message}`);
       } else {
