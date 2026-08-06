@@ -347,32 +347,20 @@ function AppContent() {
       }
 
       for (const item of notificationsToCreate) {
-        // Prevent creating duplicate notifications within a 10-second window
-        const isDuplicate = notifications.some(
-          (existing) =>
-            existing.audit_id === savedAudit.id &&
-            existing.recipient_role === item.role &&
-            existing.action_type === item.action &&
-            existing.sender_name === currentUser.full_name &&
-            (new Date().getTime() - new Date(existing.created_at).getTime()) < 10000
-        );
-
-        if (!isDuplicate) {
-          const newNotif: AuditNotification = {
-            id: generateUUID(),
-            audit_id: savedAudit.id,
-            audit_number: savedAudit.audit_number,
-            station_name: savedAudit.station_name,
-            audit_date: savedAudit.audit_date,
-            recipient_role: item.role,
-            sender_name: currentUser.full_name,
-            action_type: item.action,
-            message: item.msg,
-            is_read: false,
-            created_at: new Date().toISOString(),
-          };
-          await saveNotifToStorage(newNotif);
-        }
+        const newNotif: AuditNotification = {
+          id: generateUUID(),
+          audit_id: savedAudit.id,
+          audit_number: savedAudit.audit_number,
+          station_name: savedAudit.station_name,
+          audit_date: savedAudit.audit_date,
+          recipient_role: item.role,
+          sender_name: currentUser.full_name,
+          action_type: item.action,
+          message: item.msg,
+          is_read: false,
+          created_at: new Date().toISOString(),
+        };
+        await saveNotifToStorage(newNotif);
       }
 
       const updatedNotifs = await fetchNotifications();

@@ -900,7 +900,10 @@ export async function saveAudit(audit: StationAudit): Promise<StationAudit> {
 
 // --- NOTIFICATIONS MANAGEMENT ---
 
+const NOTIFS_STORAGE_KEY = 'station_audit_notifications';
+
 export async function fetchNotifications(): Promise<AuditNotification[]> {
+  let dbNotifs: AuditNotification[] = [];
   if (isSupabaseConfigured && supabase) {
     try {
       const { data, error } = await supabase
@@ -908,37 +911,61 @@ export async function fetchNotifications(): Promise<AuditNotification[]> {
         .select('*')
         .order('created_at', { ascending: false });
 
-      if (!error && data) return data as AuditNotification[];
+      if (!error && data) {
+        dbNotifs = data as AuditNotification[];
+      }
     } catch (e) {
       console.warn('Supabase fetchNotifications error:', e);
     }
   }
-  return [];
+
+  try {
+    const localStr = localStorage.getItem(NOTIFS_STORAGE_KEY);
+    const localNotifs: AuditNotification[] = localStr ? JSON.parse(localStr) : [];
+    const map = new Map<string, AuditNotification>();
+    localNotifs.forEach((n) => map.set(n.id, n));
+    dbNotifs.forEach((n) => map.set(n.id, n));
+
+    const combined = Array.from(map.values()).sort(
+      (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+    );
+    return combined;
+  } catch (e) {
+    return dbNotifs;
+  }
 }
 
 export async function saveNotification(notif: AuditNotification): Promise<AuditNotification> {
+  const validAuditId = isValidUuid(notif.audit_id) ? notif.audit_id : generateUUID();
+  const notifId = isValidUuid(notif.id) ? notif.id : generateUUID();
+
+  const notifPayload: AuditNotification = {
+    id: notifId,
+    audit_id: validAuditId,
+    audit_number: notif.audit_number,
+    station_name: notif.station_name,
+    audit_date: notif.audit_date,
+    recipient_role: notif.recipient_role,
+    sender_name: notif.sender_name,
+    action_type: notif.action_type,
+    message: notif.message,
+    is_read: notif.is_read ?? false,
+    created_at: notif.created_at || new Date().toISOString(),
+  };
+
+  // Always save to LocalStorage immediately for instant local reactivity
+  try {
+    const localStr = localStorage.getItem(NOTIFS_STORAGE_KEY);
+    const localNotifs: AuditNotification[] = localStr ? JSON.parse(localStr) : [];
+    const updated = [notifPayload, ...localNotifs.filter((n) => n.id !== notifId)];
+    localStorage.setItem(NOTIFS_STORAGE_KEY, JSON.stringify(updated));
+  } catch (e) {
+    console.warn('LocalStorage saveNotification error:', e);
+  }
+
+  // Also upsert to Supabase
   if (isSupabaseConfigured && supabase) {
     try {
-      const validAuditId = isValidUuid(notif.audit_id) ? notif.audit_id : null;
-      if (!validAuditId) {
-        console.warn('[SAVE NOTIFICATION WARNING] Skipped: missing or invalid audit_id UUID');
-        return notif;
-      }
-
-      const notifPayload = {
-        id: isValidUuid(notif.id) ? notif.id : generateUUID(),
-        audit_id: validAuditId,
-        audit_number: notif.audit_number,
-        station_name: notif.station_name,
-        audit_date: notif.audit_date,
-        recipient_role: notif.recipient_role,
-        sender_name: notif.sender_name,
-        action_type: notif.action_type,
-        message: notif.message,
-        is_read: notif.is_read ?? false,
-        created_at: notif.created_at || new Date().toISOString(),
-      };
-
       const { error } = await supabase.from('station_audit_notifications').upsert(notifPayload, { onConflict: 'id' });
       if (error) {
         console.error(`[SAVE NOTIFICATION ERROR] Code: ${error.code} | Message: ${error.message}`);
@@ -949,10 +976,21 @@ export async function saveNotification(notif: AuditNotification): Promise<AuditN
       console.warn('Supabase saveNotification error:', e);
     }
   }
-  return notif;
+  return notifPayload;
 }
 
 export async function markNotificationAsRead(id: string): Promise<void> {
+  try {
+    const localStr = localStorage.getItem(NOTIFS_STORAGE_KEY);
+    if (localStr) {
+      const localNotifs: AuditNotification[] = JSON.parse(localStr);
+      const updated = localNotifs.map((n) => (n.id === id ? { ...n, is_read: true } : n));
+      localStorage.setItem(NOTIFS_STORAGE_KEY, JSON.stringify(updated));
+    }
+  } catch (e) {
+    console.warn('LocalStorage markNotificationAsRead error:', e);
+  }
+
   if (isSupabaseConfigured && supabase) {
     try {
       await supabase
@@ -967,6 +1005,18 @@ export async function markNotificationAsRead(id: string): Promise<void> {
 
 export async function markAllNotificationsAsRead(ids: string[]): Promise<void> {
   if (ids.length === 0) return;
+
+  try {
+    const localStr = localStorage.getItem(NOTIFS_STORAGE_KEY);
+    if (localStr) {
+      const localNotifs: AuditNotification[] = JSON.parse(localStr);
+      const updated = localNotifs.map((n) => (ids.includes(n.id) ? { ...n, is_read: true } : n));
+      localStorage.setItem(NOTIFS_STORAGE_KEY, JSON.stringify(updated));
+    }
+  } catch (e) {
+    console.warn('LocalStorage markAllNotificationsAsRead error:', e);
+  }
+
   if (isSupabaseConfigured && supabase) {
     try {
       await supabase
@@ -980,6 +1030,17 @@ export async function markAllNotificationsAsRead(ids: string[]): Promise<void> {
 }
 
 export async function deleteNotificationFromStorage(id: string): Promise<void> {
+  try {
+    const localStr = localStorage.getItem(NOTIFS_STORAGE_KEY);
+    if (localStr) {
+      const localNotifs: AuditNotification[] = JSON.parse(localStr);
+      const updated = localNotifs.filter((n) => n.id !== id);
+      localStorage.setItem(NOTIFS_STORAGE_KEY, JSON.stringify(updated));
+    }
+  } catch (e) {
+    console.warn('LocalStorage deleteNotificationFromStorage error:', e);
+  }
+
   if (isSupabaseConfigured && supabase) {
     try {
       await supabase
