@@ -263,7 +263,7 @@ export const SOFormView: React.FC<Props> = ({
             {/* Station Field */}
             <div>
               <label className="block text-xs font-extrabold text-slate-700 mb-1">
-                {isUnsubmittedNewForm ? t('so.selectStation') : (t('common.station') || 'Station')}
+                {isUnsubmittedNewForm ? t('so.selectStation') : t('auditForm.stationLabel')}
               </label>
               {isUnsubmittedNewForm ? (
                 <select
