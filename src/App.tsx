@@ -293,58 +293,90 @@ function AppContent() {
       const updatedAudits = await fetchAudits();
       setAudits(updatedAudits);
 
-      let notifRole: UserRole | 'ALL' = 'ALL';
-      let actionType: AuditNotification['action_type'] = 'submitted';
-      let message = '';
-
       const isManagementOverride = audit.comments?.some((c) => c.comment_text?.includes('override authority'));
 
+      const notificationsToCreate: Array<{ role: UserRole | 'ALL'; action: AuditNotification['action_type']; msg: string }> = [];
+
       if (savedAudit.current_status === 'pending_accountant') {
-        notifRole = 'Accountant';
-        actionType = 'submitted';
-        message = `New Audit #${savedAudit.audit_number} for ${savedAudit.station_name} (${savedAudit.audit_date}) submitted by ${currentUser.full_name} for Accountant review.`;
+        // Step 1: Operation Supervisor submits -> notify Accountant AND Management Executive
+        notificationsToCreate.push({
+          role: 'Accountant',
+          action: 'submitted',
+          msg: `New Audit #${savedAudit.audit_number} for ${savedAudit.station_name} (${savedAudit.audit_date}) submitted by ${currentUser.full_name} for Accountant review.`,
+        });
+        notificationsToCreate.push({
+          role: 'Management',
+          action: 'submitted',
+          msg: `New Audit #${savedAudit.audit_number} for ${savedAudit.station_name} (${savedAudit.audit_date}) submitted by ${currentUser.full_name} — pending Accountant review.`,
+        });
       } else if (savedAudit.current_status === 'pending_account_manager') {
-        notifRole = 'Account Manager';
-        actionType = 'approved';
-        message = `Audit #${savedAudit.audit_number} for ${savedAudit.station_name} (${savedAudit.audit_date}) approved by Accountant ${currentUser.full_name} — pending Account Manager review.`;
+        // Step 2: Accountant approves -> notify Account Manager
+        notificationsToCreate.push({
+          role: 'Account Manager',
+          action: 'approved',
+          msg: `Audit #${savedAudit.audit_number} for ${savedAudit.station_name} (${savedAudit.audit_date}) approved by Accountant ${currentUser.full_name} — awaiting Account Manager approval.`,
+        });
       } else if (savedAudit.current_status === 'pending_management') {
-        notifRole = 'Management';
-        actionType = 'approved';
-        message = `Audit #${savedAudit.audit_number} for ${savedAudit.station_name} (${savedAudit.audit_date}) approved by Account Manager ${currentUser.full_name} — pending Management Executive review.`;
+        // Step 3: Account Manager approves -> notify Management Executive
+        notificationsToCreate.push({
+          role: 'Management',
+          action: 'approved',
+          msg: `Audit #${savedAudit.audit_number} for ${savedAudit.station_name} (${savedAudit.audit_date}) approved by Account Manager ${currentUser.full_name} — awaiting final Management Executive approval.`,
+        });
       } else if (savedAudit.current_status === 'approved') {
-        notifRole = 'Operation Supervisor';
-        actionType = 'approved';
-        message = isManagementOverride
-          ? `Audit #${savedAudit.audit_number} for ${savedAudit.station_name} (${savedAudit.audit_date}) approved & finalized by Management Executive ${currentUser.full_name} using override authority.`
-          : `Audit #${savedAudit.audit_number} for ${savedAudit.station_name} (${savedAudit.audit_date}) fully approved & completed by Management Executive ${currentUser.full_name}.`;
+        // Step 4: Management Executive approves -> notify Operation Supervisor
+        notificationsToCreate.push({
+          role: 'Operation Supervisor',
+          action: 'approved',
+          msg: isManagementOverride
+            ? `Audit #${savedAudit.audit_number} for ${savedAudit.station_name} (${savedAudit.audit_date}) approved & finalized by Management Executive ${currentUser.full_name} using override authority.`
+            : `Audit #${savedAudit.audit_number} for ${savedAudit.station_name} (${savedAudit.audit_date}) fully approved and completed by Management Executive ${currentUser.full_name}.`,
+        });
       } else if (savedAudit.current_status === 'returned_for_correction') {
-        notifRole = 'Operation Supervisor';
-        actionType = 'returned';
-        message = `Audit #${savedAudit.audit_number} for ${savedAudit.station_name} (${savedAudit.audit_date}) returned for correction by ${currentUser.full_name} (${currentUser.role}).`;
+        notificationsToCreate.push({
+          role: 'Operation Supervisor',
+          action: 'returned',
+          msg: `Audit #${savedAudit.audit_number} for ${savedAudit.station_name} (${savedAudit.audit_date}) returned for correction by ${currentUser.full_name} (${currentUser.role}).`,
+        });
       } else if (savedAudit.current_status === 'rejected') {
-        notifRole = 'Operation Supervisor';
-        actionType = 'rejected';
-        message = `Audit #${savedAudit.audit_number} for ${savedAudit.station_name} (${savedAudit.audit_date}) rejected by ${currentUser.full_name} (${currentUser.role}).`;
+        notificationsToCreate.push({
+          role: 'Operation Supervisor',
+          action: 'rejected',
+          msg: `Audit #${savedAudit.audit_number} for ${savedAudit.station_name} (${savedAudit.audit_date}) rejected by ${currentUser.full_name} (${currentUser.role}).`,
+        });
       }
 
-      if (message) {
-        const newNotif: AuditNotification = {
-          id: generateUUID(),
-          audit_id: savedAudit.id,
-          audit_number: savedAudit.audit_number,
-          station_name: savedAudit.station_name,
-          audit_date: savedAudit.audit_date,
-          recipient_role: notifRole,
-          sender_name: currentUser.full_name,
-          action_type: actionType,
-          message,
-          is_read: false,
-          created_at: new Date().toISOString(),
-        };
-        await saveNotifToStorage(newNotif);
-        const updatedNotifs = await fetchNotifications();
-        setNotifications(updatedNotifs);
+      for (const item of notificationsToCreate) {
+        // Prevent creating duplicate notifications within a 10-second window
+        const isDuplicate = notifications.some(
+          (existing) =>
+            existing.audit_id === savedAudit.id &&
+            existing.recipient_role === item.role &&
+            existing.action_type === item.action &&
+            existing.sender_name === currentUser.full_name &&
+            (new Date().getTime() - new Date(existing.created_at).getTime()) < 10000
+        );
+
+        if (!isDuplicate) {
+          const newNotif: AuditNotification = {
+            id: generateUUID(),
+            audit_id: savedAudit.id,
+            audit_number: savedAudit.audit_number,
+            station_name: savedAudit.station_name,
+            audit_date: savedAudit.audit_date,
+            recipient_role: item.role,
+            sender_name: currentUser.full_name,
+            action_type: item.action,
+            message: item.msg,
+            is_read: false,
+            created_at: new Date().toISOString(),
+          };
+          await saveNotifToStorage(newNotif);
+        }
       }
+
+      const updatedNotifs = await fetchNotifications();
+      setNotifications(updatedNotifs);
 
       await logActivity(
         currentUser.id,
