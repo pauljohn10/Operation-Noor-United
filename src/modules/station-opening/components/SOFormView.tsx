@@ -260,14 +260,12 @@ export const SOFormView: React.FC<Props> = ({
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            {/* Station Dropdown */}
+            {/* Station Field */}
             <div>
-              <label className="block text-xs font-extrabold text-slate-700 mb-1">{t('so.selectStation')}</label>
-              {!isDraftOrReturned ? (
-                <div className="w-full bg-white/70 backdrop-blur-md border border-sky-200/80 rounded-xl px-3.5 py-2.5 text-xs font-extrabold text-slate-900 shadow-sm flex items-center min-h-[42px]">
-                  {form.station_no} - {form.station_name}
-                </div>
-              ) : (
+              <label className="block text-xs font-extrabold text-slate-700 mb-1">
+                {isUnsubmittedNewForm ? t('so.selectStation') : (t('common.station') || 'Station')}
+              </label>
+              {isUnsubmittedNewForm ? (
                 <select
                   value={form.station_id}
                   onChange={(e) => handleStationChange(e.target.value)}
@@ -275,10 +273,14 @@ export const SOFormView: React.FC<Props> = ({
                 >
                   {stations.map((s) => (
                     <option key={s.id} value={s.id}>
-                      {s.station_no} - {s.name}
+                      {s.station_no ? `${s.station_no} – ` : ''}{s.name}
                     </option>
                   ))}
                 </select>
+              ) : (
+                <div className="w-full bg-slate-100/90 backdrop-blur-md border border-slate-200/90 rounded-xl px-3.5 py-2.5 text-xs font-black text-slate-900 shadow-xs flex items-center min-h-[42px]">
+                  {form.station_no ? `${form.station_no} – ` : ''}{form.station_name}
+                </div>
               )}
             </div>
 
