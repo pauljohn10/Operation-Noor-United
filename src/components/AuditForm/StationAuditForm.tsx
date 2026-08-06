@@ -554,7 +554,7 @@ export const StationAuditForm: React.FC<Props> = ({
         : 'management');
 
     currentAuditObj.approvals = currentAuditObj.approvals.map((app) => {
-      if (app.role === 'management' || app.role === approvalRoleKey) {
+      if (app.role === 'management') {
         return {
           ...app,
           approver_id: isValidUuid(currentUser?.id) ? currentUser.id : null,
@@ -565,10 +565,39 @@ export const StationAuditForm: React.FC<Props> = ({
             ? `Approved by Management Executive using override authority${comment ? `: ${comment}` : ''}`
             : comment || app.comments || 'Approved fuel audit.',
           action_timestamp: new Date().toISOString(),
+          digital_signature_code: `SIG-MGT-${Math.floor(100000 + Math.random() * 900000)}`,
+          signature_url: customSignatureUrl || app.signature_url || currentUser.signature_url,
+        };
+      }
+
+      if (isManagementOverride && app.status !== 'approved') {
+        return {
+          ...app,
+          status: 'skipped',
+          approver_id: undefined,
+          approver_name: undefined,
+          approver_position: undefined,
+          signature_url: undefined,
+          digital_signature_code: undefined,
+          action_timestamp: undefined,
+          comments: 'Bypassed by Management Executive override authority',
+        };
+      }
+
+      if (!isManagementOverride && app.role === approvalRoleKey) {
+        return {
+          ...app,
+          approver_id: isValidUuid(currentUser?.id) ? currentUser.id : null,
+          approver_name: currentUser.full_name,
+          approver_position: currentUser.position,
+          status: 'approved',
+          comments: comment || app.comments || 'Approved fuel audit.',
+          action_timestamp: new Date().toISOString(),
           digital_signature_code: `SIG-${currentUser.role.substring(0, 3).toUpperCase()}-${Math.floor(100000 + Math.random() * 900000)}`,
           signature_url: customSignatureUrl || app.signature_url || currentUser.signature_url,
         };
       }
+
       return app;
     });
 

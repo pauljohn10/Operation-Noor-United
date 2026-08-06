@@ -223,8 +223,10 @@ export const ApprovalPanel: React.FC<Props> = ({
         ></div>
 
         {steps.map((step, idx) => {
-          const isPassed = isStepCompleted(step.role, idx);
-          const isCurrent = isStepCurrent(step.role, idx);
+          const appRecord = audit.approvals?.find((a) => a.role === step.role);
+          const isSkipped = appRecord?.status === 'skipped' || appRecord?.status === 'bypassed';
+          const isPassed = !isSkipped && isStepCompleted(step.role, idx);
+          const isCurrent = !isSkipped && isStepCurrent(step.role, idx);
           const isRejected = audit.current_status === 'rejected' && currentIndex === idx + 1;
 
           return (
@@ -233,6 +235,8 @@ export const ApprovalPanel: React.FC<Props> = ({
                 className={`w-10 h-10 rounded-full flex items-center justify-center font-black text-xs transition-all shadow-md ${
                   isPassed
                     ? 'bg-emerald-600 text-white ring-4 ring-emerald-500/20'
+                    : isSkipped
+                    ? 'bg-slate-200 text-slate-700 border-2 border-slate-400 font-bold'
                     : isCurrent
                     ? isRejected
                       ? 'bg-rose-600 text-white ring-4 ring-rose-500/20'
@@ -240,14 +244,14 @@ export const ApprovalPanel: React.FC<Props> = ({
                     : 'bg-slate-200 text-slate-700 border-2 border-slate-300 font-black'
                 }`}
               >
-                {isPassed ? <CheckCircle2 className="w-5 h-5" /> : idx + 1}
+                {isPassed ? <CheckCircle2 className="w-5 h-5" /> : isSkipped ? <ShieldAlert className="w-4 h-4 text-slate-600" /> : idx + 1}
               </div>
               <span
                 className={`text-xs font-black mt-2 text-center max-w-[110px] ${
-                  isPassed ? 'text-emerald-900' : isCurrent ? 'text-sky-900 font-black' : 'text-slate-700 font-bold'
+                  isPassed ? 'text-emerald-900' : isSkipped ? 'text-slate-600 font-bold' : isCurrent ? 'text-sky-900 font-black' : 'text-slate-700 font-bold'
                 }`}
               >
-                {step.label}
+                {step.label} {isSkipped && <span className="block text-[9.5px] text-slate-500 font-bold">(Bypassed)</span>}
               </span>
             </div>
           );

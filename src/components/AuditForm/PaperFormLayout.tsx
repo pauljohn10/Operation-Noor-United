@@ -828,17 +828,18 @@ export const PaperFormLayout: React.FC<Props> = ({
     const isApproved = approvalSlot?.status === 'approved';
     const isRejected = approvalSlot?.status === 'rejected';
     const isReturned = approvalSlot?.status === 'returned';
+    const isSkipped = approvalSlot?.status === 'skipped' || approvalSlot?.status === 'bypassed';
 
     return (
       <div
-        onClick={() => onSignatoryClick && onSignatoryClick(roleKey)}
+        onClick={() => onSignatoryClick && !isSkipped && onSignatoryClick(roleKey)}
         className={`border border-black p-1.5 flex flex-col justify-between min-h-[100px] bg-white relative transition-all ${
-          !isApproved ? 'cursor-pointer hover:border-amber-600 hover:shadow-md hover:bg-amber-50/50' : ''
+          !isApproved && !isSkipped ? 'cursor-pointer hover:border-amber-600 hover:shadow-md hover:bg-amber-50/50' : ''
         }`}
       >
         <div className="font-bold text-black border-b border-gray-300 pb-1 mb-1 text-[10px] flex items-center justify-between">
           <span>{title}</span>
-          {!isApproved && <PenTool className="w-3 h-3 text-amber-600 no-print" />}
+          {!isApproved && !isSkipped && <PenTool className="w-3 h-3 text-amber-600 no-print" />}
         </div>
 
         {isApproved ? (
@@ -872,6 +873,13 @@ export const PaperFormLayout: React.FC<Props> = ({
                 {new Date(approvalSlot.action_timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
               </p>
             )}
+          </div>
+        ) : isSkipped ? (
+          <div className="my-auto py-2 text-slate-600 font-bold text-[9px] text-center flex flex-col items-center justify-center gap-1">
+            <span className="px-2 py-1 bg-slate-100 border border-slate-300 rounded-md text-[8.5px] font-black uppercase text-slate-700 tracking-wider">
+              Bypassed by Override
+            </span>
+            <span className="text-[8px] text-slate-500 font-semibold">Not Signed</span>
           </div>
         ) : isRejected ? (
           <div className="my-auto py-1 text-red-600 font-bold text-[10px]">

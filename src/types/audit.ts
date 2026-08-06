@@ -54,7 +54,7 @@ export type ApprovalRole =
   | 'account_manager'
   | 'management';
 
-export type ApprovalActionStatus = 'pending' | 'approved' | 'rejected' | 'returned';
+export type ApprovalActionStatus = 'pending' | 'approved' | 'rejected' | 'returned' | 'skipped' | 'bypassed';
 
 export interface Station {
   id: string;

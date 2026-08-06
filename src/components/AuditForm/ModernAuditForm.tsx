@@ -15,6 +15,7 @@ import {
   CreditCard,
   PenTool,
   ShieldCheck,
+  ShieldAlert,
 } from 'lucide-react';
 
 interface Props {
@@ -854,14 +855,17 @@ export const ModernAuditForm: React.FC<Props> = ({
             return stages.map((sigBox) => {
               const isApproved = sigBox.status === 'approved';
               const isRejected = sigBox.status === 'rejected';
+              const isSkipped = sigBox.status === 'skipped' || sigBox.status === 'bypassed';
 
               return (
                 <div
                   key={sigBox.key}
-                  onClick={() => onSignatoryClick(sigBox.key)}
+                  onClick={() => !isSkipped && onSignatoryClick(sigBox.key)}
                   className={`p-3.5 rounded-2xl border transition-all cursor-pointer flex flex-col justify-between min-h-[140px] relative ${
                     isApproved
                       ? 'bg-emerald-50/80 border-emerald-300 shadow-sm hover:shadow-md'
+                      : isSkipped
+                      ? 'bg-slate-100/80 border-slate-300 shadow-xs'
                       : isRejected
                       ? 'bg-rose-50/80 border-rose-300 shadow-sm'
                       : 'bg-white/80 border-slate-200/90 hover:border-sky-300 shadow-sm'
@@ -872,11 +876,15 @@ export const ModernAuditForm: React.FC<Props> = ({
                       <span className="text-[10px] font-black uppercase text-slate-700 tracking-wider truncate">
                         {sigBox.title}
                       </span>
-                      {!isApproved && !isReadOnly && <PenTool className="w-3 h-3 text-sky-600 no-print" />}
+                      {!isApproved && !isSkipped && !isReadOnly && <PenTool className="w-3 h-3 text-sky-600 no-print" />}
                     </div>
 
                     <span className="text-xs font-black text-slate-900 block truncate">
-                      {sigBox.name || 'Pending Approval'}
+                      {isApproved
+                        ? sigBox.name
+                        : isSkipped
+                        ? 'Bypassed by Override'
+                        : sigBox.name || 'Pending Approval'}
                     </span>
                     <span className="text-[10px] text-slate-500 font-medium block truncate">
                       {sigBox.position}
@@ -884,7 +892,11 @@ export const ModernAuditForm: React.FC<Props> = ({
                   </div>
 
                   <div className="my-2">
-                    {sigBox.sig ? (
+                    {isSkipped ? (
+                      <div className="h-9 my-1 flex items-center justify-center bg-slate-200/50 rounded-lg p-1 border border-slate-300/60 text-[10px] font-bold text-slate-600">
+                        No Signature
+                      </div>
+                    ) : sigBox.sig ? (
                       <div className="h-9 my-1 flex items-center justify-center bg-white/60 rounded-lg p-1 border border-slate-200/60">
                         <img src={sigBox.sig} alt="Signature" className="max-h-full object-contain mx-auto" />
                       </div>
@@ -908,6 +920,10 @@ export const ModernAuditForm: React.FC<Props> = ({
                     {isApproved ? (
                       <span className="text-[10px] font-black text-emerald-700 flex items-center gap-1">
                         <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 shrink-0" /> Approved
+                      </span>
+                    ) : isSkipped ? (
+                      <span className="text-[10px] font-black text-slate-600 flex items-center gap-1">
+                        <ShieldAlert className="w-3.5 h-3.5 text-slate-500 shrink-0" /> Bypassed
                       </span>
                     ) : isRejected ? (
                       <span className="text-[10px] font-black text-rose-700 flex items-center gap-1">
