@@ -154,7 +154,7 @@ export const StationManagement: React.FC<Props> = ({
                         <div>
                           <span className="block font-black text-white text-xs">{st.name}</span>
                           <span className="inline-block text-[10px] text-sky-200/90 font-mono font-extrabold bg-white/10 px-2 py-0.5 rounded-md border border-white/20 mt-0.5">
-                            Code: {st.station_no.replace(/^ST-0*/i, '').replace(/^ST-/i, '')}
+                            Noor: {st.station_no.replace(/^ST-0*/i, '').replace(/^ST-/i, '')}
                           </span>
                         </div>
                       </div>
@@ -231,7 +231,7 @@ export const StationManagement: React.FC<Props> = ({
             <form onSubmit={handleSubmit} className="space-y-4 text-xs">
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-slate-700 font-bold mb-1">Station Code (Sequential)</label>
+                  <label className="block text-slate-700 font-bold mb-1">Noor # (Sequential)</label>
                   <input
                     type="text"
                     required
