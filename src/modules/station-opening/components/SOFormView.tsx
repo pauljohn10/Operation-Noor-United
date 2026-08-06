@@ -60,7 +60,11 @@ export const SOFormView: React.FC<Props> = ({
   const [isApprovalPanelOpen, setIsApprovalPanelOpen] = useState(false);
 
   const isHeadOfOperation = currentUser?.role === 'Head of Operation';
-  const isDraftOrReturned = isHeadOfOperation && (form.current_status === 'pending_safety_quality' || form.current_status === 'returned' || !form.created_at);
+  const isUnsubmittedNewForm = (form as any)?.is_unsubmitted === true || (initialForm as any)?.is_unsubmitted === true;
+  const isReturnedForm = form.current_status === 'returned';
+
+  // Form is editable ONLY when creating an unsubmitted new form OR when returned for correction
+  const isDraftOrReturned = isHeadOfOperation && (isUnsubmittedNewForm || isReturnedForm);
 
   const activeStageRole = form.current_approver_role;
   const isCurrentStageApprover =
@@ -213,6 +217,19 @@ export const SOFormView: React.FC<Props> = ({
           )}
         </div>
       </div>
+
+      {/* FORM LOCKED READ-ONLY BANNER FOR SUBMITTED FORMS */}
+      {!isDraftOrReturned && form.current_status !== 'returned' && (
+        <div className="bg-sky-500/10 border border-sky-400/30 p-4 rounded-2xl flex items-start gap-3 text-sky-100 backdrop-blur-xl shadow-md">
+          <ShieldCheck className="w-5 h-5 text-sky-300 shrink-0 mt-0.5" />
+          <div>
+            <h4 className="text-xs font-black uppercase tracking-wider text-sky-200">Form Locked (Read-Only Mode)</h4>
+            <p className="text-xs font-bold text-sky-100/90 mt-0.5">
+              This Station Opening Form has been submitted and is currently locked. All fields are view-only while undergoing workflow approval.
+            </p>
+          </div>
+        </div>
+      )}
 
       {/* RETURN REASON ALERT BANNER */}
       {form.current_status === 'returned' && form.return_reason && (

@@ -142,5 +142,6 @@ export function createEmptyStationOpeningForm(
     created_by_role: creatorRole,
     created_at: now,
     updated_at: now,
-  };
+    is_unsubmitted: true,
+  } as StationOpeningForm;
 }

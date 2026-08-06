@@ -202,6 +202,7 @@ export const StationOpeningModule: React.FC<Props> = ({ currentUser, stations })
       current_approver_role: 'safety_quality',
       created_at: updated.created_at || new Date().toISOString(),
     };
+    delete (formToSubmit as any).is_unsubmitted;
 
     // Create database record ONLY now upon explicit user submission
     const saved = await saveStationOpeningForm(formToSubmit, currentUser.role);
