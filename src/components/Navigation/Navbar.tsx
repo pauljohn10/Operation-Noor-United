@@ -3,16 +3,71 @@ import { useAuth } from '../../context/AuthContext';
 import { useLanguage } from '../../context/LanguageContext';
 import {
   LayoutDashboard,
-  FileText,
   PlusCircle,
   Bell,
   ShieldCheck,
+  Globe,
+  Building,
   LogOut,
   Menu,
   X,
-  Globe,
-  Building,
 } from 'lucide-react';
+
+// DISTINCTIVE 3D / ISOMETRIC MULTI-LAYERED AUDIT ICON COMPONENT
+const AuditIcon3D: React.FC<{ className?: string }> = ({ className = "w-5 h-5" }) => (
+  <svg
+    className={className}
+    viewBox="0 0 24 24"
+    fill="none"
+    xmlns="http://www.w3.org/2000/svg"
+  >
+    <defs>
+      <linearGradient id="audit3d_grad1" x1="2" y1="2" x2="22" y2="22" gradientUnits="userSpaceOnUse">
+        <stop stopColor="#34D399" />
+        <stop offset="1" stopColor="#059669" />
+      </linearGradient>
+      <linearGradient id="audit3d_grad2" x1="6" y1="6" x2="18" y2="18" gradientUnits="userSpaceOnUse">
+        <stop stopColor="#6EE7B7" />
+        <stop offset="1" stopColor="#10B981" />
+      </linearGradient>
+    </defs>
+    
+    {/* 3D Depth Shadow Sheet Layer */}
+    <path
+      d="M7 3.5C5.89543 3.5 5 4.39543 5 5.5V18.5C5 19.6046 5.89543 20.5 7 20.5H16.5C17.6046 20.5 18.5 19.6046 18.5 18.5V9.5L12.5 3.5H7Z"
+      fill="#064E3B"
+      opacity="0.4"
+      transform="translate(0.8, 0.8)"
+    />
+
+    {/* Main Multi-Layered Document Sheet */}
+    <path
+      d="M6 3C4.89543 3 4 3.89543 4 5V18C4 19.1046 4.89543 20 6 20H15.5C16.6046 20 17.5 19.1046 17.5 18V9L11.5 3H6Z"
+      fill="url(#audit3d_grad1)"
+    />
+
+    {/* 3D Folded Top Corner Flap */}
+    <path
+      d="M11.5 3V8.5H17.5L11.5 3Z"
+      fill="url(#audit3d_grad2)"
+    />
+
+    {/* Document Content Lines */}
+    <rect x="6.5" y="9" width="4.5" height="1.4" rx="0.7" fill="#E6F4EA" opacity="0.95" />
+    <rect x="6.5" y="12" width="7.5" height="1.4" rx="0.7" fill="#E6F4EA" opacity="0.95" />
+    <rect x="6.5" y="15" width="5" height="1.4" rx="0.7" fill="#E6F4EA" opacity="0.95" />
+
+    {/* 3D Checkmark Emblem Badge */}
+    <circle cx="16" cy="16" r="4" fill="#047857" stroke="#A7F3D0" strokeWidth="1" />
+    <path
+      d="M14.2 16L15.4 17.2L17.8 14.8"
+      stroke="#FFFFFF"
+      strokeWidth="1.5"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+  </svg>
+);
 
 interface Props {
   activeTab: 'dashboard' | 'audits' | 'new-audit' | 'activity' | 'admin';
@@ -87,7 +142,7 @@ export const Navbar: React.FC<Props> = ({
               </div>
             </div>
 
-            {/* DESKTOP NAVIGATION TABS */}
+            {/* DESKTOP NAVIGATION TABS WITH COLORED MICRO-BADGES */}
             <nav className="hidden md:flex items-center gap-1 sm:gap-2">
               {/* ENTERPRISE MODULE SWITCHER SEGMENTED CONTROL (SUPER ADMIN ONLY) */}
               {isSuperAdmin && (
@@ -100,7 +155,7 @@ export const Navbar: React.FC<Props> = ({
                         : 'text-sky-100 hover:text-white hover:bg-white/10'
                     }`}
                   >
-                    <FileText className="w-3.5 h-3.5" />
+                    <AuditIcon3D className="w-4 h-4" />
                     <span>Station Audit System</span>
                   </button>
 
@@ -122,13 +177,15 @@ export const Navbar: React.FC<Props> = ({
               {isSuperAdmin && (
                 <button
                   onClick={() => setActiveTab('admin')}
-                  className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-extrabold transition-all ${
+                  className={`group flex items-center gap-2 px-3 py-1.5 rounded-xl text-xs font-extrabold transition-all ${
                     activeTab === 'admin'
-                      ? 'bg-purple-500/30 text-purple-100 border border-purple-400/40 shadow-sm ring-1 ring-purple-400/30'
+                      ? 'bg-purple-500/30 text-purple-100 border border-purple-400/40 shadow-sm ring-1 ring-purple-400/40'
                       : 'bg-purple-500/10 text-purple-200 border border-purple-400/20 hover:bg-purple-500/20 hover:text-white'
                   }`}
                 >
-                  <ShieldCheck className="w-4 h-4 text-purple-300" />
+                  <div className="p-1 rounded-lg bg-purple-500/20 text-purple-300 border border-purple-400/30 group-hover:scale-110 transition-transform">
+                    <ShieldCheck className="w-3.5 h-3.5" />
+                  </div>
                   <span>{t('nav.adminHub')}</span>
                 </button>
               )}
@@ -136,56 +193,68 @@ export const Navbar: React.FC<Props> = ({
               {/* STATION AUDIT SYSTEM TABS (HIDDEN FOR STATION OPENING ACCOUNTS) */}
               {!isStationOpeningUser && (
                 <>
+                  {/* 1. DASHBOARD: SOFT INDIGO / CYAN MICRO-BADGE */}
                   <button
                     onClick={() => setActiveTab('dashboard')}
-                    className={`flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-bold transition-all ${
+                    className={`group flex items-center gap-2 px-3 py-1.5 rounded-xl text-xs font-extrabold transition-all ${
                       activeTab === 'dashboard'
-                        ? 'bg-sky-500/25 text-white border border-sky-400/40 shadow-sm ring-1 ring-sky-400/30'
+                        ? 'bg-indigo-500/30 text-white border border-indigo-400/40 shadow-sm ring-1 ring-cyan-400/30'
                         : 'text-sky-100 hover:text-white hover:bg-white/15'
                     }`}
                   >
-                    <LayoutDashboard className="w-4 h-4" />
+                    <div className="p-1 rounded-lg bg-indigo-500/20 text-cyan-300 border border-indigo-400/30 group-hover:scale-110 transition-transform">
+                      <LayoutDashboard className="w-3.5 h-3.5" />
+                    </div>
                     <span>{t('nav.dashboard')}</span>
                   </button>
 
+                  {/* 2. AUDITS: SOFT TEAL / EMERALD MICRO-BADGE & 3D ISOMETRIC ICON */}
                   <button
                     onClick={() => setActiveTab('audits')}
-                    className={`flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-bold transition-all ${
+                    className={`group flex items-center gap-2 px-3 py-1.5 rounded-xl text-xs font-extrabold transition-all ${
                       activeTab === 'audits'
-                        ? 'bg-sky-500/25 text-white border border-sky-400/40 shadow-sm ring-1 ring-sky-400/30'
+                        ? 'bg-emerald-500/30 text-white border border-emerald-400/40 shadow-sm ring-1 ring-emerald-400/30'
                         : 'text-sky-100 hover:text-white hover:bg-white/15'
                     }`}
                   >
-                    <FileText className="w-4 h-4" />
+                    <div className="p-1 rounded-lg bg-teal-500/20 border border-teal-400/30 group-hover:scale-110 transition-transform flex items-center justify-center">
+                      <AuditIcon3D className="w-4 h-4" />
+                    </div>
                     <span>{t('nav.audits')}</span>
                   </button>
 
+                  {/* 3. NEW AUDIT: VIBRANT ELECTRIC BLUE */}
                   {canCreateAudit && (
                     <button
                       onClick={() => setActiveTab('new-audit')}
-                      className={`flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-extrabold transition-all ${
+                      className={`group flex items-center gap-2 px-3.5 py-1.5 rounded-xl text-xs font-black transition-all ${
                         activeTab === 'new-audit'
-                          ? 'bg-gradient-to-r from-sky-500 via-blue-600 to-indigo-600 text-white shadow-md shadow-sky-600/30 ring-2 ring-sky-400/40'
-                          : 'bg-sky-400/20 text-white border border-sky-400/30 hover:bg-sky-400/30'
+                          ? 'bg-gradient-to-r from-sky-500 via-blue-600 to-indigo-600 text-white shadow-md shadow-sky-600/30 ring-2 ring-sky-400/50'
+                          : 'bg-gradient-to-r from-sky-600/90 to-blue-600/90 text-white border border-sky-300/40 hover:from-sky-500 hover:to-blue-500 hover:scale-[1.03] shadow-sm'
                       }`}
                     >
-                      <PlusCircle className="w-4 h-4" />
+                      <div className="p-0.5 rounded-lg bg-white/20 text-white group-hover:scale-110 transition-transform">
+                        <PlusCircle className="w-3.5 h-3.5" />
+                      </div>
                       <span>{t('nav.newAudit')}</span>
                     </button>
                   )}
 
+                  {/* 4. ACTIVITY: SOFT AMBER / ORANGE MICRO-BADGE */}
                   <button
                     onClick={() => setActiveTab('activity')}
-                    className={`relative flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-bold transition-all ${
+                    className={`group relative flex items-center gap-2 px-3 py-1.5 rounded-xl text-xs font-extrabold transition-all ${
                       activeTab === 'activity'
-                        ? 'bg-sky-500/25 text-white border border-sky-400/40 shadow-sm ring-1 ring-sky-400/30'
+                        ? 'bg-amber-500/30 text-white border border-amber-400/40 shadow-sm ring-1 ring-amber-400/30'
                         : 'text-sky-100 hover:text-white hover:bg-white/15'
                     }`}
                   >
-                    <Bell className="w-4 h-4" />
+                    <div className="p-1 rounded-lg bg-amber-500/20 text-amber-300 border border-amber-400/30 group-hover:scale-110 transition-transform">
+                      <Bell className="w-3.5 h-3.5" />
+                    </div>
                     <span>{t('nav.activity')}</span>
                     {unreadCount > 0 && (
-                      <span className="absolute -top-1 -right-1 bg-amber-500 text-slate-950 font-black text-[9px] w-4 h-4 rounded-full flex items-center justify-center shadow-sm">
+                      <span className="absolute -top-1 -right-1 bg-gradient-to-r from-amber-500 to-orange-500 text-slate-950 font-black text-[9px] w-4.5 h-4.5 rounded-full flex items-center justify-center shadow-md ring-2 ring-slate-900">
                         {unreadCount}
                       </span>
                     )}
@@ -349,7 +418,9 @@ export const Navbar: React.FC<Props> = ({
                     : 'text-slate-700 hover:bg-sky-50'
                 }`}
               >
-                <LayoutDashboard className="w-5 h-5" />
+                <div className="p-1.5 rounded-lg bg-indigo-100 text-indigo-700 border border-indigo-200">
+                  <LayoutDashboard className="w-4 h-4" />
+                </div>
                 <span>{t('nav.dashboard')}</span>
               </button>
 
@@ -361,7 +432,9 @@ export const Navbar: React.FC<Props> = ({
                     : 'text-slate-700 hover:bg-sky-50'
                 }`}
               >
-                <FileText className="w-5 h-5" />
+                <div className="p-1 rounded-lg bg-teal-100 text-emerald-700 border border-teal-200 flex items-center justify-center">
+                  <AuditIcon3D className="w-5 h-5" />
+                </div>
                 <span>{t('nav.audits')}</span>
               </button>
 
@@ -374,7 +447,9 @@ export const Navbar: React.FC<Props> = ({
                       : 'bg-sky-500/10 text-sky-700 hover:bg-sky-500/20'
                   }`}
                 >
-                  <PlusCircle className="w-5 h-5" />
+                  <div className="p-1.5 rounded-lg bg-sky-600 text-white shadow-2xs">
+                    <PlusCircle className="w-4 h-4" />
+                  </div>
                   <span>{t('nav.newAudit')}</span>
                 </button>
               )}
