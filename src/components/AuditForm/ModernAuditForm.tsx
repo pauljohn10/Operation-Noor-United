@@ -626,12 +626,12 @@ export const ModernAuditForm: React.FC<Props> = ({
                   })()}
                 </div>
 
-                {/* 2. DESKTOP GRID TABLE (HIGH-CONTRAST PURE WHITE TYPOGRAPHY & GLASS ROW STYLING) */}
+                {/* 2. DESKTOP GRID TABLE (HIGH-CONTRAST SOLID WHITE TYPOGRAPHY & DATA ROW STYLING) */}
                 <div className="hidden md:block overflow-x-auto p-4 sm:p-5">
-                  <table className="w-full text-left text-xs">
+                  <table className="w-full text-left text-xs bg-white border border-slate-200 rounded-xl overflow-hidden shadow-2xs">
                     <thead>
-                      <tr className="bg-slate-950/60 backdrop-blur-xl text-white font-black uppercase text-[11px] border-b border-white/20">
-                        <th className="p-3.5 w-20 text-center">{t('auditForm.pumpNo')}</th>
+                      <tr className="bg-slate-100 text-slate-800 font-extrabold uppercase text-[11px] border-b border-slate-200">
+                        <th className="p-3.5 w-24 text-center">{t('auditForm.pumpNo')}</th>
                         <th className="p-3.5">{t('auditForm.openingReading')}</th>
                         <th className="p-3.5">{t('auditForm.closingReading')}</th>
                         <th className="p-3.5 text-right">{t('auditForm.quantitySold')} (L)</th>
@@ -639,7 +639,7 @@ export const ModernAuditForm: React.FC<Props> = ({
                         <th className="p-3.5 text-right">{t('auditForm.totalAmount')}</th>
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-white/10 text-white font-medium">
+                    <tbody className="divide-y divide-slate-100 text-slate-900 font-medium">
                       {fuelItems.map((item, index) => {
                         const isTotalRow = item.pump_no === 15;
                         return (
@@ -647,20 +647,20 @@ export const ModernAuditForm: React.FC<Props> = ({
                             key={item.pump_no}
                             className={
                               isTotalRow
-                                ? 'bg-sky-500/25 font-black border-y-2 border-sky-400/40 text-white'
-                                : 'odd:bg-white/5 even:bg-white/10 hover:bg-white/20 transition-all'
+                                ? 'bg-sky-50/90 font-black border-y-2 border-sky-300 text-slate-900'
+                                : 'hover:bg-slate-50 transition-all'
                             }
                           >
-                            <td className="p-3 text-center font-black font-mono text-white text-xs drop-shadow-sm">
+                            <td className="p-3 text-center font-extrabold font-mono text-slate-900 text-xs">
                               {isTotalRow ? (
-                                <span className="font-black text-sky-300 font-sans uppercase text-xs tracking-wider">Total</span>
+                                <span className="font-extrabold text-sky-900 font-sans uppercase text-xs tracking-wider">Total</span>
                               ) : (
                                 `Pump ${item.pump_no}`
                               )}
                             </td>
                             <td className="p-3">
                               {isReadOnly ? (
-                                <span className="font-mono font-black text-white text-xs drop-shadow-sm">
+                                <span className="font-mono font-black text-slate-900 text-xs">
                                   {item.start_reading != null ? formatMeterReading(item.start_reading) : '-'}
                                 </span>
                               ) : (
@@ -690,19 +690,19 @@ export const ModernAuditForm: React.FC<Props> = ({
                                   placeholder={isTotalRow ? 'Manual Entry' : '0.00'}
                                   className={
                                     isTotalRow
-                                      ? 'w-full text-xs font-black text-slate-900 bg-amber-200 border-2 border-amber-400 rounded-xl px-3 py-1.5 focus:ring-2 focus:ring-amber-500 font-mono shadow-xs touch-manipulation cursor-text'
-                                      : 'w-full min-h-[38px] text-xs font-black text-white bg-slate-950/60 border border-white/30 rounded-xl px-3 py-1.5 focus:border-sky-400 focus:ring-2 focus:ring-sky-400/30 font-mono touch-manipulation cursor-text placeholder:text-slate-500'
+                                      ? 'w-full text-xs font-black text-slate-900 bg-amber-100 border-2 border-amber-400 rounded-xl px-3 py-1.5 focus:ring-2 focus:ring-amber-500 font-mono shadow-2xs touch-manipulation cursor-text'
+                                      : 'w-full min-h-[38px] text-xs font-black text-slate-900 bg-white border border-slate-300 rounded-xl px-3 py-1.5 focus:border-sky-500 focus:ring-2 focus:ring-sky-500/20 font-mono touch-manipulation cursor-text placeholder:text-slate-400 shadow-2xs'
                                   }
                                 />
                               )}
                             </td>
                             <td className="p-3">
                               {isTotalRow ? (
-                                <span className="font-mono font-black text-sky-200 text-xs drop-shadow-sm">
+                                <span className="font-mono font-black text-sky-900 text-xs">
                                   {item.end_reading != null ? `${formatMeterReading(item.end_reading)} L` : '-'}
                                 </span>
                               ) : isReadOnly ? (
-                                <span className="font-mono font-black text-white text-xs drop-shadow-sm">
+                                <span className="font-mono font-black text-slate-900 text-xs">
                                   {item.end_reading != null ? formatMeterReading(item.end_reading) : '-'}
                                 </span>
                               ) : (
@@ -720,37 +720,37 @@ export const ModernAuditForm: React.FC<Props> = ({
                                     )
                                   }
                                   placeholder="0.00"
-                                  className="w-full min-h-[38px] text-xs font-black text-white bg-slate-950/60 border border-white/30 rounded-xl px-3 py-1.5 focus:border-sky-400 focus:ring-2 focus:ring-sky-400/30 font-mono placeholder:text-slate-500"
+                                  className="w-full min-h-[38px] text-xs font-black text-slate-900 bg-white border border-slate-300 rounded-xl px-3 py-1.5 focus:border-sky-500 focus:ring-2 focus:ring-sky-500/20 font-mono placeholder:text-slate-400 shadow-2xs"
                                 />
                               )}
                             </td>
                             <td className="p-3 text-right font-black font-mono">
                               {isTotalRow ? (
-                                <span className="text-sky-300 font-black text-xs drop-shadow-sm">
+                                <span className="text-sky-900 font-black text-xs">
                                   {item.quantity_sold != null ? `${formatNumber(item.quantity_sold)} L` : '-'}
                                 </span>
                               ) : (
-                                <span className="text-sky-200/60 font-bold">-</span>
+                                <span className="text-slate-400 font-bold text-center block">-</span>
                               )}
                             </td>
                             {index === 0 && (
                               <td
                                 rowSpan={fuelItems.length}
-                                className="p-3 text-center align-middle font-black font-mono text-white bg-slate-950/50 backdrop-blur-xl border-x border-white/20 shadow-inner"
+                                className="p-3 text-center align-middle font-black font-mono bg-sky-50/70 border-x border-slate-200"
                               >
-                                <span className="text-xs font-black text-sky-300 drop-shadow-sm">SAR {sec.price.toFixed(2)}</span>
-                                <span className="block text-[10px] text-sky-200/80 font-sans font-bold mt-1">
+                                <span className="text-xs font-black text-sky-900">SAR {sec.price.toFixed(2)}</span>
+                                <span className="block text-[10px] text-slate-500 font-sans font-bold mt-1">
                                   Shared Unit Price
                                 </span>
                               </td>
                             )}
                             <td className="p-3 text-right font-black font-mono">
                               {isTotalRow ? (
-                                <span className="text-emerald-300 font-black text-xs drop-shadow-sm">
+                                <span className="text-emerald-800 font-black text-xs">
                                   {item.amount != null ? `${formatCurrency(item.amount)} SAR` : '-'}
                                 </span>
                               ) : (
-                                <span className="text-sky-200/60 font-bold">-</span>
+                                <span className="text-slate-400 font-bold text-center block">-</span>
                               )}
                             </td>
                           </tr>
