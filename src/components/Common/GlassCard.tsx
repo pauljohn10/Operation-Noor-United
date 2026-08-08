@@ -17,11 +17,11 @@ export const GlassCard: React.FC<GlassCardProps> = ({
   ...props
 }) => {
   const variantStyles = {
-    blue: 'bg-sky-500/10 backdrop-blur-3xl border-sky-300/30 text-white shadow-[0_20px_45px_rgba(0,0,0,0.2),0_0_30px_rgba(14,165,233,0.15)] hover:shadow-[0_25px_55px_rgba(0,0,0,0.25),0_0_45px_rgba(56,189,248,0.25)] hover:bg-sky-500/15 hover:border-sky-300/50',
-    default: 'bg-white/10 backdrop-blur-3xl border-white/25 text-white shadow-[0_20px_45px_rgba(0,0,0,0.15),0_0_30px_rgba(255,255,255,0.05)] hover:shadow-[0_25px_55px_rgba(0,0,0,0.2),0_0_40px_rgba(56,189,248,0.15)] hover:bg-white/15 hover:border-white/40',
-    emerald: 'bg-emerald-500/10 backdrop-blur-3xl border-emerald-300/30 text-white shadow-[0_20px_45px_rgba(0,0,0,0.2),0_0_30px_rgba(16,185,129,0.15)] hover:shadow-[0_25px_55px_rgba(0,0,0,0.25),0_0_45px_rgba(16,185,129,0.25)] hover:bg-emerald-500/15 hover:border-emerald-300/50',
-    amber: 'bg-amber-500/10 backdrop-blur-3xl border-amber-300/30 text-white shadow-[0_20px_45px_rgba(0,0,0,0.2),0_0_30px_rgba(245,158,11,0.15)] hover:shadow-[0_25px_55px_rgba(0,0,0,0.25),0_0_45px_rgba(245,158,11,0.25)] hover:bg-amber-500/15 hover:border-amber-300/50',
-    rose: 'bg-rose-500/10 backdrop-blur-3xl border-rose-300/30 text-white shadow-[0_20px_45px_rgba(0,0,0,0.2),0_0_30px_rgba(244,63,94,0.15)] hover:shadow-[0_25px_55px_rgba(0,0,0,0.25),0_0_45px_rgba(244,63,94,0.25)] hover:bg-rose-500/15 hover:border-rose-300/50',
+    blue: 'bg-white/95 backdrop-blur-md border-sky-200/90 text-slate-900 shadow-sm hover:shadow-md hover:border-sky-300 hover:bg-white',
+    default: 'bg-white/95 backdrop-blur-md border-slate-200/90 text-slate-900 shadow-sm hover:shadow-md hover:border-slate-300 hover:bg-white',
+    emerald: 'bg-white/95 backdrop-blur-md border-emerald-200/90 text-slate-900 shadow-sm hover:shadow-md hover:border-emerald-300 hover:bg-white',
+    amber: 'bg-white/95 backdrop-blur-md border-amber-200/90 text-slate-900 shadow-sm hover:shadow-md hover:border-amber-300 hover:bg-white',
+    rose: 'bg-white/95 backdrop-blur-md border-rose-200/90 text-slate-900 shadow-sm hover:shadow-md hover:border-rose-300 hover:bg-white',
   };
 
   const selectedVariant = variantStyles[variant] || variantStyles.blue;

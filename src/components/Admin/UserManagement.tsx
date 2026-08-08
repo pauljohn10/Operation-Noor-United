@@ -153,36 +153,36 @@ export const UserManagement: React.FC<Props> = ({
   return (
     <div className="space-y-6">
       {/* HEADER TOOLBAR */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white/10 backdrop-blur-3xl border border-white/25 p-4 rounded-2xl shadow-xl">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white border border-slate-200 p-4 rounded-2xl shadow-sm">
         <div className="flex-1 flex flex-col sm:flex-row items-center gap-3">
           <div className="relative w-full sm:w-72">
-            <Search className="w-4 h-4 text-sky-300 absolute left-3.5 top-1/2 -translate-y-1/2" />
+            <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
             <input
               type="text"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               placeholder="Search users..."
-              className="w-full bg-white/15 backdrop-blur-xl border border-white/30 rounded-xl pl-10 pr-4 py-2 text-xs font-bold text-white placeholder-sky-200/70 focus:outline-none focus:bg-white/25 focus:border-white/50 transition-all shadow-inner"
+              className="w-full bg-white border border-slate-300 rounded-xl pl-10 pr-4 py-2 text-xs font-bold text-slate-900 placeholder-slate-400 focus:outline-none focus:border-sky-500 focus:ring-2 focus:ring-sky-500/20 transition-all shadow-xs"
             />
           </div>
 
           <select
             value={roleFilter}
             onChange={(e) => setRoleFilter(e.target.value)}
-            className="w-full sm:w-auto bg-white/15 backdrop-blur-xl border border-white/30 rounded-xl px-3 py-2 text-xs font-bold text-white focus:outline-none focus:bg-white/25 transition-all shadow-sm"
+            className="w-full sm:w-auto bg-white border border-slate-300 rounded-xl px-3 py-2 text-xs font-bold text-slate-900 focus:outline-none focus:border-sky-500 focus:ring-2 focus:ring-sky-500/20 transition-all shadow-xs"
           >
-            <option value="ALL" className="bg-slate-900 text-white">All Roles</option>
-            <option value="Super Admin" className="bg-slate-900 text-white">Super Admin</option>
-            <option value="Management" className="bg-slate-900 text-white">Management</option>
-            <option value="Account Manager" className="bg-slate-900 text-white">Account Manager</option>
-            <option value="Accountant" className="bg-slate-900 text-white">Accountant</option>
-            <option value="Operation Supervisor" className="bg-slate-900 text-white">Operation Supervisor</option>
+            <option value="ALL">All Roles</option>
+            <option value="Super Admin">Super Admin</option>
+            <option value="Management">Management</option>
+            <option value="Account Manager">Account Manager</option>
+            <option value="Accountant">Accountant</option>
+            <option value="Operation Supervisor">Operation Supervisor</option>
           </select>
         </div>
 
         <button
           onClick={handleOpenAdd}
-          className="px-5 py-2.5 bg-gradient-to-r from-sky-600 via-blue-600 to-indigo-600 hover:from-sky-500 hover:to-indigo-500 text-white font-extrabold text-xs rounded-2xl shadow-lg shadow-sky-600/30 hover:shadow-sky-600/40 hover:-translate-y-0.5 transition-all flex items-center gap-1.5 shrink-0"
+          className="px-5 py-2.5 bg-gradient-to-r from-sky-600 via-blue-600 to-indigo-600 hover:from-sky-500 hover:to-indigo-500 text-white font-extrabold text-xs rounded-2xl shadow-md hover:-translate-y-0.5 transition-all flex items-center gap-1.5 shrink-0"
         >
           <Plus className="w-4 h-4" />
           <span>Create New User</span>
@@ -190,10 +190,10 @@ export const UserManagement: React.FC<Props> = ({
       </div>
 
       {/* USERS TABLE */}
-      <div className="bg-white/10 backdrop-blur-3xl border border-white/25 rounded-[28px] overflow-hidden shadow-xl">
+      <div className="bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-sm">
         <div className="overflow-x-auto">
           <table className="w-full text-left text-xs">
-            <thead className="bg-white/15 text-white uppercase font-extrabold border-b border-white/25">
+            <thead className="bg-slate-50 text-slate-700 uppercase font-extrabold border-b border-slate-200">
               <tr>
                 <th className="p-4">User & Emp ID</th>
                 <th className="p-4">Role & Position</th>

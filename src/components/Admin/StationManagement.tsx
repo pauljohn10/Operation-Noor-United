@@ -102,21 +102,21 @@ export const StationManagement: React.FC<Props> = ({
   return (
     <div className="space-y-6">
       {/* HEADER TOOLBAR */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white/10 backdrop-blur-3xl border border-white/25 p-4 rounded-2xl shadow-xl">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white border border-slate-200 p-4 rounded-2xl shadow-sm">
         <div className="relative flex-1">
-          <Search className="w-4 h-4 text-sky-300 absolute left-3.5 top-1/2 -translate-y-1/2" />
+          <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
           <input
             type="text"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             placeholder="Search stations by name, station #, location..."
-            className="w-full bg-white/15 backdrop-blur-xl border border-white/30 rounded-xl pl-10 pr-4 py-2 text-xs font-bold text-white placeholder-sky-200/70 focus:outline-none focus:bg-white/25 focus:border-white/50 focus:ring-4 focus:ring-sky-400/20 transition-all shadow-inner"
+            className="w-full bg-white border border-slate-300 rounded-xl pl-10 pr-4 py-2 text-xs font-bold text-slate-900 placeholder-slate-400 focus:outline-none focus:border-sky-500 focus:ring-2 focus:ring-sky-500/20 transition-all shadow-xs"
           />
         </div>
 
         <button
           onClick={handleOpenAdd}
-          className="px-5 py-2.5 bg-gradient-to-r from-sky-600 via-blue-600 to-indigo-600 hover:from-sky-500 hover:to-indigo-500 text-white font-extrabold text-xs rounded-2xl shadow-lg shadow-sky-600/30 hover:shadow-sky-600/40 hover:-translate-y-0.5 transition-all flex items-center gap-1.5 shrink-0"
+          className="px-5 py-2.5 bg-gradient-to-r from-sky-600 via-blue-600 to-indigo-600 hover:from-sky-500 hover:to-indigo-500 text-white font-extrabold text-xs rounded-2xl shadow-md hover:-translate-y-0.5 transition-all flex items-center gap-1.5 shrink-0"
         >
           <Plus className="w-4 h-4" />
           <span>Add New Station</span>
@@ -124,10 +124,10 @@ export const StationManagement: React.FC<Props> = ({
       </div>
 
       {/* STATIONS TABLE */}
-      <div className="bg-white/10 backdrop-blur-3xl border border-white/25 rounded-[28px] overflow-hidden shadow-xl">
+      <div className="bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-sm">
         <div className="overflow-x-auto">
           <table className="w-full text-left text-xs">
-            <thead className="bg-white/15 text-white uppercase font-extrabold border-b border-white/25">
+            <thead className="bg-slate-50 text-slate-700 uppercase font-extrabold border-b border-slate-200">
               <tr>
                 <th className="p-4 text-center w-16">Station #</th>
                 <th className="p-4">Station Name</th>
@@ -137,33 +137,33 @@ export const StationManagement: React.FC<Props> = ({
                 <th className="p-4 text-right">Actions</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-white/15 text-white">
+            <tbody className="divide-y divide-slate-100 text-slate-900">
               {filtered.length === 0 ? (
                 <tr>
-                  <td colSpan={6} className="p-8 text-center text-sky-200/80 font-medium italic">
+                  <td colSpan={6} className="p-8 text-center text-slate-500 font-medium italic">
                     No stations found.
                   </td>
                 </tr>
               ) : (
                 filtered.map((st, index) => (
-                  <tr key={st.id} className="hover:bg-white/15 transition-colors">
-                    <td className="p-4 font-black text-sky-300 font-mono text-center">{index + 1}</td>
-                    <td className="p-4 font-bold text-white">
+                  <tr key={st.id} className="hover:bg-slate-50/80 transition-colors">
+                    <td className="p-4 font-black text-sky-900 font-mono text-center">{index + 1}</td>
+                    <td className="p-4 font-bold text-slate-900">
                       <div className="flex items-center gap-2">
-                        <Building className="w-4 h-4 text-sky-300 shrink-0" />
+                        <Building className="w-4 h-4 text-sky-600 shrink-0" />
                         <div>
-                          <span className="block font-black text-white text-xs">{st.name}</span>
-                          <span className="inline-block text-[10px] text-sky-200/90 font-mono font-extrabold bg-white/10 px-2 py-0.5 rounded-md border border-white/20 mt-0.5">
+                          <span className="block font-black text-slate-900 text-xs">{st.name}</span>
+                          <span className="inline-block text-[10px] text-sky-900 font-mono font-extrabold bg-sky-50 px-2 py-0.5 rounded-md border border-sky-200 mt-0.5">
                             Noor: {st.station_no.replace(/^ST-0*/i, '').replace(/^ST-/i, '')}
                           </span>
                         </div>
                       </div>
                     </td>
                     <td className="p-4">
-                      <p className="text-white font-bold">{st.location}</p>
-                      <p className="text-[10px] text-sky-200/80 font-medium">{st.region || 'Central Region'}</p>
+                      <p className="text-slate-900 font-bold">{st.location}</p>
+                      <p className="text-[10px] text-slate-500 font-medium">{st.region || 'Central Region'}</p>
                     </td>
-                    <td className="p-4 font-extrabold text-sky-200">
+                    <td className="p-4 font-extrabold text-slate-800">
                       {st.operation_supervisor_name || 'Unassigned'}
                     </td>
                     <td className="p-4">
@@ -171,8 +171,8 @@ export const StationManagement: React.FC<Props> = ({
                         onClick={() => handleToggleStatus(st)}
                         className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider transition-colors flex items-center gap-1 ${
                           st.status === 'active'
-                            ? 'bg-emerald-500/10 text-emerald-700 border border-emerald-500/30'
-                            : 'bg-rose-500/10 text-rose-700 border border-rose-500/30'
+                            ? 'bg-emerald-50 text-emerald-700 border border-emerald-300'
+                            : 'bg-rose-50 text-rose-700 border border-rose-300'
                         }`}
                       >
                         {st.status === 'active' ? (
@@ -192,7 +192,7 @@ export const StationManagement: React.FC<Props> = ({
                       <div className="flex items-center justify-end gap-2">
                         <button
                           onClick={() => handleOpenEdit(st)}
-                          className="p-2 bg-white/80 hover:bg-white text-sky-700 rounded-xl border border-sky-200/80 shadow-sm transition-all"
+                          className="p-2 bg-slate-50 hover:bg-sky-50 text-sky-700 rounded-xl border border-slate-200 shadow-2xs transition-all"
                           title="Edit Station"
                         >
                           <Edit2 className="w-3.5 h-3.5" />
@@ -203,7 +203,7 @@ export const StationManagement: React.FC<Props> = ({
                               onDeleteStation(st.id);
                             }
                           }}
-                          className="p-2 bg-white/80 hover:bg-white text-rose-600 rounded-xl border border-rose-200/80 shadow-sm transition-all"
+                          className="p-2 bg-slate-50 hover:bg-rose-50 text-rose-600 rounded-xl border border-slate-200 shadow-2xs transition-all"
                           title="Delete Station"
                         >
                           <Trash2 className="w-3.5 h-3.5" />
@@ -220,8 +220,8 @@ export const StationManagement: React.FC<Props> = ({
 
       {/* ADD/EDIT STATION MODAL */}
       {isModalOpen && editingStation && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 backdrop-blur-md p-4">
-          <div className="bg-white/85 backdrop-blur-2xl border border-white/90 rounded-2xl max-w-lg w-full p-6 shadow-2xl ring-1 ring-white/60">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 backdrop-blur-sm p-4">
+          <div className="bg-white border border-slate-200 rounded-2xl max-w-lg w-full p-6 shadow-2xl">
             <h3 className="text-base font-black text-slate-900 mb-4">
               {editingStation.id && stations.some((s) => s.id === editingStation.id)
                 ? 'Edit Fuel Station'

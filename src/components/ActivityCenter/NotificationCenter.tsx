@@ -57,18 +57,18 @@ export const NotificationCenter: React.FC<Props> = ({
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
       {/* HEADER CARD */}
-      <div className="flex flex-wrap items-center justify-between gap-4 bg-white/90 backdrop-blur-2xl border border-white p-5 sm:p-6 rounded-2xl shadow-[0_15px_35px_rgba(14,165,233,0.15)] ring-1 ring-white/80">
+      <div className="flex flex-wrap items-center justify-between gap-4 bg-white border border-slate-200 p-5 sm:p-6 rounded-2xl shadow-sm">
         <div>
-          <h2 className="text-xl sm:text-2xl font-black text-slate-950 flex items-center gap-2.5 tracking-tight">
+          <h2 className="text-xl sm:text-2xl font-black text-slate-900 flex items-center gap-2.5 tracking-tight">
             <Bell className="w-6 h-6 text-sky-600" />
             <span>{t('notifications.title')}</span>
             {unreadCount > 0 && (
-              <span className="px-3 py-0.5 rounded-full text-xs font-black bg-amber-500 text-slate-950 shadow-sm border border-amber-400 animate-pulse">
+              <span className="px-3 py-0.5 rounded-full text-xs font-black bg-amber-500 text-slate-950 shadow-xs border border-amber-400">
                 {unreadCount} {t('notifications.unread') || 'Unread'}
               </span>
             )}
           </h2>
-          <p className="text-xs sm:text-sm text-slate-700 font-extrabold mt-1">
+          <p className="text-xs sm:text-sm text-slate-600 font-extrabold mt-1">
             {t('notifications.subtitle')}
           </p>
         </div>
@@ -77,7 +77,7 @@ export const NotificationCenter: React.FC<Props> = ({
         {unreadCount > 0 && (
           <button
             onClick={onMarkAllAsRead}
-            className="flex items-center gap-1.5 px-4 py-2 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white rounded-xl text-xs font-black transition-all shadow-md active:scale-95 border border-emerald-400/40"
+            className="flex items-center gap-1.5 px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-black transition-all shadow-xs active:scale-95 border border-emerald-500"
           >
             <CheckCheck className="w-4 h-4" />
             <span>{t('notifications.markAllRead') || 'Mark All as Read'}</span>
@@ -86,14 +86,14 @@ export const NotificationCenter: React.FC<Props> = ({
       </div>
 
       {/* FILTER TABS (ALL vs UNREAD) */}
-      <div className="flex items-center justify-between border-b border-sky-200/60 pb-2.5 flex-wrap gap-3">
-        <div className="flex items-center gap-2 p-1 bg-white/80 backdrop-blur-xl rounded-xl border border-white shadow-xs">
+      <div className="flex items-center justify-between border-b border-slate-200 pb-2.5 flex-wrap gap-3">
+        <div className="flex items-center gap-2 p-1 bg-white rounded-xl border border-slate-200 shadow-xs">
           <button
             onClick={() => setFilterTab('all')}
             className={`flex items-center gap-1.5 px-4 py-1.5 rounded-lg text-xs font-black transition-all ${
               filterTab === 'all'
-                ? 'bg-sky-600 text-white shadow-md ring-1 ring-sky-400/40'
-                : 'text-slate-800 hover:text-slate-950 hover:bg-white/80 font-extrabold'
+                ? 'bg-sky-600 text-white shadow-xs'
+                : 'text-slate-700 hover:text-slate-900 hover:bg-slate-50 font-extrabold'
             }`}
           >
             <span>{t('common.all') || 'All'}</span>
@@ -106,8 +106,8 @@ export const NotificationCenter: React.FC<Props> = ({
             onClick={() => setFilterTab('unread')}
             className={`flex items-center gap-1.5 px-4 py-1.5 rounded-lg text-xs font-black transition-all ${
               filterTab === 'unread'
-                ? 'bg-sky-600 text-white shadow-md ring-1 ring-sky-400/40'
-                : 'text-slate-800 hover:text-slate-950 hover:bg-white/80 font-extrabold'
+                ? 'bg-sky-600 text-white shadow-xs'
+                : 'text-slate-700 hover:text-slate-900 hover:bg-slate-50 font-extrabold'
             }`}
           >
             <Filter className="w-3.5 h-3.5" />
@@ -120,7 +120,7 @@ export const NotificationCenter: React.FC<Props> = ({
           </button>
         </div>
 
-        <span className="text-xs font-black text-sky-950 bg-sky-100/90 px-3.5 py-1 rounded-full border border-sky-300/90 shadow-2xs">
+        <span className="text-xs font-black text-sky-900 bg-sky-50 px-3.5 py-1 rounded-full border border-sky-200 shadow-2xs">
           {displayedNotifications.length} {displayedNotifications.length === 1 ? 'activity' : 'activities'} listed
         </span>
       </div>
@@ -128,7 +128,7 @@ export const NotificationCenter: React.FC<Props> = ({
       {/* NOTIFICATIONS LIST */}
       <div className="space-y-3.5">
         {displayedNotifications.length === 0 ? (
-          <div className="bg-white/85 backdrop-blur-xl border border-white p-8 rounded-2xl text-center text-slate-700 font-extrabold shadow-sm">
+          <div className="bg-white border border-slate-200 p-8 rounded-2xl text-center text-slate-600 font-extrabold shadow-sm">
             {filterTab === 'unread'
               ? (t('notifications.allCaughtUp') || 'All notifications caught up!')
               : (t('notifications.noNotifications') || 'No notifications available')}
@@ -137,10 +137,10 @@ export const NotificationCenter: React.FC<Props> = ({
           displayedNotifications.map((notif) => (
             <div
               key={notif.id}
-              className={`p-4.5 sm:p-5 rounded-2xl transition-all flex items-start justify-between gap-4 backdrop-blur-2xl ${
+              className={`p-4.5 sm:p-5 rounded-2xl transition-all flex items-start justify-between gap-4 ${
                 !notif.is_read
-                  ? 'bg-white/95 border-2 border-sky-500 shadow-[0_12px_30px_rgba(14,165,233,0.18)] ring-2 ring-sky-400/25'
-                  : 'bg-white/80 border border-slate-300/80 text-slate-800 shadow-sm hover:bg-white/90'
+                  ? 'bg-white border-2 border-sky-500 shadow-sm'
+                  : 'bg-white border border-slate-200 text-slate-900 shadow-2xs hover:border-slate-300'
               }`}
             >
               <div className="flex items-start gap-3.5">

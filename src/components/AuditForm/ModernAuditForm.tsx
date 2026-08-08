@@ -88,19 +88,16 @@ export const ModernAuditForm: React.FC<Props> = ({
     <div className="space-y-3.5 sm:space-y-4">
       
       {/* 1. AUDIT & STATION METADATA CARD (ALWAYS DISPLAYED WITH ADAPTIVE LABELS) */}
-      <div className="bg-white/60 backdrop-blur-2xl border border-white/90 p-4 sm:p-4.5 rounded-2xl shadow-[0_10px_25px_rgba(14,165,233,0.08)] space-y-3">
-        <div className="flex items-center justify-between border-b border-sky-100 pb-2.5">
+      <div className="bg-white border border-slate-200 p-4 sm:p-4.5 rounded-2xl shadow-sm space-y-3">
+        <div className="flex items-center justify-between border-b border-slate-200 pb-2.5">
           <div className="flex items-center gap-2">
-            <div className="p-2 bg-sky-500/10 text-sky-600 rounded-lg border border-sky-500/20">
+            <div className="p-2 bg-sky-50 text-sky-600 rounded-lg border border-sky-200">
               <Building className="w-4 h-4" />
             </div>
             <div>
               <h3 className="text-sm font-black text-slate-900">{t('auditForm.auditInfoTitle')}</h3>
             </div>
           </div>
-          <span className="text-[11px] font-mono font-bold text-sky-800 bg-sky-50 px-2.5 py-0.5 rounded-full border border-sky-200">
-            {audit.audit_number || 'NEW AUDIT'}
-          </span>
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
@@ -114,11 +111,11 @@ export const ModernAuditForm: React.FC<Props> = ({
               <select
                 value={selectedStation.id}
                 onChange={(e) => onMetaChange('station_id', e.target.value)}
-                className="w-full bg-white/90 border border-slate-300 rounded-xl px-3 py-1.5 text-xs font-extrabold text-slate-900 focus:ring-2 focus:ring-sky-500 focus:border-sky-500 shadow-2xs min-h-[36px]"
+                className="w-full bg-white border border-slate-300 rounded-xl px-3 py-2 text-xs font-bold text-slate-900 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-sky-500 transition-all shadow-xs"
               >
-                {stations.map((s) => (
-                  <option key={s.id} value={s.id}>
-                    {s.station_no} - {s.name} ({s.location})
+                {stations.map((st) => (
+                  <option key={st.id} value={st.id} className="text-slate-900">
+                    {st.station_no ? `${st.station_no} – ${st.name}` : st.name}
                   </option>
                 ))}
               </select>

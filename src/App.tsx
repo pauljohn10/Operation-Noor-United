@@ -433,26 +433,15 @@ function AppContent() {
   return (
     <div className="min-h-screen min-h-[100dvh] w-full text-slate-900 flex flex-col font-sans selection:bg-sky-500 selection:text-white relative overflow-x-hidden">
       
-      {/* 1. ELEGANT BLUE ANIMATED ENTERPRISE BACKGROUND SYSTEM (NO IMAGE AFTER LOGIN) */}
-      <div className="fixed inset-0 w-full h-full bg-[#020617] pointer-events-none z-0 overflow-hidden">
+      {/* 1. ELEGANT CLEAN ENTERPRISE BACKGROUND SYSTEM */}
+      <div className="fixed inset-0 w-full h-full bg-slate-100 pointer-events-none z-0 overflow-hidden">
         {/* Layer 1: Base Gradient Mesh */}
-        <div className="absolute inset-0 bg-gradient-to-br from-[#020617] via-[#0f172a] to-[#030712]"></div>
+        <div className="absolute inset-0 bg-gradient-to-br from-slate-100 via-sky-50/60 to-slate-200/80"></div>
 
-        {/* Layer 2: Radial Glow Center Accent */}
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_20%,rgba(37,99,235,0.18),transparent_65%)]"></div>
-
-        {/* Layer 3: Floating Animated Light Orbs (GPU Accelerated) */}
-        {/* Top Left Royal Blue Glow */}
-        <div className="absolute -top-44 -left-44 w-[750px] h-[750px] bg-[#2563eb]/25 rounded-full blur-[130px] animate-orb-slow"></div>
-
-        {/* Bottom Right Sky Blue Glow */}
-        <div className="absolute -bottom-44 -right-44 w-[700px] h-[700px] bg-[#38bdf8]/20 rounded-full blur-[120px] animate-orb-reverse"></div>
-
-        {/* Center-Top Cyan Ambient Pulse Glow */}
-        <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-[600px] h-[600px] bg-[#06b6d4]/20 rounded-full blur-[110px] animate-pulse-glow"></div>
-
-        {/* Subtle Top Specular Refraction Beam */}
-        <div className="absolute inset-x-0 top-0 h-96 bg-gradient-to-b from-sky-400/10 via-blue-500/5 to-transparent pointer-events-none"></div>
+        {/* Layer 2: Subtle Ambient Accent Orbs */}
+        <div className="absolute -top-44 -left-44 w-[750px] h-[750px] bg-sky-200/40 rounded-full blur-[120px]"></div>
+        <div className="absolute -bottom-44 -right-44 w-[700px] h-[700px] bg-blue-200/35 rounded-full blur-[120px]"></div>
+        <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-[600px] h-[600px] bg-cyan-100/30 rounded-full blur-[100px]"></div>
       </div>
 
       {/* NAVBAR */}
