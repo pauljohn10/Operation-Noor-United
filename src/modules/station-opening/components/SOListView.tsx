@@ -45,25 +45,25 @@ export const SOListView: React.FC<Props> = ({ forms, currentUser, onOpenForm, on
     switch (status) {
       case 'approved':
         return (
-          <span className="inline-block px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider bg-emerald-500/20 text-emerald-300 border border-emerald-400/40 shadow-sm backdrop-blur-md">
+          <span className="inline-block px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider bg-emerald-50 text-emerald-800 border border-emerald-300 shadow-2xs">
             {t('so.statusApproved')}
           </span>
         );
       case 'rejected':
         return (
-          <span className="inline-block px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider bg-rose-500/20 text-rose-300 border border-rose-400/40 shadow-sm backdrop-blur-md">
+          <span className="inline-block px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider bg-rose-50 text-rose-800 border border-rose-300 shadow-2xs">
             {t('so.statusRejected')}
           </span>
         );
       case 'returned':
         return (
-          <span className="inline-block px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider bg-amber-500/20 text-amber-300 border border-amber-400/40 shadow-sm backdrop-blur-md">
+          <span className="inline-block px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider bg-amber-50 text-amber-800 border border-amber-300 shadow-2xs">
             {t('so.statusReturned')}
           </span>
         );
       default:
         return (
-          <span className="inline-block px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider bg-sky-500/20 text-sky-200 border border-sky-400/40 shadow-sm backdrop-blur-md">
+          <span className="inline-block px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider bg-sky-50 text-sky-800 border border-sky-300 shadow-2xs">
             {status.replace('pending_', '').replace(/_/g, ' ')}
           </span>
         );
@@ -73,13 +73,13 @@ export const SOListView: React.FC<Props> = ({ forms, currentUser, onOpenForm, on
   return (
     <div className="w-full px-4 sm:px-6 lg:px-8 py-6 space-y-6">
       {/* PAGE HEADER */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white/45 backdrop-blur-2xl border border-white/80 p-6 rounded-[28px] shadow-[0_20px_50px_rgba(14,165,233,0.15)] ring-1 ring-white/60">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white border border-slate-200 p-6 rounded-2xl shadow-sm">
         <div>
           <h2 className="text-xl font-black text-slate-900 flex items-center gap-2">
             <Building className="w-5 h-5 text-sky-600" />
             <span>{t('so.listTitle')}</span>
           </h2>
-          <p className="text-xs text-slate-600 font-medium mt-1">
+          <p className="text-xs text-slate-600 font-semibold mt-1">
             {t('so.listSub')}
           </p>
         </div>
@@ -87,7 +87,7 @@ export const SOListView: React.FC<Props> = ({ forms, currentUser, onOpenForm, on
         {isHeadOfOp && (
           <button
             onClick={onCreateNew}
-            className="px-5 py-2.5 bg-gradient-to-r from-sky-600 via-blue-600 to-indigo-600 hover:from-sky-500 hover:to-indigo-500 text-white font-extrabold text-xs rounded-2xl shadow-lg shadow-sky-600/30 hover:shadow-sky-600/40 hover:-translate-y-0.5 transition-all shrink-0 flex items-center gap-1.5"
+            className="px-5 py-2.5 bg-gradient-to-r from-sky-600 to-blue-700 hover:from-sky-500 hover:to-blue-600 text-white font-extrabold text-xs rounded-xl shadow-md transition-all shrink-0 flex items-center gap-1.5 min-h-[44px]"
           >
             <PlusCircle className="w-4 h-4" />
             <span>{t('so.newForm')}</span>
@@ -96,15 +96,15 @@ export const SOListView: React.FC<Props> = ({ forms, currentUser, onOpenForm, on
       </div>
 
       {/* FILTER TOOLBAR */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4 bg-white/10 backdrop-blur-3xl border border-white/25 p-4 rounded-2xl shadow-xl">
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4 bg-white border border-slate-200 p-4 rounded-2xl shadow-sm">
         <div className="md:col-span-2 relative">
-          <Search className="w-4 h-4 text-sky-300 absolute start-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+          <Search className="w-4 h-4 text-slate-400 absolute start-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
           <input
             type="text"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             placeholder={t('so.searchPlaceholder')}
-            className="w-full bg-white/15 backdrop-blur-xl border border-white/30 rounded-xl ps-10 pe-4 py-2 text-xs font-bold text-white placeholder-sky-200/70 focus:outline-none focus:bg-white/25 focus:border-white/50 transition-all shadow-inner"
+            className="w-full bg-white border border-slate-300 rounded-xl ps-10 pe-4 py-2 text-xs font-bold text-slate-900 placeholder-slate-400 focus:outline-none focus:border-sky-500 focus:ring-2 focus:ring-sky-500/20 transition-all shadow-xs"
           />
         </div>
 
@@ -112,16 +112,16 @@ export const SOListView: React.FC<Props> = ({ forms, currentUser, onOpenForm, on
           <select
             value={selectedStatus}
             onChange={(e) => setSelectedStatus(e.target.value)}
-            className="w-full bg-white/15 backdrop-blur-xl border border-white/30 text-xs font-bold rounded-xl px-3 py-2 text-white focus:outline-none focus:bg-white/25 transition-all shadow-sm"
+            className="w-full bg-white border border-slate-300 text-xs font-bold rounded-xl px-3 py-2 text-slate-900 focus:outline-none focus:border-sky-500 focus:ring-2 focus:ring-sky-500/20 transition-all shadow-xs"
           >
-            <option value="ALL" className="bg-slate-900 text-white">{t('so.allStatuses')}</option>
-            <option value="pending_safety_quality" className="bg-slate-900 text-white">{t('so.statusPendingSafetyQuality')}</option>
-            <option value="pending_document_controller" className="bg-slate-900 text-white">{t('so.statusPendingDocController')}</option>
-            <option value="pending_engineering" className="bg-slate-900 text-white">{t('so.statusPendingEngineering')}</option>
-            <option value="pending_management" className="bg-slate-900 text-white">{t('so.statusPendingManagement')}</option>
-            <option value="approved" className="bg-slate-900 text-white">{t('so.statusApproved')}</option>
-            <option value="returned" className="bg-slate-900 text-white">{t('so.statusReturned')}</option>
-            <option value="rejected" className="bg-slate-900 text-white">{t('so.statusRejected')}</option>
+            <option value="ALL">{t('so.allStatuses')}</option>
+            <option value="pending_safety_quality">{t('so.statusPendingSafetyQuality')}</option>
+            <option value="pending_document_controller">{t('so.statusPendingDocController')}</option>
+            <option value="pending_engineering">{t('so.statusPendingEngineering')}</option>
+            <option value="pending_management">{t('so.statusPendingManagement')}</option>
+            <option value="approved">{t('so.statusApproved')}</option>
+            <option value="returned">{t('so.statusReturned')}</option>
+            <option value="rejected">{t('so.statusRejected')}</option>
           </select>
         </div>
 
@@ -129,11 +129,11 @@ export const SOListView: React.FC<Props> = ({ forms, currentUser, onOpenForm, on
           <select
             value={selectedStation}
             onChange={(e) => setSelectedStation(e.target.value)}
-            className="w-full bg-white/15 backdrop-blur-xl border border-white/30 text-xs font-bold rounded-xl px-3 py-2 text-white focus:outline-none focus:bg-white/25 transition-all shadow-sm"
+            className="w-full bg-white border border-slate-300 text-xs font-bold rounded-xl px-3 py-2 text-slate-900 focus:outline-none focus:border-sky-500 focus:ring-2 focus:ring-sky-500/20 transition-all shadow-xs"
           >
-            <option value="ALL" className="bg-slate-900 text-white">{t('auditsList.allStations')}</option>
+            <option value="ALL">{t('auditsList.allStations')}</option>
             {uniqueStations.map((st) => (
-              <option key={st} value={st} className="bg-slate-900 text-white">
+              <option key={st} value={st}>
                 {st}
               </option>
             ))}
@@ -142,10 +142,10 @@ export const SOListView: React.FC<Props> = ({ forms, currentUser, onOpenForm, on
       </div>
 
       {/* TABLE DATA */}
-      <div className="bg-white/10 backdrop-blur-3xl border border-white/25 rounded-[28px] overflow-hidden shadow-xl">
+      <div className="bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-sm">
         <div className="overflow-x-auto">
           <table className="w-full text-center text-xs">
-            <thead className="bg-white/15 text-white uppercase font-black border-b border-white/25">
+            <thead className="bg-slate-50 text-slate-700 uppercase font-black border-b border-slate-200">
               <tr>
                 <th className="p-4 text-center">{t('so.formNoCol')}</th>
                 <th className="p-4 text-center">{t('so.stationCol')}</th>
@@ -155,38 +155,38 @@ export const SOListView: React.FC<Props> = ({ forms, currentUser, onOpenForm, on
                 <th className="p-4 text-center">{t('so.actionsCol')}</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-white/15 text-white">
+            <tbody className="divide-y divide-slate-100 text-slate-900">
               {filtered.length === 0 ? (
                 <tr>
-                  <td colSpan={6} className="p-8 text-center text-sky-200/90 font-medium italic">
+                  <td colSpan={6} className="p-8 text-center text-slate-500 font-medium italic">
                     {t('so.noFormsFound')}
                   </td>
                 </tr>
               ) : (
                 filtered.map((f) => (
-                  <tr key={f.id} className="odd:bg-white/5 even:bg-white/10 hover:bg-white/20 transition-all border-b border-white/10">
+                  <tr key={f.id} className="hover:bg-slate-50/80 transition-all">
                     <td className="p-4 text-center">
-                      <p className="font-extrabold text-sky-300 flex items-center justify-center gap-1.5 drop-shadow-sm font-mono">
-                        <FileText className="w-4 h-4 text-sky-300" />
+                      <p className="font-extrabold text-sky-900 flex items-center justify-center gap-1.5 font-mono">
+                        <FileText className="w-4 h-4 text-sky-600" />
                         <span>{f.form_number}</span>
                       </p>
-                      <p className="text-[11px] text-sky-200/90 font-bold mt-0.5 flex items-center justify-center gap-1">
-                        <Calendar className="w-3.5 h-3.5 text-sky-300" />
+                      <p className="text-[11px] text-slate-500 font-bold mt-0.5 flex items-center justify-center gap-1">
+                        <Calendar className="w-3.5 h-3.5 text-slate-400" />
                         <span>{f.date_started}</span>
                       </p>
                     </td>
 
                     <td className="p-4 text-center">
-                      <p className="font-extrabold text-white text-xs drop-shadow-sm">{f.station_name}</p>
-                      <p className="text-[11px] text-sky-200/90 font-medium">{f.address}</p>
+                      <p className="font-extrabold text-slate-900 text-xs">{f.station_name}</p>
+                      <p className="text-[11px] text-slate-500 font-medium">{f.address}</p>
                     </td>
 
                     <td className="p-4 text-center">
-                      <p className="text-white font-extrabold drop-shadow-sm">{f.head_of_operation_name || f.created_by_name || 'Operation Supervisor'}</p>
+                      <p className="text-slate-900 font-extrabold">{f.head_of_operation_name || f.created_by_name || 'Operation Supervisor'}</p>
                     </td>
 
                     <td className="p-4 text-center">
-                      <p className="text-sky-200 font-extrabold drop-shadow-sm">{f.station_supervisor_name || 'N/A'}</p>
+                      <p className="text-slate-700 font-extrabold">{f.station_supervisor_name || 'N/A'}</p>
                     </td>
 
                     <td className="p-4 text-center">
@@ -197,7 +197,7 @@ export const SOListView: React.FC<Props> = ({ forms, currentUser, onOpenForm, on
                       <div className="flex items-center justify-center gap-2">
                         <button
                           onClick={() => onOpenForm(f.id)}
-                          className="px-3.5 py-1.5 bg-sky-500/20 hover:bg-sky-500/30 text-white border border-sky-400/40 rounded-xl text-xs font-extrabold transition-all flex items-center gap-1.5 shadow-sm"
+                          className="px-3.5 py-1.5 bg-sky-600 hover:bg-sky-700 text-white rounded-xl text-xs font-extrabold transition-all flex items-center gap-1.5 shadow-2xs"
                         >
                           <FileCheck className="w-3.5 h-3.5" />
                           <span>View & Process</span>
@@ -205,7 +205,7 @@ export const SOListView: React.FC<Props> = ({ forms, currentUser, onOpenForm, on
                         {isHeadOfOp && (
                           <button
                             onClick={() => onDeleteForm(f.id)}
-                            className="p-1.5 text-rose-300 hover:text-rose-100 hover:bg-rose-500/20 rounded-lg transition-colors border border-rose-400/30"
+                            className="p-1.5 text-rose-600 hover:text-rose-700 hover:bg-rose-50 rounded-lg transition-colors border border-rose-200"
                             title="Delete Form"
                           >
                             <Trash2 className="w-4 h-4" />
