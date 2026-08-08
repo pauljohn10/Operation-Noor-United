@@ -57,32 +57,32 @@ export const AdminDashboard: React.FC<Props> = ({
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
       {/* HEADER NAVBAR */}
-      <div className="bg-white/10 backdrop-blur-3xl border border-white/25 p-5 rounded-[28px] shadow-xl flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <div className="bg-white border border-slate-200 p-5 rounded-2xl shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <div className="inline-flex items-center gap-2 px-3 py-1 bg-sky-400/20 text-sky-200 rounded-full text-xs font-extrabold border border-sky-400/30">
-            <ShieldCheck className="w-3.5 h-3.5 text-sky-300 animate-pulse" />
+          <div className="inline-flex items-center gap-2 px-3 py-1 bg-sky-50 text-sky-800 rounded-full text-xs font-extrabold border border-sky-200">
+            <ShieldCheck className="w-3.5 h-3.5 text-sky-600" />
             <span>Enterprise Admin Portal</span>
           </div>
-          <h2 className="text-xl font-black text-white tracking-tight flex items-center gap-2 mt-1 drop-shadow-sm">
-            <Building className="w-5 h-5 text-sky-300" />
+          <h2 className="text-xl font-black text-slate-900 tracking-tight flex items-center gap-2 mt-1">
+            <Building className="w-5 h-5 text-sky-600" />
             <span>Admin Hub</span>
           </h2>
-          <p className="text-xs text-sky-100/90 font-semibold drop-shadow-sm">
+          <p className="text-xs text-slate-600 font-semibold">
             Manage stations, user permissions, audit records & system parameters
           </p>
         </div>
 
-        {/* HIGH-CONTRAST DEDICATED FROSTED NAVIGATION CONTAINER */}
-        <div className="flex items-center gap-1.5 overflow-x-auto bg-slate-950/40 backdrop-blur-2xl p-1.5 rounded-2xl border border-white/30 shadow-inner">
+        {/* HIGH-CONTRAST DEDICATED NAVIGATION CONTAINER */}
+        <div className="flex items-center gap-1.5 overflow-x-auto bg-slate-100 p-1.5 rounded-xl border border-slate-200">
           <button
             onClick={() => setActiveMenu('dashboard')}
             className={`px-3.5 py-2 rounded-xl text-xs font-extrabold transition-all flex items-center gap-2 ${
               activeMenu === 'dashboard'
-                ? 'bg-gradient-to-r from-sky-500 to-blue-600 text-white shadow-lg shadow-sky-500/30 scale-[1.02]'
-                : 'text-white hover:text-sky-200 hover:bg-white/10'
+                ? 'bg-sky-600 text-white shadow-xs'
+                : 'text-slate-700 hover:text-slate-900 hover:bg-white font-extrabold'
             }`}
           >
-            <LayoutDashboard className="w-4 h-4 text-sky-300" />
+            <LayoutDashboard className="w-4 h-4" />
             <span>{t('admin.navDashboard')}</span>
           </button>
 
@@ -90,13 +90,13 @@ export const AdminDashboard: React.FC<Props> = ({
             onClick={() => setActiveMenu('stations')}
             className={`px-3.5 py-2 rounded-xl text-xs font-extrabold transition-all flex items-center gap-2 ${
               activeMenu === 'stations'
-                ? 'bg-gradient-to-r from-sky-500 to-blue-600 text-white shadow-lg shadow-sky-500/30 scale-[1.02]'
-                : 'text-white hover:text-sky-200 hover:bg-white/10'
+                ? 'bg-sky-600 text-white shadow-xs'
+                : 'text-slate-700 hover:text-slate-900 hover:bg-white font-extrabold'
             }`}
           >
-            <Building className="w-4 h-4 text-sky-300" />
+            <Building className="w-4 h-4" />
             <span>{t('admin.tabStations')}</span>
-            <span className="px-1.5 py-0.5 bg-white/20 text-white rounded-full text-[10px] font-mono">
+            <span className="px-1.5 py-0.5 bg-slate-200 text-slate-800 rounded-full text-[10px] font-mono">
               {stations.length}
             </span>
           </button>
@@ -105,13 +105,13 @@ export const AdminDashboard: React.FC<Props> = ({
             onClick={() => setActiveMenu('users')}
             className={`px-3.5 py-2 rounded-xl text-xs font-extrabold transition-all flex items-center gap-2 ${
               activeMenu === 'users'
-                ? 'bg-gradient-to-r from-sky-500 to-blue-600 text-white shadow-lg shadow-sky-500/30 scale-[1.02]'
-                : 'text-white hover:text-sky-200 hover:bg-white/10'
+                ? 'bg-sky-600 text-white shadow-xs'
+                : 'text-slate-700 hover:text-slate-900 hover:bg-white font-extrabold'
             }`}
           >
-            <Users className="w-4 h-4 text-sky-300" />
+            <Users className="w-4 h-4" />
             <span>{t('admin.tabUsers')}</span>
-            <span className="px-1.5 py-0.5 bg-white/20 text-white rounded-full text-[10px] font-mono">
+            <span className="px-1.5 py-0.5 bg-slate-200 text-slate-800 rounded-full text-[10px] font-mono">
               {users.length}
             </span>
           </button>
@@ -120,13 +120,13 @@ export const AdminDashboard: React.FC<Props> = ({
             onClick={() => setActiveMenu('audits')}
             className={`px-3.5 py-2 rounded-xl text-xs font-extrabold transition-all flex items-center gap-2 ${
               activeMenu === 'audits'
-                ? 'bg-gradient-to-r from-sky-500 to-blue-600 text-white shadow-lg shadow-sky-500/30 scale-[1.02]'
-                : 'text-white hover:text-sky-200 hover:bg-white/10'
+                ? 'bg-sky-600 text-white shadow-xs'
+                : 'text-slate-700 hover:text-slate-900 hover:bg-white font-extrabold'
             }`}
           >
-            <FileText className="w-4 h-4 text-sky-300" />
+            <FileText className="w-4 h-4" />
             <span>{t('nav.audits')}</span>
-            <span className="px-1.5 py-0.5 bg-white/20 text-white rounded-full text-[10px] font-mono">
+            <span className="px-1.5 py-0.5 bg-slate-200 text-slate-800 rounded-full text-[10px] font-mono">
               {audits.length}
             </span>
           </button>
@@ -135,11 +135,11 @@ export const AdminDashboard: React.FC<Props> = ({
             onClick={() => setActiveMenu('reports')}
             className={`px-3.5 py-2 rounded-xl text-xs font-extrabold transition-all flex items-center gap-2 ${
               activeMenu === 'reports'
-                ? 'bg-gradient-to-r from-sky-500 to-blue-600 text-white shadow-lg shadow-sky-500/30 scale-[1.02]'
-                : 'text-white hover:text-sky-200 hover:bg-white/10'
+                ? 'bg-sky-600 text-white shadow-xs'
+                : 'text-slate-700 hover:text-slate-900 hover:bg-white font-extrabold'
             }`}
           >
-            <Terminal className="w-4 h-4 text-sky-300" />
+            <Terminal className="w-4 h-4" />
             <span>{t('admin.tabLogs')}</span>
           </button>
 
@@ -147,11 +147,11 @@ export const AdminDashboard: React.FC<Props> = ({
             onClick={() => setActiveMenu('settings')}
             className={`px-3.5 py-2 rounded-xl text-xs font-extrabold transition-all flex items-center gap-2 ${
               activeMenu === 'settings'
-                ? 'bg-gradient-to-r from-sky-500 to-blue-600 text-white shadow-lg shadow-sky-500/30 scale-[1.02]'
-                : 'text-white hover:text-sky-200 hover:bg-white/10'
+                ? 'bg-sky-600 text-white shadow-xs'
+                : 'text-slate-700 hover:text-slate-900 hover:bg-white font-extrabold'
             }`}
           >
-            <Settings className="w-4 h-4 text-sky-300" />
+            <Settings className="w-4 h-4" />
             <span>{t('admin.tabSettings')}</span>
           </button>
         </div>

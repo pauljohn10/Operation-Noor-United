@@ -204,36 +204,36 @@ export const UserManagement: React.FC<Props> = ({
                 <th className="p-4 text-right">Actions</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-white/15 text-white">
+            <tbody className="divide-y divide-slate-100 text-slate-900">
               {filtered.map((u) => (
-                <tr key={u.id} className="hover:bg-white/15 transition-colors">
+                <tr key={u.id} className="hover:bg-slate-50/80 transition-colors">
                   <td className="p-4">
-                    <p className="font-extrabold text-white flex items-center gap-2">
-                      <UserCheck className="w-4 h-4 text-sky-300" />
+                    <p className="font-extrabold text-slate-900 flex items-center gap-2">
+                      <UserCheck className="w-4 h-4 text-sky-600" />
                       <span>{u.full_name}</span>
                     </p>
-                    <p className="text-[10px] text-sky-200/80 font-mono font-bold mt-0.5">ID: {u.employee_id}</p>
+                    <p className="text-[10px] text-slate-500 font-mono font-bold mt-0.5">ID: {u.employee_id}</p>
                   </td>
 
                   <td className="p-4">
-                    <span className="font-extrabold text-purple-200 bg-purple-500/20 px-2.5 py-0.5 rounded-full border border-purple-400/30 text-[11px]">
+                    <span className="font-extrabold text-purple-900 bg-purple-50 px-2.5 py-0.5 rounded-full border border-purple-200 text-[11px]">
                       {u.role}
                     </span>
-                    <p className="text-[10px] text-sky-200/80 font-semibold mt-1">{u.position}</p>
+                    <p className="text-[10px] text-slate-500 font-bold mt-1">{u.position}</p>
                   </td>
 
                   <td className="p-4">
-                    <p className="font-bold text-white">{u.email}</p>
-                    <p className="text-[10px] text-sky-200/80 font-mono">@{u.username}</p>
+                    <p className="font-bold text-slate-900">{u.email}</p>
+                    <p className="text-[10px] text-slate-500 font-mono">@{u.username}</p>
                   </td>
 
                   <td className="p-4">
-                    <p className="font-bold text-white">{u.assigned_station_name || 'Central Office'}</p>
+                    <p className="font-bold text-slate-800">{u.assigned_station_name || 'Central Office'}</p>
                   </td>
 
                   <td className="p-4">
                     {u.signature_url ? (
-                      <span className="text-[10px] font-extrabold text-emerald-700 bg-emerald-500/10 px-2 py-0.5 rounded-full border border-emerald-500/20 flex items-center gap-1 w-fit">
+                      <span className="text-[10px] font-extrabold text-emerald-800 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200 flex items-center gap-1 w-fit">
                         <CheckCircle className="w-3 h-3 text-emerald-600" /> Recorded
                       </span>
                     ) : (
@@ -245,8 +245,8 @@ export const UserManagement: React.FC<Props> = ({
                     <span
                       className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider ${
                         u.status === 'active'
-                          ? 'bg-emerald-500/10 text-emerald-700 border border-emerald-500/30'
-                          : 'bg-rose-500/10 text-rose-700 border border-rose-500/30'
+                          ? 'bg-emerald-50 text-emerald-700 border border-emerald-300'
+                          : 'bg-rose-50 text-rose-700 border border-rose-300'
                       }`}
                     >
                       {u.status}

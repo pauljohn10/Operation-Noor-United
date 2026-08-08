@@ -220,7 +220,7 @@ export const SOUserManagement: React.FC<Props> = ({
       </div>
 
       {/* USERS ACCOUNT DIRECTORY TABLE */}
-      <div className="bg-white/50 backdrop-blur-2xl border border-white/90 rounded-[28px] overflow-hidden shadow-[0_20px_50px_rgba(14,165,233,0.12)]">
+      <div className="bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-sm">
         <div className="overflow-x-auto">
           <table className="w-full text-left text-xs">
             <thead className="bg-white/80 text-slate-700 uppercase font-extrabold border-b border-sky-100">
