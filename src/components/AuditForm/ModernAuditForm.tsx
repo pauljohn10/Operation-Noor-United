@@ -161,15 +161,15 @@ export const ModernAuditForm: React.FC<Props> = ({
         {/* Card 1: Total Sales */}
         <GlassCard variant="blue" className="!p-3.5 sm:!p-4">
           <div className="flex items-center justify-between mb-1.5">
-            <span className="text-[11px] font-extrabold text-sky-100 uppercase tracking-wider drop-shadow-sm">{t('auditForm.grandTotalSales')}</span>
-            <div className="p-2 bg-sky-500/20 backdrop-blur-xl rounded-xl border border-sky-400/30 text-cyan-300 shadow-2xs">
+            <span className="text-[11px] font-black text-sky-950 uppercase tracking-wider">{t('auditForm.grandTotalSales')}</span>
+            <div className="p-2 bg-sky-100 text-sky-700 rounded-xl border border-sky-200 shadow-2xs">
               <TrendingUp className="w-4 h-4" />
             </div>
           </div>
-          <div className="text-xl sm:text-2xl font-black tracking-tight text-white font-mono drop-shadow-md">
-            {formatCurrency(grandTotalSales)} <span className="text-xs font-normal text-sky-200">{t('common.sar')}</span>
+          <div className="text-xl sm:text-2xl font-black tracking-tight text-slate-900 font-mono">
+            {formatCurrency(grandTotalSales)} <span className="text-xs font-bold text-slate-600">{t('common.sar')}</span>
           </div>
-          <div className="mt-1.5 text-[10px] text-sky-200/90 font-bold drop-shadow-sm">
+          <div className="mt-1.5 text-[10px] text-slate-600 font-bold">
             {t('auditForm.meteredFuelRevenue')}
           </div>
         </GlassCard>
@@ -177,51 +177,53 @@ export const ModernAuditForm: React.FC<Props> = ({
         {/* Card 2: Actual Cash Received */}
         <GlassCard variant="emerald" className="!p-3.5 sm:!p-4">
           <div className="flex items-center justify-between mb-1.5">
-            <span className="text-[11px] font-extrabold text-emerald-100 uppercase tracking-wider drop-shadow-sm">{t('auditForm.cashReceived')}</span>
-            <div className="p-2 bg-emerald-500/20 backdrop-blur-xl rounded-xl border border-emerald-400/30 text-emerald-300 shadow-2xs">
+            <span className="text-[11px] font-black text-emerald-950 uppercase tracking-wider">{t('auditForm.cashReceived')}</span>
+            <div className="p-2 bg-emerald-100 text-emerald-700 rounded-xl border border-emerald-200 shadow-2xs">
               <Banknote className="w-4 h-4" />
             </div>
           </div>
-          <div className="text-xl sm:text-2xl font-black text-emerald-300 font-mono drop-shadow-md">
+          <div className="text-xl sm:text-2xl font-black text-emerald-900 font-mono">
             {cashReceivedVal != null ? formatCurrency(cashReceivedVal) : '0.00'}{' '}
-            <span className="text-xs font-normal text-emerald-200">{t('common.sar')}</span>
+            <span className="text-xs font-bold text-emerald-700">{t('common.sar')}</span>
           </div>
-          <div className="mt-1.5 text-[10px] text-emerald-200/90 font-bold drop-shadow-sm">
-            {t('auditForm.expected')}: <strong className="text-white font-mono">{formatCurrency(expectedCash)} {t('common.sar')}</strong>
+          <div className="mt-1.5 text-[10px] text-slate-600 font-bold">
+            {t('auditForm.expected')}: <strong className="text-slate-900 font-mono font-black">{formatCurrency(expectedCash)} {t('common.sar')}</strong>
           </div>
         </GlassCard>
 
         {/* Card 3: Discrepancy / Variance */}
         <GlassCard variant={discrepancyVal < 0 ? 'rose' : discrepancyVal > 0 ? 'emerald' : 'blue'} className="!p-3.5 sm:!p-4">
           <div className="flex items-center justify-between mb-1.5">
-            <span className="text-[11px] font-extrabold uppercase tracking-wider drop-shadow-sm">{t('auditForm.netDiscrepancy')}</span>
+            <span className="text-[11px] font-black text-slate-900 uppercase tracking-wider">{t('auditForm.netDiscrepancy')}</span>
             <div
-              className={`p-2 rounded-xl border backdrop-blur-xl shadow-2xs ${
+              className={`p-2 rounded-xl border shadow-2xs ${
                 discrepancyVal < 0
-                  ? 'bg-rose-500/20 text-rose-300 border-rose-400/40'
-                  : 'bg-emerald-500/20 text-emerald-300 border-emerald-400/40'
+                  ? 'bg-rose-100 text-rose-700 border-rose-200'
+                  : discrepancyVal > 0
+                  ? 'bg-emerald-100 text-emerald-700 border-emerald-200'
+                  : 'bg-sky-100 text-sky-700 border-sky-200'
               }`}
             >
               <AlertTriangle className="w-4 h-4" />
             </div>
           </div>
-          <div className={`text-xl sm:text-2xl font-black font-mono drop-shadow-md ${
-            discrepancyVal < 0 ? 'text-rose-300' : discrepancyVal > 0 ? 'text-emerald-300' : 'text-white'
+          <div className={`text-xl sm:text-2xl font-black font-mono ${
+            discrepancyVal < 0 ? 'text-rose-900' : discrepancyVal > 0 ? 'text-emerald-900' : 'text-slate-900'
           }`}>
-            {formatCurrency(discrepancyVal)} <span className="text-xs font-normal">{t('common.sar')}</span>
+            {formatCurrency(discrepancyVal)} <span className="text-xs font-bold">{t('common.sar')}</span>
           </div>
-          <div className="mt-1.5 text-[10px] font-extrabold drop-shadow-sm">
+          <div className="mt-1.5 text-[10px] font-extrabold">
             {discrepancyVal < 0 ? (
-              <span className="text-rose-300 font-extrabold flex items-center gap-1">
-                <AlertTriangle className="w-3 h-3 text-rose-400" /> {t('auditForm.cashShortage')}
+              <span className="text-rose-800 font-black flex items-center gap-1">
+                <AlertTriangle className="w-3 h-3 text-rose-600" /> {t('auditForm.cashShortage')}
               </span>
             ) : discrepancyVal > 0 ? (
-              <span className="text-emerald-300 font-extrabold flex items-center gap-1">
-                <CheckCircle2 className="w-3 h-3 text-emerald-400" /> {t('auditForm.cashSurplus')}
+              <span className="text-emerald-800 font-black flex items-center gap-1">
+                <CheckCircle2 className="w-3 h-3 text-emerald-600" /> {t('auditForm.cashSurplus')}
               </span>
             ) : (
-              <span className="text-sky-200 font-extrabold flex items-center gap-1">
-                <CheckCircle2 className="w-3 h-3 text-cyan-300" /> {t('auditForm.balanced')}
+              <span className="text-sky-900 font-black flex items-center gap-1">
+                <CheckCircle2 className="w-3 h-3 text-sky-600" /> {t('auditForm.balanced')}
               </span>
             )}
           </div>
@@ -341,15 +343,15 @@ export const ModernAuditForm: React.FC<Props> = ({
         </div>
       </div>
 
-      {/* 4. FUEL METER READINGS SECTIONS (COLOR-CODED GLASSMORPHISM CARDS BY FUEL TYPE) */}
+      {/* 4. FUEL METER READINGS SECTIONS (COLOR-CODED HIGH-CONTRAST CARDS BY FUEL TYPE) */}
       {([
         {
           key: 'PETROL_91',
           title: t('auditForm.petrol91'),
           colorClass: 'bg-emerald-600 text-white',
-          cardClass: 'bg-emerald-950/20 backdrop-blur-2xl border border-emerald-400/40 shadow-[0_20px_50px_rgba(16,185,129,0.15)] hover:shadow-[0_25px_60px_rgba(16,185,129,0.25)]',
-          headerBg: 'bg-emerald-500/15 text-white border-emerald-400/30',
-          textColor: 'text-emerald-200',
+          cardClass: 'bg-white border border-emerald-300 shadow-sm rounded-2xl overflow-hidden',
+          headerBg: 'bg-emerald-50/90 text-slate-900 border-b border-emerald-200',
+          textColor: 'text-emerald-900',
           totals: p91Totals,
           price: prices.PETROL_91,
         },
@@ -357,9 +359,9 @@ export const ModernAuditForm: React.FC<Props> = ({
           key: 'PETROL_95',
           title: t('auditForm.petrol95'),
           colorClass: 'bg-rose-600 text-white',
-          cardClass: 'bg-rose-950/20 backdrop-blur-2xl border border-rose-400/40 shadow-[0_20px_50px_rgba(244,63,94,0.15)] hover:shadow-[0_25px_60px_rgba(244,63,94,0.25)]',
-          headerBg: 'bg-rose-500/15 text-white border-rose-400/30',
-          textColor: 'text-rose-200',
+          cardClass: 'bg-white border border-rose-300 shadow-sm rounded-2xl overflow-hidden',
+          headerBg: 'bg-rose-50/90 text-slate-900 border-b border-rose-200',
+          textColor: 'text-rose-900',
           totals: p95Totals,
           price: prices.PETROL_95,
         },
@@ -367,9 +369,9 @@ export const ModernAuditForm: React.FC<Props> = ({
           key: 'DIESEL',
           title: t('auditForm.diesel'),
           colorClass: 'bg-amber-600 text-white',
-          cardClass: 'bg-amber-950/20 backdrop-blur-2xl border border-amber-400/40 shadow-[0_20px_50px_rgba(245,158,11,0.15)] hover:shadow-[0_25px_60px_rgba(245,158,11,0.25)]',
-          headerBg: 'bg-amber-500/15 text-white border-amber-400/30',
-          textColor: 'text-amber-200',
+          cardClass: 'bg-amber-300/60 border border-amber-300 shadow-sm rounded-2xl overflow-hidden',
+          headerBg: 'bg-amber-50/90 text-slate-900 border-b border-amber-200',
+          textColor: 'text-amber-900',
           totals: dieselTotals,
           price: prices.DIESEL,
         },
@@ -381,16 +383,16 @@ export const ModernAuditForm: React.FC<Props> = ({
         return (
           <div
             key={fuelType}
-            className={`rounded-[28px] overflow-hidden transition-all ${sec.cardClass}`}
+            className={`transition-all ${sec.cardClass}`}
           >
             {/* Section Header Bar (Collapsible Accordion Header) */}
             <div
               onClick={() => toggleSection(fuelType)}
-              className={`p-3 sm:p-3.5 flex flex-wrap items-center justify-between gap-2.5 border-b cursor-pointer select-none transition-all hover:brightness-110 ${sec.headerBg}`}
+              className={`p-3 sm:p-3.5 flex flex-wrap items-center justify-between gap-2.5 cursor-pointer select-none transition-all hover:brightness-95 ${sec.headerBg}`}
             >
               <div className="flex items-center gap-2.5 flex-wrap">
                 {/* Accordion Expand/Collapse Indicator Icon */}
-                <div className="p-1 bg-white/90 text-slate-800 rounded-lg shadow-2xs flex items-center justify-center">
+                <div className="p-1 bg-white border border-slate-200 text-slate-800 rounded-lg shadow-2xs flex items-center justify-center">
                   <ChevronDown
                     className={`w-4 h-4 transition-transform duration-200 ${!isCollapsed ? 'rotate-180' : ''}`}
                   />
@@ -402,8 +404,8 @@ export const ModernAuditForm: React.FC<Props> = ({
                 </div>
 
                 {/* Fuel Price Tag */}
-                <div className="flex items-center gap-1.5 bg-white/95 px-2.5 py-1 rounded-lg border border-white/50 shadow-2xs text-[11px] font-extrabold text-slate-900" onClick={(e) => e.stopPropagation()}>
-                  <span className="text-slate-500 font-bold">{t('auditForm.unitPrice')}:</span>
+                <div className="flex items-center gap-1.5 bg-white px-2.5 py-1 rounded-lg border border-slate-200 shadow-2xs text-[11px] font-extrabold text-slate-900" onClick={(e) => e.stopPropagation()}>
+                  <span className="text-slate-600 font-bold">{t('auditForm.unitPrice')}:</span>
                   {isReadOnly ? (
                     <span className="font-mono text-slate-900 font-black">{sec.price.toFixed(2)} SAR/Liter</span>
                   ) : (
@@ -414,16 +416,16 @@ export const ModernAuditForm: React.FC<Props> = ({
                         inputMode="decimal"
                         value={sec.price}
                         onChange={(e) => onPriceChange(fuelType, parseFloat(e.target.value) || 0)}
-                        className="w-14 text-xs font-black text-center bg-slate-50 border-b border-sky-500 focus:outline-none font-mono"
+                        className="w-14 text-xs font-black text-center bg-slate-50 border-b border-sky-500 focus:outline-none font-mono text-slate-900"
                       />
-                      <span className="text-[10px] text-slate-500 font-bold">SAR/Liter</span>
+                      <span className="text-[10px] text-slate-600 font-bold">SAR/Liter</span>
                     </div>
                   )}
                 </div>
 
                 {/* Pump Count Badge */}
-                <div className="bg-white/90 px-2.5 py-1 rounded-lg border border-white/40 text-[11px] font-black text-slate-800 shadow-2xs flex items-center gap-1">
-                  <Fuel className="w-3 h-3 text-sky-600" />
+                <div className="bg-white px-2.5 py-1 rounded-lg border border-slate-200 text-[11px] font-black text-slate-800 shadow-2xs flex items-center gap-1">
+                  <Fuel className="w-3.5 h-3.5 text-sky-600" />
                   <span>{fuelItems.filter((i) => i.pump_no !== 15).length} Pumps</span>
                 </div>
               </div>
@@ -431,12 +433,12 @@ export const ModernAuditForm: React.FC<Props> = ({
               {/* Section Totals & Summary */}
               <div className="flex items-center gap-2.5">
                 <div className="text-right">
-                  <span className="block text-[10px] font-bold text-white/80 uppercase tracking-wider">{t('auditForm.quantitySold')}</span>
-                  <span className="text-xs sm:text-sm font-black font-mono text-white drop-shadow-sm">{formatNumber(sec.totals.total_quantity)} L</span>
+                  <span className="block text-[10px] font-black text-slate-600 uppercase tracking-wider">{t('auditForm.quantitySold')}</span>
+                  <span className="text-xs sm:text-sm font-black font-mono text-slate-900">{formatNumber(sec.totals.total_quantity)} L</span>
                 </div>
 
-                <div className="text-right bg-white/95 px-3 py-1 rounded-lg border border-white/50 font-mono shadow-2xs">
-                  <span className="block text-[9px] font-extrabold text-slate-500 uppercase tracking-wider">{t('auditForm.fuelSalesSummary')}</span>
+                <div className="text-right bg-white px-3 py-1 rounded-lg border border-slate-200 font-mono shadow-2xs">
+                  <span className="block text-[9px] font-extrabold text-slate-600 uppercase tracking-wider">{t('auditForm.fuelSalesSummary')}</span>
                   <span className="text-xs sm:text-sm font-black text-slate-900">{formatCurrency(sec.totals.total_sales)} SAR</span>
                 </div>
               </div>
