@@ -164,84 +164,84 @@ export const AdminDashboard: React.FC<Props> = ({
           {/* 1. System Health */}
           <GlassCard variant="emerald">
             <div className="flex items-center justify-between">
-              <span className="text-xs font-extrabold text-emerald-100 uppercase tracking-wider drop-shadow-sm">System Health</span>
-              <div className="p-3 bg-emerald-500/20 backdrop-blur-xl rounded-2xl border border-emerald-400/30 text-emerald-300 shadow-sm">
+              <span className="text-xs font-black text-emerald-950 uppercase tracking-wider">System Health</span>
+              <div className="p-3 bg-emerald-100 text-emerald-700 rounded-2xl border border-emerald-200 shadow-2xs">
                 <ShieldCheck className="w-5 h-5" />
               </div>
             </div>
             <div className="mt-3">
-              <p className="text-3xl font-black text-emerald-300 font-mono drop-shadow-md">100%</p>
-              <p className="text-xs text-emerald-200/90 font-bold mt-1 drop-shadow-sm">Database & RLS Security Active</p>
+              <p className="text-3xl font-black text-emerald-900 font-mono">100%</p>
+              <p className="text-xs text-slate-600 font-bold mt-1">Database & RLS Security Active</p>
             </div>
           </GlassCard>
 
           {/* 2. Station Registry */}
           <GlassCard variant="blue" className="cursor-pointer" onClick={() => setActiveMenu('stations')}>
             <div className="flex items-center justify-between">
-              <span className="text-xs font-extrabold text-sky-100 uppercase tracking-wider drop-shadow-sm">{t('admin.tabStations')}</span>
-              <div className="p-3 bg-sky-500/20 backdrop-blur-xl rounded-2xl border border-sky-400/30 text-cyan-300 shadow-sm">
+              <span className="text-xs font-black text-sky-950 uppercase tracking-wider">{t('admin.tabStations')}</span>
+              <div className="p-3 bg-sky-100 text-sky-700 rounded-2xl border border-sky-200 shadow-2xs">
                 <Building className="w-5 h-5" />
               </div>
             </div>
             <div className="mt-3">
-              <p className="text-3xl font-black text-white font-mono drop-shadow-md">{stations.length}</p>
-              <p className="text-xs text-sky-200/90 font-bold mt-1 drop-shadow-sm">{activeStationsCount} Operational Fuel Stations</p>
+              <p className="text-3xl font-black text-slate-900 font-mono">{stations.length}</p>
+              <p className="text-xs text-slate-600 font-bold mt-1">{activeStationsCount} Operational Fuel Stations</p>
             </div>
           </GlassCard>
 
           {/* 3. User Management */}
           <GlassCard variant="blue" className="cursor-pointer" onClick={() => setActiveMenu('users')}>
             <div className="flex items-center justify-between">
-              <span className="text-xs font-extrabold text-purple-100 uppercase tracking-wider drop-shadow-sm">{t('admin.tabUsers')}</span>
-              <div className="p-3 bg-purple-500/20 backdrop-blur-xl rounded-2xl border border-purple-400/30 text-purple-300 shadow-sm">
+              <span className="text-xs font-black text-sky-950 uppercase tracking-wider">{t('admin.tabUsers')}</span>
+              <div className="p-3 bg-indigo-100 text-indigo-700 rounded-2xl border border-indigo-200 shadow-2xs">
                 <Users className="w-5 h-5" />
               </div>
             </div>
             <div className="mt-3">
-              <p className="text-3xl font-black text-white font-mono drop-shadow-md">{users.length}</p>
-              <p className="text-xs text-purple-200/90 font-bold mt-1 drop-shadow-sm">{activeUsersCount} Active Accounts</p>
+              <p className="text-3xl font-black text-slate-900 font-mono">{users.length}</p>
+              <p className="text-xs text-slate-600 font-bold mt-1">{activeUsersCount} Active Accounts</p>
             </div>
           </GlassCard>
 
           {/* 4. Audits */}
           <GlassCard variant="blue" className="cursor-pointer" onClick={() => setActiveMenu('audits')}>
             <div className="flex items-center justify-between">
-              <span className="text-xs font-extrabold text-blue-100 uppercase tracking-wider drop-shadow-sm">{t('nav.audits')}</span>
-              <div className="p-3 bg-blue-500/20 backdrop-blur-xl rounded-2xl border border-blue-400/30 text-cyan-300 shadow-sm">
+              <span className="text-xs font-black text-sky-950 uppercase tracking-wider">{t('nav.audits')}</span>
+              <div className="p-3 bg-sky-100 text-sky-700 rounded-2xl border border-sky-200 shadow-2xs">
                 <FileText className="w-5 h-5" />
               </div>
             </div>
             <div className="mt-3">
-              <p className="text-3xl font-black text-white font-mono drop-shadow-md">{audits.length}</p>
-              <p className="text-xs text-blue-200/90 font-bold mt-1 drop-shadow-sm">Total Filed Station Audits</p>
+              <p className="text-3xl font-black text-slate-900 font-mono">{audits.length}</p>
+              <p className="text-xs text-slate-600 font-bold mt-1">Total Filed Station Audits</p>
             </div>
           </GlassCard>
 
           {/* 5. System Activity Logs */}
           <GlassCard variant="amber" className="cursor-pointer" onClick={() => setActiveMenu('reports')}>
             <div className="flex items-center justify-between">
-              <span className="text-xs font-extrabold text-amber-100 uppercase tracking-wider drop-shadow-sm">{t('admin.tabLogs')}</span>
-              <div className="p-3 bg-amber-500/20 backdrop-blur-xl rounded-2xl border border-amber-400/30 text-amber-300 shadow-sm">
+              <span className="text-xs font-black text-amber-950 uppercase tracking-wider">{t('admin.tabLogs')}</span>
+              <div className="p-3 bg-amber-100 text-amber-700 rounded-2xl border border-amber-200 shadow-2xs">
                 <Terminal className="w-5 h-5" />
               </div>
             </div>
             <div className="mt-3">
-              <p className="text-3xl font-black text-amber-300 font-mono drop-shadow-md">Active</p>
-              <p className="text-xs text-amber-200/90 font-bold mt-1 drop-shadow-sm">Real-time Audit Trail & Logs</p>
+              <p className="text-3xl font-black text-amber-900 font-mono">Active</p>
+              <p className="text-xs text-slate-600 font-bold mt-1">Real-time Audit Trail & Logs</p>
             </div>
           </GlassCard>
 
           {/* 6. System Settings */}
           <GlassCard variant="blue" className="cursor-pointer" onClick={() => setActiveMenu('settings')}>
             <div className="flex items-center justify-between">
-              <span className="text-xs font-extrabold text-indigo-100 uppercase tracking-wider drop-shadow-sm">{t('admin.tabSettings')}</span>
-              <div className="p-3 bg-indigo-500/20 backdrop-blur-xl rounded-2xl border border-indigo-400/30 text-indigo-300 shadow-sm">
+              <span className="text-xs font-black text-sky-950 uppercase tracking-wider">{t('admin.tabSettings')}</span>
+              <div className="p-3 bg-sky-100 text-sky-700 rounded-2xl border border-sky-200 shadow-2xs">
                 <Settings className="w-5 h-5" />
               </div>
             </div>
             <div className="mt-3">
-              <p className="text-3xl font-black text-white font-mono drop-shadow-md">Configured</p>
-              <p className="text-xs text-indigo-200/90 font-bold mt-1 drop-shadow-sm">Default Fuel Prices & Session Controls</p>
+              <p className="text-3xl font-black text-slate-900 font-mono">Configured</p>
+              <p className="text-xs text-slate-600 font-bold mt-1">Default Fuel Prices & Session Controls</p>
             </div>
           </GlassCard>
         </div>

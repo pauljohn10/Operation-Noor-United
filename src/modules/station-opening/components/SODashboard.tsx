@@ -70,20 +70,20 @@ export const SODashboard: React.FC<Props> = ({
 
   return (
     <div className="w-full px-4 sm:px-6 lg:px-8 py-6 space-y-6">
-      {/* 1. WELCOME HERO GLASS BANNER */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 bg-white/12 backdrop-blur-3xl border border-white/25 p-7 rounded-[28px] shadow-[0_20px_50px_rgba(0,0,0,0.2)] ring-1 ring-white/20 relative overflow-hidden transition-all">
-        <div className="absolute -right-12 -bottom-12 w-56 h-56 bg-sky-400/20 rounded-full blur-3xl pointer-events-none"></div>
+      {/* 1. WELCOME HERO ENTERPRISE BANNER */}
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 bg-gradient-to-r from-slate-900 via-sky-950 to-indigo-950 p-7 rounded-2xl shadow-md border border-slate-800 relative overflow-hidden transition-all">
+        <div className="absolute -right-12 -bottom-12 w-56 h-56 bg-sky-500/10 rounded-full blur-3xl pointer-events-none"></div>
 
-        <div className="relative z-10 space-y-1">
-          <div className="inline-flex items-center gap-2 px-3 py-1 bg-sky-400/20 text-sky-200 rounded-full text-xs font-extrabold border border-sky-400/30">
+        <div className="relative z-10 space-y-1.5">
+          <div className="inline-flex items-center gap-2 px-3 py-1 bg-sky-500/20 text-sky-200 rounded-full text-xs font-extrabold border border-sky-400/30">
             <Sparkles className="w-3.5 h-3.5 text-sky-300 animate-pulse" />
             <span>{t('dashboard.welcomeBack')}, {currentUser?.full_name || 'User'}</span>
           </div>
-          <h2 className="text-2xl font-black text-white tracking-tight flex items-center gap-2 drop-shadow-sm">
-            <Building className="w-6 h-6 text-sky-300" />
+          <h2 className="text-2xl font-black text-white tracking-tight flex items-center gap-2">
+            <Building className="w-6 h-6 text-sky-400" />
             <span>{t('so.dashboardTitle')}</span>
           </h2>
-          <p className="text-xs text-sky-100/90 font-semibold max-w-xl drop-shadow-sm">
+          <p className="text-xs text-sky-200/90 font-semibold max-w-xl">
             {t('so.dashboardSub')} ({currentUser?.role})
           </p>
         </div>
@@ -91,7 +91,7 @@ export const SODashboard: React.FC<Props> = ({
         {isHeadOfOperation && (
           <button
             onClick={onCreateNew}
-            className="px-5 py-3 bg-gradient-to-r from-sky-600 via-blue-600 to-indigo-600 hover:from-sky-500 hover:to-indigo-500 text-white font-extrabold text-xs rounded-2xl shadow-lg shadow-sky-600/30 hover:shadow-sky-600/40 hover:-translate-y-0.5 transition-all shrink-0 flex items-center gap-2"
+            className="px-5 py-3 bg-gradient-to-r from-sky-500 to-blue-600 hover:from-sky-400 hover:to-blue-500 text-white font-extrabold text-xs rounded-xl shadow-md hover:-translate-y-0.5 transition-all shrink-0 flex items-center gap-2 min-h-[44px]"
           >
             <PlusCircle className="w-4 h-4" />
             <span>{t('so.newForm')}</span>
@@ -101,40 +101,40 @@ export const SODashboard: React.FC<Props> = ({
 
       {/* 2. PENDING APPROVAL QUEUE BANNER FOR APPROVERS */}
       {pendingForUser.length > 0 && (
-        <div className="bg-gradient-to-r from-sky-500/20 via-blue-500/20 to-indigo-500/20 border-2 border-sky-400/50 p-6 rounded-[28px] backdrop-blur-3xl shadow-xl space-y-3">
+        <div className="bg-white border-2 border-sky-300 p-6 rounded-2xl shadow-sm space-y-3">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2.5">
-              <ShieldCheck className="w-6 h-6 text-sky-300" />
+              <ShieldCheck className="w-6 h-6 text-sky-600" />
               <div>
-                <h3 className="text-sm font-black text-white uppercase tracking-wider drop-shadow-sm">
+                <h3 className="text-sm font-black text-slate-900 uppercase tracking-wider">
                   {t('so.pendingApprovals')} ({pendingForUser.length})
                 </h3>
-                <p className="text-xs text-sky-200/90 font-semibold drop-shadow-sm">
+                <p className="text-xs text-slate-600 font-semibold">
                   {currentUser?.role === 'Head of Operation'
                     ? t('so.returnedFormsSub')
                     : t('so.pendingApprovalsSub')}
                 </p>
               </div>
             </div>
-            <span className="px-3.5 py-1 bg-sky-600 text-white font-black text-xs rounded-full shadow-md font-mono">
+            <span className="px-3.5 py-1 bg-sky-600 text-white font-black text-xs rounded-full shadow-xs font-mono">
               {pendingForUser.length} Action Required
             </span>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 pt-2">
             {pendingForUser.map((f) => (
-              <div key={f.id} className="bg-white/15 backdrop-blur-2xl p-4 rounded-2xl border border-white/30 shadow-md space-y-2 text-xs">
+              <div key={f.id} className="bg-slate-50 p-4 rounded-xl border border-slate-200 shadow-2xs space-y-2 text-xs">
                 <div className="flex items-center justify-between">
-                  <span className="font-mono font-black text-sky-200">{f.form_number}</span>
-                  <span className="px-2 py-0.5 bg-sky-400/20 text-sky-200 font-bold rounded-md text-[10px] border border-sky-400/30">
+                  <span className="font-mono font-black text-sky-900">{f.form_number}</span>
+                  <span className="px-2 py-0.5 bg-sky-100 text-sky-800 font-extrabold rounded-md text-[10px] border border-sky-200">
                     {getStatusLabel(f.current_status)}
                   </span>
                 </div>
-                <p className="font-black text-white">{f.station_name}</p>
-                <p className="text-[11px] text-sky-200/80 font-bold">{t('so.creatorCol')}: {f.created_by_name}</p>
+                <p className="font-black text-slate-900">{f.station_name}</p>
+                <p className="text-[11px] text-slate-500 font-bold">{t('so.creatorCol')}: {f.created_by_name}</p>
                 <button
                   onClick={() => onOpenForm(f.id)}
-                  className="w-full mt-2 py-2 bg-sky-600 hover:bg-sky-500 text-white font-extrabold rounded-xl shadow-sm transition-all text-xs flex items-center justify-center gap-1.5"
+                  className="w-full mt-2 py-2 bg-sky-600 hover:bg-sky-700 text-white font-extrabold rounded-xl shadow-2xs transition-all text-xs flex items-center justify-center gap-1.5"
                 >
                   <FileCheck className="w-4 h-4" />
                   <span>{t('so.viewEdit')}</span>
@@ -145,23 +145,23 @@ export const SODashboard: React.FC<Props> = ({
         </div>
       )}
 
-      {/* 3. KPI METRIC SUMMARY CARDS (BLUE FROSTED GLASS) */}
+      {/* 3. HIGH-CONTRAST KPI METRIC SUMMARY CARDS */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {/* TOTAL FORMS */}
         <GlassCard variant="blue">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-extrabold text-sky-100 uppercase tracking-wider drop-shadow-sm">
+            <span className="text-xs font-black text-sky-950 uppercase tracking-wider">
               {t('so.totalForms')}
             </span>
-            <div className="p-3 bg-sky-500/20 backdrop-blur-xl rounded-2xl border border-sky-400/30 text-cyan-300 shadow-sm">
+            <div className="p-3 bg-sky-100 text-sky-700 rounded-2xl border border-sky-200 shadow-2xs">
               <FileText className="w-5 h-5" />
             </div>
           </div>
           <div className="mt-3">
-            <span className="text-3xl sm:text-4xl font-black text-white tracking-tight font-mono drop-shadow-md">
+            <span className="text-3xl sm:text-4xl font-black text-slate-900 tracking-tight font-mono">
               {totalCount}
             </span>
-            <p className="text-[11px] text-sky-200/90 font-bold mt-1.5 drop-shadow-sm">
+            <p className="text-[11px] text-slate-600 font-bold mt-1.5">
               {t('so.totalFormsSub')}
             </p>
           </div>
@@ -170,18 +170,18 @@ export const SODashboard: React.FC<Props> = ({
         {/* PENDING APPROVALS */}
         <GlassCard variant="amber">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-extrabold text-amber-100 uppercase tracking-wider drop-shadow-sm">
+            <span className="text-xs font-black text-amber-950 uppercase tracking-wider">
               {t('so.pendingApprovals')}
             </span>
-            <div className="p-3 bg-amber-500/20 backdrop-blur-xl rounded-2xl border border-amber-400/30 text-amber-300 shadow-sm">
+            <div className="p-3 bg-amber-100 text-amber-700 rounded-2xl border border-amber-200 shadow-2xs">
               <Clock className="w-5 h-5" />
             </div>
           </div>
           <div className="mt-3">
-            <span className="text-3xl sm:text-4xl font-black text-amber-300 tracking-tight font-mono drop-shadow-md">
+            <span className="text-3xl sm:text-4xl font-black text-amber-900 tracking-tight font-mono">
               {pendingCount}
             </span>
-            <p className="text-[11px] text-amber-200/90 font-bold mt-1.5 drop-shadow-sm">
+            <p className="text-[11px] text-slate-600 font-bold mt-1.5">
               {t('so.pendingApprovalsSub')}
             </p>
           </div>
@@ -190,18 +190,18 @@ export const SODashboard: React.FC<Props> = ({
         {/* APPROVED FORMS */}
         <GlassCard variant="emerald">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-extrabold text-emerald-100 uppercase tracking-wider drop-shadow-sm">
+            <span className="text-xs font-black text-emerald-950 uppercase tracking-wider">
               {t('so.completedApprovals')}
             </span>
-            <div className="p-3 bg-emerald-500/20 backdrop-blur-xl rounded-2xl border border-emerald-400/30 text-emerald-300 shadow-sm">
+            <div className="p-3 bg-emerald-100 text-emerald-700 rounded-2xl border border-emerald-200 shadow-2xs">
               <CheckCircle2 className="w-5 h-5" />
             </div>
           </div>
           <div className="mt-3">
-            <span className="text-3xl sm:text-4xl font-black text-emerald-300 tracking-tight font-mono drop-shadow-md">
+            <span className="text-3xl sm:text-4xl font-black text-emerald-900 tracking-tight font-mono">
               {approvedCount}
             </span>
-            <p className="text-[11px] text-emerald-200/90 font-bold mt-1.5 drop-shadow-sm">
+            <p className="text-[11px] text-slate-600 font-bold mt-1.5">
               {t('so.completedApprovalsSub')}
             </p>
           </div>
@@ -210,18 +210,18 @@ export const SODashboard: React.FC<Props> = ({
         {/* RETURNED & REJECTED */}
         <GlassCard variant="rose">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-extrabold text-rose-100 uppercase tracking-wider drop-shadow-sm">
+            <span className="text-xs font-black text-rose-950 uppercase tracking-wider">
               {t('so.returnedForms')}
             </span>
-            <div className="p-3 bg-rose-500/20 backdrop-blur-xl rounded-2xl border border-rose-400/30 text-rose-300 shadow-sm">
+            <div className="p-3 bg-rose-100 text-rose-700 rounded-2xl border border-rose-200 shadow-2xs">
               <RotateCcw className="w-5 h-5" />
             </div>
           </div>
           <div className="mt-3">
-            <span className="text-3xl sm:text-4xl font-black text-rose-300 tracking-tight font-mono drop-shadow-md">
+            <span className="text-3xl sm:text-4xl font-black text-rose-900 tracking-tight font-mono">
               {returnedCount + rejectedCount}
             </span>
-            <p className="text-[11px] text-rose-200/90 font-bold mt-1.5 drop-shadow-sm">
+            <p className="text-[11px] text-slate-600 font-bold mt-1.5">
               {t('so.returnedFormsSub')}
             </p>
           </div>
