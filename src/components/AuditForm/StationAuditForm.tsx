@@ -39,6 +39,7 @@ import {
   CheckCircle2,
   RotateCcw,
   AlertTriangle,
+  Loader2,
 } from 'lucide-react';
 
 interface Props {
@@ -47,7 +48,7 @@ interface Props {
   stations: Station[];
   existingAudits: StationAudit[];
   defaultPrices: { p91: number; p95: number; diesel: number };
-  onSave: (audit: StationAudit) => void;
+  onSave: (audit: StationAudit) => Promise<void> | void;
   onBack: () => void;
 }
 
@@ -104,6 +105,10 @@ export const StationAuditForm: React.FC<Props> = ({
     DIESEL:    initialAudit?.diesel_price ?? defaultPrices.diesel,
   });
 
+
+  // Submission & Loading State
+  const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
+  const [submitSuccessMsg, setSubmitSuccessMsg] = useState<string | null>(null);
 
   // Signature Pad Modal State
   const [activeSigModal, setActiveSigModal] = useState<{
@@ -469,14 +474,25 @@ export const StationAuditForm: React.FC<Props> = ({
     };
   };
 
-  const handleSaveDraft = () => {
-    if (!validateForm()) return;
+  const handleSaveDraft = async () => {
+    if (!validateForm() || isSubmitting) return;
     const auditObj = buildAuditObject('draft');
-    onSave(auditObj);
+    try {
+      setIsSubmitting(true);
+      await onSave(auditObj);
+      setSubmitSuccessMsg('Audit draft saved successfully.');
+      setTimeout(() => {
+        onBack();
+      }, 500);
+    } catch (err: any) {
+      console.error('Error saving draft:', err);
+      alert(err?.message || 'Error saving audit draft.');
+      setIsSubmitting(false);
+    }
   };
 
-  const handleSubmitForApproval = () => {
-    if (!validateForm()) return;
+  const handleSubmitForApproval = async () => {
+    if (!validateForm() || isSubmitting) return;
 
     if (!supervisorSignatureUrl) {
       alert('Please collect the Fuel Station Supervisor handwritten signature before submitting.');
@@ -495,7 +511,7 @@ export const StationAuditForm: React.FC<Props> = ({
         initialAudit.current_status === 'rejected' ||
         initialAudit.rejected_by_role)
     ) {
-      handleResubmitAudit();
+      await handleResubmitAudit();
       return;
     }
 
@@ -518,10 +534,24 @@ export const StationAuditForm: React.FC<Props> = ({
     auditObj.comments.unshift(submissionComment);
 
     setCurrentStatus('pending_accountant');
-    onSave(auditObj);
+
+    try {
+      setIsSubmitting(true);
+      await onSave(auditObj);
+      setSubmitSuccessMsg('Audit submitted successfully for approval.');
+      setTimeout(() => {
+        onBack();
+      }, 500);
+    } catch (err: any) {
+      console.error('Error submitting audit for approval:', err);
+      alert(err?.message || 'Error submitting audit for approval.');
+      setIsSubmitting(false);
+    }
   };
 
-  const handleWorkflowApprove = (comment?: string, customSignatureUrl?: string, roleOverrideKey?: string) => {
+  const handleWorkflowApprove = async (comment?: string, customSignatureUrl?: string, roleOverrideKey?: string) => {
+    if (isSubmitting) return;
+
     const isManagementOverride =
       (currentUser?.role === 'Management' || currentUser?.role === 'Super Admin') &&
       (currentStatus === 'pending_accountant' || currentStatus === 'pending_account_manager');
@@ -620,12 +650,24 @@ export const StationAuditForm: React.FC<Props> = ({
     }
 
     setCurrentStatus(nextStatus);
-    onSave(currentAuditObj);
+
+    try {
+      setIsSubmitting(true);
+      await onSave(currentAuditObj);
+      setSubmitSuccessMsg('Audit approval submitted successfully.');
+      setTimeout(() => {
+        onBack();
+      }, 500);
+    } catch (err: any) {
+      console.error('Error approving audit:', err);
+      alert(err?.message || 'Failed to approve audit.');
+      setIsSubmitting(false);
+    }
   };
 
-  const handleWorkflowReject = (reason: string) => {
-    if (!reason || !reason.trim()) {
-      alert('A mandatory rejection reason is required.');
+  const handleWorkflowReject = async (reason: string) => {
+    if (!reason || !reason.trim() || isSubmitting) {
+      if (!reason || !reason.trim()) alert('A mandatory rejection reason is required.');
       return;
     }
 
@@ -666,15 +708,27 @@ export const StationAuditForm: React.FC<Props> = ({
     });
 
     setCurrentStatus('returned_for_correction');
-    onSave(currentAuditObj);
+
+    try {
+      setIsSubmitting(true);
+      await onSave(currentAuditObj);
+      setSubmitSuccessMsg('Audit returned for correction.');
+      setTimeout(() => {
+        onBack();
+      }, 500);
+    } catch (err: any) {
+      console.error('Error returning audit for correction:', err);
+      alert(err?.message || 'Failed to return audit.');
+      setIsSubmitting(false);
+    }
   };
 
   const handleWorkflowReturn = (comment: string) => {
     handleWorkflowReject(comment);
   };
 
-  const handleResubmitAudit = () => {
-    if (!validateForm()) return;
+  const handleResubmitAudit = async () => {
+    if (!validateForm() || isSubmitting) return;
 
     const rejRole: ApprovalRole = initialAudit?.rejected_by_role || 'accountant';
     const rolesOrder: ApprovalRole[] = ['accountant', 'account_manager', 'management'];
@@ -732,7 +786,19 @@ export const StationAuditForm: React.FC<Props> = ({
     });
 
     setCurrentStatus(targetStatus);
-    onSave(auditObj);
+
+    try {
+      setIsSubmitting(true);
+      await onSave(auditObj);
+      setSubmitSuccessMsg('Corrected audit submitted successfully for approval.');
+      setTimeout(() => {
+        onBack();
+      }, 500);
+    } catch (err: any) {
+      console.error('Error resubmitting audit:', err);
+      alert(err?.message || 'Failed to resubmit audit.');
+      setIsSubmitting(false);
+    }
   };
 
   const handleAddThreadComment = () => {
@@ -791,7 +857,10 @@ export const StationAuditForm: React.FC<Props> = ({
           {currentStatus === 'draft' && (currentUser.role === 'Operation Supervisor' || currentUser.role === 'Super Admin') && (
             <button
               onClick={handleSaveDraft}
-              className="flex items-center gap-1.5 px-3 py-1.5 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-700 font-extrabold text-xs rounded-lg transition-all border border-emerald-500/30 shadow-xs"
+              disabled={isSubmitting}
+              className={`flex items-center gap-1.5 px-3 py-1.5 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-700 font-extrabold text-xs rounded-lg transition-all border border-emerald-500/30 shadow-xs ${
+                isSubmitting ? 'opacity-50 cursor-not-allowed' : ''
+              }`}
             >
               <Save className="w-3.5 h-3.5 text-emerald-600" />
               <span>{t('auditForm.saveDraft')}</span>
@@ -801,25 +870,75 @@ export const StationAuditForm: React.FC<Props> = ({
           {currentStatus === 'draft' && (currentUser.role === 'Operation Supervisor' || currentUser.role === 'Super Admin') && (
             <button
               onClick={handleSubmitForApproval}
-              className="flex items-center gap-1.5 px-4 py-1.5 bg-gradient-to-r from-sky-600 via-blue-600 to-indigo-600 hover:from-sky-500 hover:to-indigo-500 text-white font-extrabold text-xs rounded-lg shadow-md shadow-sky-600/20 transition-all"
+              disabled={isSubmitting}
+              className={`flex items-center gap-1.5 px-4 py-1.5 bg-gradient-to-r from-sky-600 via-blue-600 to-indigo-600 hover:from-sky-500 hover:to-indigo-500 text-white font-extrabold text-xs rounded-lg shadow-md shadow-sky-600/20 transition-all ${
+                isSubmitting ? 'opacity-50 cursor-not-allowed' : ''
+              }`}
             >
-              <Send className="w-3.5 h-3.5 rtl:rotate-180" />
-              <span>{t('auditForm.submitAudit')}</span>
+              {isSubmitting ? (
+                <>
+                  <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                  <span>Submitting Audit...</span>
+                </>
+              ) : (
+                <>
+                  <Send className="w-3.5 h-3.5 rtl:rotate-180" />
+                  <span>{t('auditForm.submitAudit')}</span>
+                </>
+              )}
             </button>
           )}
 
           {(currentStatus === 'returned_for_correction' || currentStatus === 'rejected') && (currentUser.role === 'Operation Supervisor' || currentUser.role === 'Super Admin') && (
             <button
               onClick={handleResubmitAudit}
-              className="flex items-center gap-1.5 px-4 py-1.5 bg-gradient-to-r from-emerald-600 via-teal-600 to-indigo-600 hover:from-emerald-500 hover:to-indigo-500 text-white font-black text-xs rounded-lg shadow-md shadow-emerald-600/20 transition-all animate-pulse"
+              disabled={isSubmitting}
+              className={`flex items-center gap-1.5 px-4 py-1.5 bg-gradient-to-r from-emerald-600 via-teal-600 to-indigo-600 hover:from-emerald-500 hover:to-indigo-500 text-white font-black text-xs rounded-lg shadow-md shadow-emerald-600/20 transition-all ${
+                isSubmitting ? 'opacity-50 cursor-not-allowed' : 'animate-pulse'
+              }`}
             >
-              <RotateCcw className="w-3.5 h-3.5" />
-              <span>{t('auditForm.submitAudit')}</span>
+              {isSubmitting ? (
+                <>
+                  <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                  <span>Resubmitting...</span>
+                </>
+              ) : (
+                <>
+                  <RotateCcw className="w-3.5 h-3.5" />
+                  <span>Resubmit Corrected Audit</span>
+                </>
+              )}
             </button>
           )}
         </div>
 
       </div>
+
+      {/* SUCCESS CONFIRMATION NOTIFICATION BANNER */}
+      {submitSuccessMsg && (
+        <div className="mb-3.5 p-4 bg-emerald-500/15 border border-emerald-500/40 rounded-2xl text-emerald-950 font-black text-xs flex items-center gap-3 shadow-md no-print animate-in fade-in slide-in-from-top duration-300">
+          <div className="p-2 bg-emerald-500/20 text-emerald-700 rounded-xl border border-emerald-500/30 shrink-0">
+            <CheckCircle2 className="w-5 h-5 text-emerald-600" />
+          </div>
+          <div className="flex-1">
+            <span className="block text-sm font-black text-emerald-950">{submitSuccessMsg}</span>
+            <span className="text-[11px] font-semibold text-emerald-800">Closing form and returning to Audits list...</span>
+          </div>
+        </div>
+      )}
+
+      {/* SUBMISSION IN-PROGRESS LOADING BANNER */}
+      {isSubmitting && !submitSuccessMsg && (
+        <div className="mb-3.5 p-4 bg-sky-500/15 border border-sky-500/40 rounded-2xl text-sky-950 font-black text-xs flex items-center gap-3 shadow-md no-print animate-pulse">
+          <div className="p-2 bg-sky-500/20 text-sky-700 rounded-xl border border-sky-500/30 shrink-0">
+            <Loader2 className="w-5 h-5 text-sky-600 animate-spin" />
+          </div>
+          <div className="flex-1">
+            <span className="block text-sm font-black text-sky-950">Submitting Audit for Approval...</span>
+            <span className="text-[11px] font-semibold text-sky-800">Saving audit records & dispatching activity notifications...</span>
+          </div>
+        </div>
+      )}
 
       {(currentStatus === 'returned_for_correction' || currentStatus === 'rejected') && (
         <div className="mb-3.5 p-3.5 bg-rose-500/10 border border-rose-500/30 rounded-2xl backdrop-blur-md shadow-sm flex items-start gap-3 no-print">
