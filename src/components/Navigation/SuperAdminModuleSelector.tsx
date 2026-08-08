@@ -13,7 +13,7 @@ export const SuperAdminModuleSelector: React.FC<Props> = ({
 
   return (
     <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-4 pb-2">
-      <div className="bg-white/60 backdrop-blur-2xl border border-white/80 p-3 sm:p-4 rounded-[28px] shadow-[0_20px_50px_rgba(14,165,233,0.12)] ring-1 ring-white/60">
+      <div className="bg-white border border-slate-200 p-3 sm:p-4 rounded-2xl shadow-sm">
         {/* TOP BAR / LABEL */}
         <div className="flex items-center justify-between gap-3 mb-3 px-2">
           <div className="flex items-center gap-2">
