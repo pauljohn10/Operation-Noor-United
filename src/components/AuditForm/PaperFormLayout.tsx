@@ -315,8 +315,8 @@ export const PaperFormLayout: React.FC<Props> = ({
       {renderFuelMobileCards('PETROL 95', 'paper-header-p95', getFuelItems('PETROL_95'), p95Totals, 'PETROL_95')}
       {renderFuelMobileCards('DIESEL', 'paper-header-diesel', getFuelItems('DIESEL'), dieselTotals, 'DIESEL')}
 
-      {/* DESKTOP & PRINT FORM TABLES (>= 768px) */}
-      <div className="hidden md:block space-y-1.5">
+      {/* DESKTOP & PRINT FORM TABLES (ALWAYS VISIBLE FOR PDF EXPORT & PRINT) */}
+      <div className="paper-tables-container hidden md:block print:block space-y-1.5">
         {renderFuelTable('PETROL 91', 'paper-header-p91', getFuelItems('PETROL_91'), p91Totals, 'PETROL_91')}
         {renderFuelTable('PETROL 95', 'paper-header-p95', getFuelItems('PETROL_95'), p95Totals, 'PETROL_95')}
         {renderFuelTable('DIESEL', 'paper-header-diesel', getFuelItems('DIESEL'), dieselTotals, 'DIESEL')}

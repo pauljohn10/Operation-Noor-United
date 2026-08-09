@@ -75,6 +75,14 @@ function prepareElementForPdfExport(element: HTMLElement): { clone: HTMLElement;
     (el as HTMLElement).style.display = 'none';
   });
 
+  // Force all printable paper table containers and hidden paper sections to be visible
+  const paperTables = clone.querySelectorAll('.paper-tables-container');
+  paperTables.forEach((pt) => {
+    const htmlPt = pt as HTMLElement;
+    htmlPt.classList.remove('hidden');
+    htmlPt.style.display = 'block';
+  });
+
   // Make header & margins ultra-compact for full A4 printable area
   const header = clone.querySelector('.paper-header') as HTMLElement;
   if (header) {
