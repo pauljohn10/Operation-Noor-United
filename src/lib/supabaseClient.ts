@@ -806,7 +806,17 @@ export async function saveAudit(audit: StationAudit): Promise<StationAudit> {
     updated_at: new Date().toISOString(),
   };
 
-  const { error: parentErr } = await supabase.from('station_audits').upsert(parentPayload, { onConflict: 'id' });
+  let { error: parentErr } = await supabase.from('station_audits').upsert(parentPayload, { onConflict: 'id' });
+
+  // Graceful fallback retry if new shortage columns do not exist in Supabase Postgres schema yet
+  if (parentErr && (parentErr.code === 'PGRST204' || parentErr.message?.includes('column'))) {
+    console.warn('[SAVE AUDIT NOTICE] Missing shortage columns in Supabase station_audits table. Retrying with standard payload...');
+    const fallbackPayload = { ...parentPayload };
+    delete (fallbackPayload as any).person_responsible_for_shortage;
+    delete (fallbackPayload as any).shortage_amount;
+    const retryRes = await supabase.from('station_audits').upsert(fallbackPayload, { onConflict: 'id' });
+    parentErr = retryRes.error;
+  }
 
   if (parentErr) {
     console.error(`[SAVE AUDIT FAILURE] Table: station_audits | Code: ${parentErr.code} | Message: ${parentErr.message} | Details: ${parentErr.details}`);

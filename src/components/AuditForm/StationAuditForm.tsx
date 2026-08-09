@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import type {
   StationAudit,
   Station,
@@ -16,12 +16,45 @@ import { useAuth } from '../../context/AuthContext';
 import { useLanguage } from '../../context/LanguageContext';
 import {
   calculateAuditTotals,
+  DEFAULT_FUEL_PRICES,
 } from '../../lib/calculations';
+import { generateEmptyItems } from '../../lib/mockData';
+
+/**
+ * Resolves fuel prices with strict priority:
+ * 1. Saved audit level price (p91_price, p95_price, diesel_price)
+ * 2. Saved pump item price
+ * 3. System default prices (for new audits)
+ */
+function getEffectiveAuditPrice(
+  fuelType: FuelType,
+  audit?: StationAudit | null,
+  systemDefaults?: { p91: number; p95: number; diesel: number }
+): number {
+  if (fuelType === 'PETROL_91') {
+    if (audit?.p91_price != null && audit.p91_price > 0) return audit.p91_price;
+    const itemPrice = audit?.items?.find((i) => i.fuel_type === 'PETROL_91' && i.price != null && i.price > 0)?.price;
+    if (itemPrice != null && itemPrice > 0) return itemPrice;
+    return systemDefaults?.p91 || DEFAULT_FUEL_PRICES.PETROL_91;
+  }
+  if (fuelType === 'PETROL_95') {
+    if (audit?.p95_price != null && audit.p95_price > 0) return audit.p95_price;
+    const itemPrice = audit?.items?.find((i) => i.fuel_type === 'PETROL_95' && i.price != null && i.price > 0)?.price;
+    if (itemPrice != null && itemPrice > 0) return itemPrice;
+    return systemDefaults?.p95 || DEFAULT_FUEL_PRICES.PETROL_95;
+  }
+  if (fuelType === 'DIESEL') {
+    if (audit?.diesel_price != null && audit.diesel_price > 0) return audit.diesel_price;
+    const itemPrice = audit?.items?.find((i) => i.fuel_type === 'DIESEL' && i.price != null && i.price > 0)?.price;
+    if (itemPrice != null && itemPrice > 0) return itemPrice;
+    return systemDefaults?.diesel || DEFAULT_FUEL_PRICES.DIESEL;
+  }
+  return DEFAULT_FUEL_PRICES[fuelType];
+}
 
 
 import { generateUUID } from '../../lib/supabaseClient';
 import {
-  generateEmptyItems,
   createDefaultApprovals,
 } from '../../lib/mockData';
 
@@ -103,14 +136,13 @@ export const StationAuditForm: React.FC<Props> = ({
   );
 
   // Section Fuel Prices State.
-  // For existing audits: restore the prices saved at audit creation time.
-  // For new audits: use the current system default prices.
-  const [sectionPrices, setSectionPrices] = useState<Record<FuelType, number>>({
-    PETROL_91: initialAudit?.p91_price ?? defaultPrices.p91,
-    PETROL_95: initialAudit?.p95_price ?? defaultPrices.p95,
-    DIESEL:    initialAudit?.diesel_price ?? defaultPrices.diesel,
-  });
-
+  // For existing audits: restore the prices saved with that audit.
+  // For new audits: use current system default prices.
+  const [sectionPrices, setSectionPrices] = useState<Record<FuelType, number>>(() => ({
+    PETROL_91: getEffectiveAuditPrice('PETROL_91', initialAudit, defaultPrices),
+    PETROL_95: getEffectiveAuditPrice('PETROL_95', initialAudit, defaultPrices),
+    DIESEL: getEffectiveAuditPrice('DIESEL', initialAudit, defaultPrices),
+  }));
 
   // Submission & Loading State
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
@@ -136,17 +168,56 @@ export const StationAuditForm: React.FC<Props> = ({
   );
 
   const [items, setItems] = useState<PumpReadingItem[]>(() => {
+    const effectivePrices = {
+      PETROL_91: getEffectiveAuditPrice('PETROL_91', initialAudit, defaultPrices),
+      PETROL_95: getEffectiveAuditPrice('PETROL_95', initialAudit, defaultPrices),
+      DIESEL: getEffectiveAuditPrice('DIESEL', initialAudit, defaultPrices),
+    };
+
     const template = generateEmptyItems();
     if (!initialAudit?.items || initialAudit.items.length === 0) {
-      return template;
+      return template.map((tmpl) => ({ ...tmpl, price: effectivePrices[tmpl.fuel_type] }));
     }
+
     return template.map((tmpl) => {
       const saved = initialAudit.items.find(
         (s) => s.fuel_type === tmpl.fuel_type && Number(s.pump_no) === Number(tmpl.pump_no)
       );
-      return saved ? { ...tmpl, ...saved } : tmpl;
+      const itemPrice = saved?.price != null && saved.price > 0 ? saved.price : effectivePrices[tmpl.fuel_type];
+      return saved ? { ...tmpl, ...saved, price: itemPrice } : { ...tmpl, price: itemPrice };
     });
   });
+
+  // Keep section prices and items synchronized whenever initialAudit changes
+  useEffect(() => {
+    const effectivePrices: Record<FuelType, number> = {
+      PETROL_91: getEffectiveAuditPrice('PETROL_91', initialAudit, defaultPrices),
+      PETROL_95: getEffectiveAuditPrice('PETROL_95', initialAudit, defaultPrices),
+      DIESEL: getEffectiveAuditPrice('DIESEL', initialAudit, defaultPrices),
+    };
+    setSectionPrices(effectivePrices);
+
+    if (initialAudit?.items && initialAudit.items.length > 0) {
+      const template = generateEmptyItems();
+      const synchronized = template.map((tmpl) => {
+        const saved = initialAudit.items.find(
+          (s) => s.fuel_type === tmpl.fuel_type && Number(s.pump_no) === Number(tmpl.pump_no)
+        );
+        const itemPrice = saved?.price != null && saved.price > 0 ? saved.price : effectivePrices[tmpl.fuel_type];
+        return saved ? { ...tmpl, ...saved, price: itemPrice } : { ...tmpl, price: itemPrice };
+      });
+      setItems(synchronized);
+    }
+  }, [
+    initialAudit?.id,
+    initialAudit?.audit_number,
+    initialAudit?.p91_price,
+    initialAudit?.p95_price,
+    initialAudit?.diesel_price,
+    defaultPrices.p91,
+    defaultPrices.p95,
+    defaultPrices.diesel,
+  ]);
 
   const [comments, setComments] = useState<AuditComment[]>(
     initialAudit?.comments || []
@@ -215,9 +286,21 @@ export const StationAuditForm: React.FC<Props> = ({
     cashReceived
   );
 
-  // Handle Section Price Update (Updates all 14 pump rows of that fuel type)
+  // Handle Section Price Update (Updates all 15 pump rows of that fuel type)
   const handleFuelPriceChange = (fuelType: FuelType, newPrice: number) => {
     setSectionPrices((prev) => ({ ...prev, [fuelType]: newPrice }));
+    setItems((prevItems) =>
+      prevItems.map((item) => {
+        if (item.fuel_type === fuelType) {
+          const updated = { ...item, price: newPrice };
+          if (item.quantity_sold != null && item.quantity_sold > 0) {
+            updated.amount = Number((item.quantity_sold * newPrice).toFixed(2));
+          }
+          return updated;
+        }
+        return item;
+      })
+    );
   };
 
   // Pump Reading Input Change Handler

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import type { StationAudit, PumpReadingItem, FuelType, Station } from '../../types/audit';
-import { calculateFuelSectionTotals, formatCurrency, formatNumber, formatMeterReading } from '../../lib/calculations';
+import { calculateFuelSectionTotals, formatCurrency, formatNumber, formatMeterReading, DEFAULT_FUEL_PRICES } from '../../lib/calculations';
 import { useLanguage } from '../../context/LanguageContext';
 import { GlassCard } from '../Common/GlassCard';
 import {
@@ -65,9 +65,27 @@ export const ModernAuditForm: React.FC<Props> = ({
     setCollapsedSections((prev) => ({ ...prev, [sectionKey]: !prev[sectionKey] }));
   };
 
-  const p91Totals = calculateFuelSectionTotals(items, 'PETROL_91', prices.PETROL_91);
-  const p95Totals = calculateFuelSectionTotals(items, 'PETROL_95', prices.PETROL_95);
-  const dieselTotals = calculateFuelSectionTotals(items, 'DIESEL', prices.DIESEL);
+  const effectivePrices: Record<FuelType, number> = {
+    PETROL_91:
+      prices?.PETROL_91 ||
+      audit.p91_price ||
+      items.find((i) => i.fuel_type === 'PETROL_91' && i.price != null && i.price > 0)?.price ||
+      DEFAULT_FUEL_PRICES.PETROL_91,
+    PETROL_95:
+      prices?.PETROL_95 ||
+      audit.p95_price ||
+      items.find((i) => i.fuel_type === 'PETROL_95' && i.price != null && i.price > 0)?.price ||
+      DEFAULT_FUEL_PRICES.PETROL_95,
+    DIESEL:
+      prices?.DIESEL ||
+      audit.diesel_price ||
+      items.find((i) => i.fuel_type === 'DIESEL' && i.price != null && i.price > 0)?.price ||
+      DEFAULT_FUEL_PRICES.DIESEL,
+  };
+
+  const p91Totals = calculateFuelSectionTotals(items, 'PETROL_91', effectivePrices.PETROL_91);
+  const p95Totals = calculateFuelSectionTotals(items, 'PETROL_95', effectivePrices.PETROL_95);
+  const dieselTotals = calculateFuelSectionTotals(items, 'DIESEL', effectivePrices.DIESEL);
 
   const grandTotalSales = p91Totals.total_sales + p95Totals.total_sales + dieselTotals.total_sales;
   const noorKhoyVal = audit.noor_khoy_amount || 0;
@@ -354,7 +372,7 @@ export const ModernAuditForm: React.FC<Props> = ({
           headerBg: 'bg-emerald-50/90 text-slate-900 border-b border-emerald-200',
           textColor: 'text-emerald-900',
           totals: p91Totals,
-          price: prices.PETROL_91,
+          price: effectivePrices.PETROL_91,
         },
         {
           key: 'PETROL_95',
@@ -364,7 +382,7 @@ export const ModernAuditForm: React.FC<Props> = ({
           headerBg: 'bg-rose-50/90 text-slate-900 border-b border-rose-200',
           textColor: 'text-rose-900',
           totals: p95Totals,
-          price: prices.PETROL_95,
+          price: effectivePrices.PETROL_95,
         },
         {
           key: 'DIESEL',
@@ -374,7 +392,7 @@ export const ModernAuditForm: React.FC<Props> = ({
           headerBg: 'bg-amber-50/90 text-slate-900 border-b border-amber-200',
           textColor: 'text-amber-900',
           totals: dieselTotals,
-          price: prices.DIESEL,
+          price: effectivePrices.DIESEL,
         },
       ] as const).map((sec) => {
         const fuelType = sec.key as FuelType;

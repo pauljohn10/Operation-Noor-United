@@ -1,6 +1,6 @@
 import React from 'react';
 import type { StationAudit, PumpReadingItem, FuelType } from '../../types/audit';
-import { calculateFuelSectionTotals, formatCurrency, formatNumber, formatMeterReading } from '../../lib/calculations';
+import { calculateFuelSectionTotals, formatCurrency, formatNumber, formatMeterReading, DEFAULT_FUEL_PRICES } from '../../lib/calculations';
 import { CheckCircle2, XCircle, AlertTriangle, ShieldCheck, PenTool, Banknote } from 'lucide-react';
 
 interface Props {
@@ -31,9 +31,27 @@ export const PaperFormLayout: React.FC<Props> = ({
   onSignatoryClick,
   isReadOnly = false,
 }) => {
-  const p91Totals = calculateFuelSectionTotals(items, 'PETROL_91', prices.PETROL_91);
-  const p95Totals = calculateFuelSectionTotals(items, 'PETROL_95', prices.PETROL_95);
-  const dieselTotals = calculateFuelSectionTotals(items, 'DIESEL', prices.DIESEL);
+  const effectivePrices: Record<FuelType, number> = {
+    PETROL_91:
+      prices?.PETROL_91 ||
+      audit.p91_price ||
+      items.find((i) => i.fuel_type === 'PETROL_91' && i.price != null && i.price > 0)?.price ||
+      DEFAULT_FUEL_PRICES.PETROL_91,
+    PETROL_95:
+      prices?.PETROL_95 ||
+      audit.p95_price ||
+      items.find((i) => i.fuel_type === 'PETROL_95' && i.price != null && i.price > 0)?.price ||
+      DEFAULT_FUEL_PRICES.PETROL_95,
+    DIESEL:
+      prices?.DIESEL ||
+      audit.diesel_price ||
+      items.find((i) => i.fuel_type === 'DIESEL' && i.price != null && i.price > 0)?.price ||
+      DEFAULT_FUEL_PRICES.DIESEL,
+  };
+
+  const p91Totals = calculateFuelSectionTotals(items, 'PETROL_91', effectivePrices.PETROL_91);
+  const p95Totals = calculateFuelSectionTotals(items, 'PETROL_95', effectivePrices.PETROL_95);
+  const dieselTotals = calculateFuelSectionTotals(items, 'DIESEL', effectivePrices.DIESEL);
 
   const getFuelItems = (type: FuelType) => items.filter((i) => i.fuel_type === type);
 

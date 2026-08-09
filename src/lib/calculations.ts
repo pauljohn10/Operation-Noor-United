@@ -15,7 +15,7 @@ export function calculateFuelSectionTotals(
   const activePumps = fuelItems.filter((i) => Number(i.pump_no) < 15);
   const totalItem = fuelItems.find((i) => Number(i.pump_no) === 15);
 
-  const currentPrice = fuelItems[0]?.price || priceFallback;
+  const currentPrice = priceFallback != null && priceFallback > 0 ? priceFallback : (fuelItems[0]?.price || DEFAULT_FUEL_PRICES[fuelType]);
 
   // Sum Closing Readings of active pumps (Pump 1 through Pump 14)
   let sumEndReadings = 0;
