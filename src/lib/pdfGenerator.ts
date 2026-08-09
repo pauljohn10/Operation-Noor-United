@@ -1,4 +1,4 @@
-import { toCanvas } from 'html-to-image';
+import html2canvas from 'html2canvas';
 import { jsPDF } from 'jspdf';
 
 /**
@@ -268,12 +268,15 @@ export async function exportAuditToPdf(
     // 2. Preload all images (logo & handwritten signatures) in clone
     await preloadImagesInClone(prepared.clone);
 
-    // 3. Render to high-res canvas (2x pixel ratio for crisp typography and lines)
-    const canvas = await toCanvas(prepared.clone, {
-      pixelRatio: 2,
+    // 3. Render to high-res canvas using html2canvas (forces 794px windowWidth for 100% Android & Desktop parity)
+    const canvas = await html2canvas(prepared.clone, {
+      scale: 2,
       backgroundColor: '#ffffff',
-      cacheBust: true,
+      useCORS: true,
+      allowTaint: true,
+      logging: false,
       width: 794,
+      windowWidth: 794,
     });
 
     const imgData = canvas.toDataURL('image/jpeg', 0.98);
