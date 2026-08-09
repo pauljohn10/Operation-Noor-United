@@ -230,6 +230,9 @@ function prepareElementForPdfExport(element: HTMLElement): { clone: HTMLElement;
     }
   });
 
+  // Sanitize oklch colors before adding to DOM
+  convertOklchColorsInClone(clone);
+
   wrapper.appendChild(clone);
   document.body.appendChild(wrapper);
 
@@ -241,6 +244,50 @@ function prepareElementForPdfExport(element: HTMLElement): { clone: HTMLElement;
       }
     },
   };
+}
+
+/**
+ * Converts modern CSS colors (like oklch, lab, color()) inside computed styles of cloned DOM elements
+ * into standard rgb() / #rrggbb hex colors so html2canvas can parse them without throwing an oklch error.
+ */
+function convertOklchColorsInClone(targetElement: HTMLElement): void {
+  const canvas = document.createElement('canvas');
+  const ctx = canvas.getContext('2d');
+
+  function toRgb(colorStr: string): string {
+    if (!colorStr || colorStr === 'transparent' || colorStr === 'none') return colorStr;
+    if (colorStr.includes('oklch') || colorStr.includes('color(') || colorStr.includes('lab(')) {
+      if (ctx) {
+        try {
+          ctx.fillStyle = '#000000';
+          ctx.fillStyle = colorStr;
+          return ctx.fillStyle;
+        } catch {
+          return '#000000';
+        }
+      }
+      return '#000000';
+    }
+    return colorStr;
+  }
+
+  const allElements = [targetElement, ...Array.from(targetElement.querySelectorAll('*'))] as HTMLElement[];
+  allElements.forEach((el) => {
+    try {
+      const computed = window.getComputedStyle(el);
+      const colorProps = ['color', 'backgroundColor', 'borderColor', 'borderTopColor', 'borderBottomColor', 'borderLeftColor', 'borderRightColor'];
+
+      colorProps.forEach((prop) => {
+        const val = computed.getPropertyValue(prop);
+        if (val && (val.includes('oklch') || val.includes('color(') || val.includes('lab('))) {
+          const rgbVal = toRgb(val);
+          (el.style as any)[prop] = rgbVal;
+        }
+      });
+    } catch {
+      // Ignore errors for unattached elements if any
+    }
+  });
 }
 
 /**
@@ -277,6 +324,9 @@ export async function exportAuditToPdf(
       logging: false,
       width: 794,
       windowWidth: 794,
+      onclone: (clonedDoc) => {
+        convertOklchColorsInClone(clonedDoc.body);
+      },
     });
 
     const imgData = canvas.toDataURL('image/jpeg', 0.98);
