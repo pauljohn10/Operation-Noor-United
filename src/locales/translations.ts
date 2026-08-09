@@ -47,13 +47,10 @@ export interface TranslationDictionary {
     title: string;
     loggedInAs: string;
     totalAudits: string;
-    repositorySize: string;
+    pendingAudits: string;
     pendingApprovals: string;
-    inReviewPipeline: string;
     completedAudits: string;
-    fullyApproved: string;
     rejectedAudits: string;
-    requiresAction: string;
     newAuditBtn: string;
   };
   auditsList: {
@@ -286,13 +283,10 @@ export const translations: Record<Language, TranslationDictionary> = {
       title: 'Operations & Compliance Executive Dashboard',
       loggedInAs: 'Logged in as {role} ({position}).',
       totalAudits: 'Total Audits',
-      repositorySize: '',
+      pendingAudits: 'Pending Audits',
       pendingApprovals: 'Pending Audits',
-      inReviewPipeline: 'Pending Audits',
       completedAudits: 'Completed Audits',
-      fullyApproved: 'Fully Approved',
       rejectedAudits: 'Rejected Audits',
-      requiresAction: 'Requires Action',
       newAuditBtn: 'New Station Audit',
     },
     auditsList: {
@@ -736,13 +730,10 @@ export const translations: Record<Language, TranslationDictionary> = {
       title: 'لوحة تحكم العمليات والامتثال التنفيذية',
       loggedInAs: 'تم تسجيل الدخول بصفتك {role} ({position}).',
       totalAudits: 'إجمالي التدقيقات',
-      repositorySize: '',
+      pendingAudits: 'التدقيقات المعلقة',
       pendingApprovals: 'التدقيقات المعلقة',
-      inReviewPipeline: 'التدقيقات المعلقة',
       completedAudits: 'التدقيقات المكتملة',
-      fullyApproved: 'معتمد بالكامل',
       rejectedAudits: 'التدقيقات المرفوضة',
-      requiresAction: 'يتطلب إجراء',
       newAuditBtn: 'تدقيق محطة جديد',
     },
     auditsList: {

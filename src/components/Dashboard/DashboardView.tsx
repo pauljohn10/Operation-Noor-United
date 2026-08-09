@@ -88,7 +88,7 @@ export const DashboardView: React.FC<Props> = ({
         {/* Pending Audits */}
         <GlassCard variant="amber">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-black text-amber-950 tracking-wider uppercase">{t('dashboard.pendingApprovals')}</span>
+            <span className="text-xs font-black text-amber-950 tracking-wider uppercase">{t('dashboard.pendingAudits')}</span>
             <div className="p-3 bg-amber-100 text-amber-700 rounded-2xl border border-amber-200 shadow-2xs">
               <Clock className="w-5 h-5" />
             </div>
