@@ -179,10 +179,7 @@ function prepareElementForPdfExport(element: HTMLElement): { clone: HTMLElement;
 
     // Determine correct text alignment: check classes and parent container
     const isInsideCell = Boolean(el.closest('td, th'));
-    const isTextRight =
-      el.classList.contains('text-right') ||
-      el.classList.contains('font-mono') ||
-      el.style.textAlign === 'right';
+    const isTextRight = el.classList.contains('text-right') || el.style.textAlign === 'right';
     const isTextLeft =
       el.classList.contains('text-left') ||
       el.type === 'date' ||

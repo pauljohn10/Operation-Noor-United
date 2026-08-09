@@ -351,10 +351,10 @@ export const PaperFormLayout: React.FC<Props> = ({
       </div>
 
       {/* 4. NOTES & SHORTAGE RESPONSIBILITY SECTION */}
-      <div className="my-1.5 p-2 bg-slate-50/80 border border-black rounded text-[9.5px] font-bold text-black space-y-1">
-        <div className="grid grid-cols-2 gap-4 pb-1 border-b border-black">
-          <div className="flex items-center gap-1.5">
-            <span className="text-black font-extrabold uppercase shrink-0">Person Responsible:</span>
+      <div className="my-1.5 p-2 bg-slate-50/80 border border-black text-[9.5px] font-bold text-black space-y-1">
+        <div className="grid grid-cols-2 gap-6 pb-1 border-b border-gray-400">
+          <div className="flex items-center gap-2">
+            <span className="text-black font-extrabold uppercase shrink-0">Person Responsible :</span>
             {isReadOnly ? (
               <span className="font-bold text-black text-left flex-1 px-1 border-b border-black">{audit.person_responsible_for_shortage || 'N/A'}</span>
             ) : (
@@ -368,10 +368,10 @@ export const PaperFormLayout: React.FC<Props> = ({
             )}
           </div>
 
-          <div className="flex items-center gap-1.5">
-            <span className="text-black font-extrabold uppercase shrink-0">Shortage Amount:</span>
+          <div className="flex items-center gap-2">
+            <span className="text-black font-extrabold uppercase shrink-0">Shortage Amount :</span>
             {isReadOnly ? (
-              <span className="font-mono font-bold text-black text-right flex-1 px-1 border-b border-black">{audit.shortage_amount != null ? `${formatCurrency(audit.shortage_amount)} SAR` : '0.00 SAR'}</span>
+              <span className="font-mono font-bold text-black text-left flex-1 px-1 border-b border-black">{audit.shortage_amount != null ? `${formatCurrency(audit.shortage_amount)} SAR` : '0.00 SAR'}</span>
             ) : (
               <input
                 type="number"
@@ -382,14 +382,14 @@ export const PaperFormLayout: React.FC<Props> = ({
                   onMetaChange && onMetaChange('shortage_amount', val);
                 }}
                 placeholder="0.00"
-                className="paper-input text-right font-mono border-b border-black font-bold flex-1 text-[9.5px]"
+                className="paper-input text-left font-mono border-b border-black font-bold flex-1 text-[9.5px]"
               />
             )}
           </div>
         </div>
 
-        <div className="flex items-center gap-1.5 pt-0.5">
-          <span className="text-black font-extrabold uppercase shrink-0">Notes / Remarks:</span>
+        <div className="flex items-center gap-2 pt-0.5">
+          <span className="text-black font-extrabold uppercase shrink-0">Notes / Remarks :</span>
           {isReadOnly ? (
             <span className="font-medium text-black text-left flex-1 px-1 border-b border-black whitespace-pre-wrap">
               {audit.notes || 'No additional notes or observations recorded.'}
