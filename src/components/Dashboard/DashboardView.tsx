@@ -83,12 +83,9 @@ export const DashboardView: React.FC<Props> = ({
             </div>
           </div>
           <p className="text-3xl sm:text-4xl font-black text-slate-900 mt-3 tracking-tight font-mono">{totalAuditsCount}</p>
-          <div className="flex items-center gap-1.5 text-[11px] text-slate-600 mt-2 font-bold">
-            <span>{t('dashboard.repositorySize')}</span>
-          </div>
         </GlassCard>
 
-        {/* Pending Approvals */}
+        {/* Pending Audits */}
         <GlassCard variant="amber">
           <div className="flex items-center justify-between">
             <span className="text-xs font-black text-amber-950 tracking-wider uppercase">{t('dashboard.pendingApprovals')}</span>
@@ -97,9 +94,6 @@ export const DashboardView: React.FC<Props> = ({
             </div>
           </div>
           <p className="text-3xl sm:text-4xl font-black text-amber-900 mt-3 tracking-tight font-mono">{pendingApprovalsCount}</p>
-          <div className="flex items-center gap-1.5 text-[11px] text-slate-600 mt-2 font-bold">
-            <span>{t('dashboard.inReviewPipeline')}</span>
-          </div>
         </GlassCard>
 
         {/* Completed Audits */}
@@ -111,9 +105,6 @@ export const DashboardView: React.FC<Props> = ({
             </div>
           </div>
           <p className="text-3xl sm:text-4xl font-black text-emerald-900 mt-3 tracking-tight font-mono">{completedAuditsCount}</p>
-          <div className="flex items-center gap-1.5 text-[11px] text-slate-600 mt-2 font-bold">
-            <span>{t('dashboard.fullyApproved')}</span>
-          </div>
         </GlassCard>
 
         {/* Rejected Audits */}
@@ -125,9 +116,6 @@ export const DashboardView: React.FC<Props> = ({
             </div>
           </div>
           <p className="text-3xl sm:text-4xl font-black text-rose-900 mt-3 tracking-tight font-mono">{rejectedAuditsCount}</p>
-          <div className="flex items-center gap-1.5 text-[11px] text-slate-600 mt-2 font-bold">
-            <span>{t('dashboard.requiresAction')}</span>
-          </div>
         </GlassCard>
       </div>
 
