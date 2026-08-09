@@ -1,4 +1,4 @@
-import html2canvas from 'html2canvas';
+import { toCanvas } from 'html-to-image';
 import { jsPDF } from 'jspdf';
 
 /**
@@ -315,18 +315,12 @@ export async function exportAuditToPdf(
     // 2. Preload all images (logo & handwritten signatures) in clone
     await preloadImagesInClone(prepared.clone);
 
-    // 3. Render to high-res canvas using html2canvas (forces 794px windowWidth for 100% Android & Desktop parity)
-    const canvas = await html2canvas(prepared.clone, {
-      scale: 2,
+    // 3. Render to high-res canvas using html-to-image (native browser SVG rendering, no oklch parser errors)
+    const canvas = await toCanvas(prepared.clone, {
+      pixelRatio: 2,
       backgroundColor: '#ffffff',
-      useCORS: true,
-      allowTaint: true,
-      logging: false,
+      cacheBust: true,
       width: 794,
-      windowWidth: 794,
-      onclone: (clonedDoc) => {
-        convertOklchColorsInClone(clonedDoc.body);
-      },
     });
 
     const imgData = canvas.toDataURL('image/jpeg', 0.98);
