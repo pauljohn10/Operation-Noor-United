@@ -332,13 +332,49 @@ export const PaperFormLayout: React.FC<Props> = ({
         )}
       </div>
 
-      {/* 4. NOTE SECTION */}
-      <div className="my-1.5 text-[10px] font-bold text-black">
-        <div className="flex items-center gap-2">
-          <span>Note:</span>
+      {/* 4. NOTES & SHORTAGE RESPONSIBILITY SECTION */}
+      <div className="my-1.5 p-2 bg-slate-50 border border-slate-300 rounded text-[9.5px] font-bold text-black space-y-1">
+        <div className="grid grid-cols-2 gap-3 pb-1 border-b border-slate-200">
+          <div className="flex items-center gap-1.5">
+            <span className="text-slate-700 font-extrabold uppercase shrink-0">Person Responsible:</span>
+            {isReadOnly ? (
+              <span className="font-bold text-slate-900 truncate">{audit.person_responsible_for_shortage || 'N/A (No Shortage Assigned)'}</span>
+            ) : (
+              <input
+                type="text"
+                value={audit.person_responsible_for_shortage || ''}
+                onChange={(e) => onMetaChange && onMetaChange('person_responsible_for_shortage', e.target.value)}
+                placeholder="Person responsible name..."
+                className="paper-input border-b border-slate-400 font-bold flex-1 text-[9.5px]"
+              />
+            )}
+          </div>
+
+          <div className="flex items-center gap-1.5">
+            <span className="text-slate-700 font-extrabold uppercase shrink-0">Shortage Amount:</span>
+            {isReadOnly ? (
+              <span className="font-mono font-bold text-slate-900">{audit.shortage_amount != null ? `${formatCurrency(audit.shortage_amount)} SAR` : '0.00 SAR'}</span>
+            ) : (
+              <input
+                type="number"
+                step="0.01"
+                value={audit.shortage_amount ?? ''}
+                onChange={(e) => {
+                  const val = e.target.value === '' ? null : parseFloat(e.target.value) || 0;
+                  onMetaChange && onMetaChange('shortage_amount', val);
+                }}
+                placeholder="0.00"
+                className="paper-input border-b border-slate-400 font-mono font-bold flex-1 text-[9.5px]"
+              />
+            )}
+          </div>
+        </div>
+
+        <div className="flex items-start gap-1.5 pt-0.5">
+          <span className="text-slate-700 font-extrabold uppercase shrink-0">Notes / Remarks:</span>
           {isReadOnly ? (
-            <span className="border-b border-gray-400 flex-1 px-1 font-medium">
-              {audit.notes || '____________________________________________________________________________________________________'}
+            <span className="font-medium text-slate-900 flex-1 whitespace-pre-wrap">
+              {audit.notes || 'No additional notes or observations recorded.'}
             </span>
           ) : (
             <input
@@ -346,7 +382,7 @@ export const PaperFormLayout: React.FC<Props> = ({
               value={audit.notes || ''}
               onChange={(e) => onMetaChange && onMetaChange('notes', e.target.value)}
               placeholder="Enter audit notes or observations..."
-              className="paper-input border-b border-gray-400 text-left font-medium flex-1 text-[10px]"
+              className="paper-input border-b border-slate-400 text-left font-medium flex-1 text-[9.5px]"
             />
           )}
         </div>

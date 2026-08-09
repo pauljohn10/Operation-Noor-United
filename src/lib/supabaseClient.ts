@@ -801,6 +801,8 @@ export async function saveAudit(audit: StationAudit): Promise<StationAudit> {
     total_quantity: audit.total_quantity != null ? Number(audit.total_quantity) : 0,
     discrepancy_amount: audit.discrepancy_amount != null ? Number(audit.discrepancy_amount) : 0,
     notes: audit.notes || '',
+    person_responsible_for_shortage: audit.person_responsible_for_shortage || '',
+    shortage_amount: audit.shortage_amount != null ? Number(audit.shortage_amount) : 0,
     updated_at: new Date().toISOString(),
   };
 

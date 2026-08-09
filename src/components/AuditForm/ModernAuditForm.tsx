@@ -16,6 +16,7 @@ import {
   PenTool,
   ShieldCheck,
   ShieldAlert,
+  FileText,
 } from 'lucide-react';
 
 interface Props {
@@ -765,6 +766,88 @@ export const ModernAuditForm: React.FC<Props> = ({
           </div>
         );
       })}
+
+      {/* 4.5 NOTES, REMARKS & SHORTAGE LIABILITY DETAILS CARD */}
+      <div className="bg-white border border-slate-200 p-5 sm:p-6 rounded-[28px] shadow-sm space-y-4">
+        <div className="flex items-center justify-between border-b border-slate-200 pb-3">
+          <div className="flex items-center gap-2.5">
+            <div className="p-2.5 bg-amber-500/10 text-amber-600 rounded-xl border border-amber-500/20">
+              <FileText className="w-5 h-5 text-amber-600" />
+            </div>
+            <div>
+              <h3 className="text-base font-black text-slate-900">Notes / Remarks & Shortage Liability Details</h3>
+              <p className="text-xs text-slate-500 font-medium">Record audit observations, responsible personnel, and shortage details</p>
+            </div>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {/* Person Responsible for Shortage */}
+          <div>
+            <label className="block text-xs font-black text-slate-800 uppercase tracking-wider mb-1.5">
+              Person Responsible for Shortage
+            </label>
+            {isReadOnly ? (
+              <div className="w-full min-h-[42px] bg-slate-50 border border-slate-300 rounded-xl px-3.5 py-2.5 text-xs font-black text-slate-900 flex items-center">
+                {audit.person_responsible_for_shortage || 'N/A (No Shortage Assigned)'}
+              </div>
+            ) : (
+              <input
+                type="text"
+                value={audit.person_responsible_for_shortage || ''}
+                onChange={(e) => onMetaChange && onMetaChange('person_responsible_for_shortage', e.target.value)}
+                placeholder="e.g. Ahmed Ali (Station Supervisor / Cashier)"
+                className="w-full min-h-[42px] text-xs font-black text-slate-900 bg-white border border-slate-300 rounded-xl px-3.5 py-2 focus:outline-none focus:ring-2 focus:ring-sky-500 shadow-2xs placeholder:text-slate-400 font-sans"
+              />
+            )}
+          </div>
+
+          {/* Shortage Amount (SAR) */}
+          <div>
+            <label className="block text-xs font-black text-slate-800 uppercase tracking-wider mb-1.5">
+              Shortage Amount (SAR)
+            </label>
+            {isReadOnly ? (
+              <div className="w-full min-h-[42px] bg-slate-50 border border-slate-300 rounded-xl px-3.5 py-2.5 text-xs font-black text-slate-900 font-mono flex items-center">
+                {audit.shortage_amount != null ? `${formatCurrency(audit.shortage_amount)} SAR` : '0.00 SAR'}
+              </div>
+            ) : (
+              <input
+                type="number"
+                step="0.01"
+                inputMode="decimal"
+                value={audit.shortage_amount ?? ''}
+                onChange={(e) => {
+                  const val = e.target.value === '' ? null : parseFloat(e.target.value) || 0;
+                  onMetaChange && onMetaChange('shortage_amount', val);
+                }}
+                placeholder="0.00"
+                className="w-full min-h-[42px] text-xs font-black text-slate-900 bg-white border border-slate-300 rounded-xl px-3.5 py-2 focus:outline-none focus:ring-2 focus:ring-sky-500 shadow-2xs font-mono placeholder:text-slate-400"
+              />
+            )}
+          </div>
+        </div>
+
+        {/* Free-Text Audit Notes & Remarks */}
+        <div>
+          <label className="block text-xs font-black text-slate-800 uppercase tracking-wider mb-1.5">
+            Notes / Remarks & Observations
+          </label>
+          {isReadOnly ? (
+            <div className="w-full min-h-[80px] bg-slate-50 border border-slate-300 rounded-xl p-3.5 text-xs font-semibold text-slate-900 whitespace-pre-wrap leading-relaxed">
+              {audit.notes || 'No additional notes or observations recorded.'}
+            </div>
+          ) : (
+            <textarea
+              rows={3}
+              value={audit.notes || ''}
+              onChange={(e) => onMetaChange && onMetaChange('notes', e.target.value)}
+              placeholder="Enter detailed audit notes, physical station observations, or discrepancy explanation..."
+              className="w-full text-xs font-semibold text-slate-900 bg-white border border-slate-300 rounded-xl p-3 focus:outline-none focus:ring-2 focus:ring-sky-500 shadow-2xs placeholder:text-slate-400 leading-relaxed font-sans"
+            />
+          )}
+        </div>
+      </div>
 
       {/* 5. SIGNATORY AUTHORIZATION CARDS (6 SEQUENTIAL STAGES) */}
       <div className="bg-white/60 backdrop-blur-2xl border border-white/90 p-5 sm:p-6 rounded-[28px] shadow-[0_15px_35px_rgba(14,165,233,0.10)] space-y-4">

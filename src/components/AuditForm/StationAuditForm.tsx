@@ -95,6 +95,12 @@ export const StationAuditForm: React.FC<Props> = ({
   );
 
   const [notes, setNotes] = useState<string>(initialAudit?.notes || '');
+  const [personResponsibleForShortage, setPersonResponsibleForShortage] = useState<string>(
+    initialAudit?.person_responsible_for_shortage || ''
+  );
+  const [shortageAmount, setShortageAmount] = useState<number | null>(
+    initialAudit?.shortage_amount !== undefined ? initialAudit.shortage_amount : null
+  );
 
   // Section Fuel Prices State.
   // For existing audits: restore the prices saved at audit creation time.
@@ -261,6 +267,8 @@ export const StationAuditForm: React.FC<Props> = ({
     if (field === 'atm_amount') setAtm(value);
     if (field === 'cash_received_amount') setCashReceived(value);
     if (field === 'notes') setNotes(value);
+    if (field === 'person_responsible_for_shortage') setPersonResponsibleForShortage(value);
+    if (field === 'shortage_amount') setShortageAmount(value);
   };
 
   // Signatory Box Click Handler
@@ -460,6 +468,8 @@ export const StationAuditForm: React.FC<Props> = ({
       p95_total_opening_reading: totalOpeningReadings.PETROL_95,
       diesel_total_opening_reading: totalOpeningReadings.DIESEL,
       notes: notes,
+      person_responsible_for_shortage: personResponsibleForShortage,
+      shortage_amount: shortageAmount,
 
       created_at: initialAudit?.created_at || new Date().toISOString(),
       updated_at: new Date().toISOString(),

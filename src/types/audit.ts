@@ -164,6 +164,8 @@ export interface StationAudit {
   diesel_total_opening_reading?: number | null;
 
   notes?: string;
+  person_responsible_for_shortage?: string;
+  shortage_amount?: number | null;
 
   created_at: string;
   updated_at: string;
