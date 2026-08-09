@@ -163,7 +163,7 @@ function prepareElementForPdfExport(element: HTMLElement): { clone: HTMLElement;
     htmlImg.style.maxHeight = '24px';
   });
 
-  // Replace form inputs/selects with clean bold text spans for 100% table alignment
+  // Replace form inputs/selects with clean bold text spans for 100% table alignment & precise text positioning
   const inputs = clone.querySelectorAll('input, select, textarea');
   inputs.forEach((inputNode) => {
     const el = inputNode as HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement;
@@ -177,13 +177,45 @@ function prepareElementForPdfExport(element: HTMLElement): { clone: HTMLElement;
       }
     }
 
+    // Determine correct text alignment: check classes and parent container
+    const isInsideCell = Boolean(el.closest('td, th'));
+    const isTextRight =
+      el.classList.contains('text-right') ||
+      el.classList.contains('font-mono') ||
+      el.style.textAlign === 'right';
+    const isTextLeft =
+      el.classList.contains('text-left') ||
+      el.type === 'date' ||
+      el.tagName.toLowerCase() === 'textarea' ||
+      el.style.textAlign === 'left';
+
+    let align = 'center';
+    if (isInsideCell) {
+      align = isTextRight ? 'right' : isTextLeft ? 'left' : 'center';
+    } else {
+      align = isTextRight ? 'right' : 'left';
+    }
+
+    // Format monetary numbers outside tables with clean SAR suffix if numeric
+    let displayVal = textVal;
+    if (
+      !isInsideCell &&
+      el.type === 'number' &&
+      displayVal !== '' &&
+      !isNaN(Number(displayVal)) &&
+      !displayVal.includes('SAR')
+    ) {
+      const numVal = parseFloat(displayVal);
+      displayVal = `${numVal.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} SAR`;
+    }
+
     const textSpan = document.createElement('span');
-    textSpan.textContent = textVal;
+    textSpan.textContent = displayVal;
     textSpan.style.fontFamily = 'inherit';
     textSpan.style.fontSize = '8.5px';
     textSpan.style.fontWeight = 'bold';
     textSpan.style.color = '#000000';
-    textSpan.style.textAlign = 'center';
+    textSpan.style.textAlign = align;
     textSpan.style.display = 'inline-block';
     textSpan.style.width = '100%';
     textSpan.style.lineHeight = '1.05';
