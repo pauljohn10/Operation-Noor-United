@@ -26,7 +26,7 @@ export const PaperFormLayout: React.FC<Props> = ({
   prices,
   onItemChange,
   onPriceChange,
-  onTotalOpeningChange,
+  onTotalOpeningChange: _onTotalOpeningChange,
   onMetaChange,
   onSignatoryClick,
   isReadOnly = false,
@@ -309,45 +309,11 @@ export const PaperFormLayout: React.FC<Props> = ({
         </div>
       )}
 
-      {/* 3. FUEL SECTIONS & PUMP TABLES */}
-      {/* MOBILE STACKED CARDS (< 768px) */}
-      {renderFuelMobileCards('PETROL 91', 'paper-header-p91', getFuelItems('PETROL_91'), p91Totals, 'PETROL_91')}
-      {renderFuelMobileCards('PETROL 95', 'paper-header-p95', getFuelItems('PETROL_95'), p95Totals, 'PETROL_95')}
-      {renderFuelMobileCards('DIESEL', 'paper-header-diesel', getFuelItems('DIESEL'), dieselTotals, 'DIESEL')}
-
-      {/* DESKTOP & PRINT FORM TABLES (ALWAYS VISIBLE FOR PDF EXPORT & PRINT) */}
-      <div className="paper-tables-container hidden md:block print:block space-y-1.5">
+      {/* 3. FUEL SECTIONS & PUMP TABLES (ALWAYS OFFICIAL A4 DESKTOP LAYOUT FOR PRINT & PDF EXPORT) */}
+      <div className="space-y-1.5">
         {renderFuelTable('PETROL 91', 'paper-header-p91', getFuelItems('PETROL_91'), p91Totals, 'PETROL_91')}
         {renderFuelTable('PETROL 95', 'paper-header-p95', getFuelItems('PETROL_95'), p95Totals, 'PETROL_95')}
         {renderFuelTable('DIESEL', 'paper-header-diesel', getFuelItems('DIESEL'), dieselTotals, 'DIESEL')}
-      </div>
-
-      {/* FULL-WIDTH MOBILE SUMMARY CARDS (< 768px) */}
-      <div className="md:hidden space-y-2.5 my-3 no-print">
-        <div className="bg-emerald-50 border border-emerald-300 p-3 rounded-2xl flex items-center justify-between shadow-sm">
-          <span className="font-extrabold text-xs text-emerald-900 uppercase">Total Petrol 91</span>
-          <span className="font-black text-base text-emerald-900 font-mono">{formatCurrency(p91Totals.total_sales)} SAR</span>
-        </div>
-        <div className="bg-rose-50 border border-rose-300 p-3 rounded-2xl flex items-center justify-between shadow-sm">
-          <span className="font-extrabold text-xs text-rose-900 uppercase">Total Petrol 95</span>
-          <span className="font-black text-base text-rose-900 font-mono">{formatCurrency(p95Totals.total_sales)} SAR</span>
-        </div>
-        <div className="bg-amber-50 border border-amber-300 p-3 rounded-2xl flex items-center justify-between shadow-sm">
-          <span className="font-extrabold text-xs text-amber-900 uppercase">Total Diesel</span>
-          <span className="font-black text-base text-amber-900 font-mono">{formatCurrency(dieselTotals.total_sales)} SAR</span>
-        </div>
-        <div className="bg-gradient-to-r from-sky-600 to-indigo-600 text-white p-3 rounded-2xl flex items-center justify-between shadow-lg">
-          <span className="font-black text-xs uppercase">Total Sales</span>
-          <span className="font-black text-base font-mono underline">{formatCurrency(grandTotalSales)} SAR</span>
-        </div>
-        {audit.cash_received_amount != null && (
-          <div className="bg-slate-900 text-white p-3 rounded-2xl flex items-center justify-between shadow-lg">
-            <span className="font-black text-xs uppercase">Discrepancy / Variance</span>
-            <span className={`font-black text-base font-mono ${(audit.discrepancy_amount || 0) < 0 ? 'text-rose-400' : (audit.discrepancy_amount || 0) > 0 ? 'text-emerald-400' : 'text-white'}`}>
-              {formatCurrency(audit.discrepancy_amount || 0)} SAR
-            </span>
-          </div>
-        )}
       </div>
 
       {/* 4. NOTES & SHORTAGE RESPONSIBILITY SECTION */}
@@ -499,206 +465,6 @@ export const PaperFormLayout: React.FC<Props> = ({
       </div>
     </div>
   );
-
-  // STACKED MOBILE PUMP CARDS RENDERER FOR ANDROID WEB BROWSERS (< 768px)
-  function renderFuelMobileCards(
-    title: string,
-    headerClass: string,
-    fuelItems: PumpReadingItem[],
-    sectionTotals: any,
-    fuelTypeKey: FuelType
-  ) {
-    return (
-      <div className={`paper-fuel-mobile-${fuelTypeKey.toLowerCase()} mb-6 md:hidden no-print space-y-3`}>
-        {/* SECTION HEADER & UNIT PRICE CARD */}
-        <div className={`p-4 rounded-2xl text-white shadow-md flex items-center justify-between gap-3 ${headerClass}`}>
-          <div>
-            <h3 className="text-base font-black tracking-wide uppercase">{title}</h3>
-            <p className="text-[11px] font-bold opacity-90">14 Active Pump Lines</p>
-          </div>
-          <div className="flex items-center gap-2 bg-black/25 px-3 py-1.5 rounded-xl border border-white/20">
-            <span className="text-xs font-bold whitespace-nowrap">Unit Price:</span>
-            {isReadOnly ? (
-              <span className="font-mono font-black text-sm">{sectionTotals.price.toFixed(2)} SAR</span>
-            ) : (
-              <input
-                type="number"
-                step="0.01"
-                inputMode="decimal"
-                value={sectionTotals.price || ''}
-                onChange={(e) => onPriceChange && onPriceChange(fuelTypeKey, parseFloat(e.target.value) || 0)}
-                placeholder="0.00"
-                className="w-20 min-h-[38px] text-center font-black text-sm bg-white text-slate-900 rounded-lg outline-none focus:ring-2 focus:ring-sky-400"
-              />
-            )}
-          </div>
-        </div>
-
-        {/* STACKED PUMP CARDS */}
-        <div className="space-y-3">
-          {fuelItems
-            .filter((item) => item.pump_no !== 15)
-            .map((item) => {
-              const pumpNo = item.pump_no;
-
-            return (
-              <div key={pumpNo} className="bg-slate-50 border border-slate-300 rounded-2xl p-4 space-y-3 shadow-sm">
-                <div className="flex items-center justify-between border-b border-slate-200 pb-2">
-                  <span className="font-extrabold text-sm text-slate-900">{title} — Pump #{pumpNo}</span>
-                </div>
-
-                <div className="grid grid-cols-2 gap-3">
-                  {/* Start Reading */}
-                  <div>
-                    <label className="block text-xs font-bold text-slate-700 mb-1">Start Reading</label>
-                    {isReadOnly ? (
-                      <div className="bg-white border border-slate-300 rounded-xl px-3 py-2.5 text-slate-900 font-mono text-sm font-bold text-center">
-                        {formatMeterReading(item.start_reading)}
-                      </div>
-                    ) : (
-                      <input
-                        type="number"
-                        step="0.01"
-                        inputMode="decimal"
-                        value={item.start_reading ?? ''}
-                        onChange={(e) =>
-                          onItemChange &&
-                          onItemChange(item.fuel_type, pumpNo, 'start_reading', e.target.value === '' ? null : parseFloat(e.target.value) || 0)
-                        }
-                        placeholder="0.00"
-                        className="w-full min-h-[48px] text-base font-extrabold text-center bg-white border border-slate-400 rounded-xl px-3 py-2 text-slate-900 focus:ring-2 focus:ring-sky-500 focus:border-sky-500 focus:bg-sky-50"
-                      />
-                    )}
-                  </div>
-
-                  {/* End Reading */}
-                  <div>
-                    <label className="block text-xs font-bold text-slate-700 mb-1">End Reading</label>
-                    {isReadOnly ? (
-                      <div className="bg-white border border-slate-300 rounded-xl px-3 py-2.5 text-slate-900 font-mono text-sm font-bold text-center">
-                        {formatMeterReading(item.end_reading)}
-                      </div>
-                    ) : (
-                      <input
-                        type="number"
-                        step="0.01"
-                        inputMode="decimal"
-                        value={item.end_reading ?? ''}
-                        onChange={(e) =>
-                          onItemChange &&
-                          onItemChange(item.fuel_type, pumpNo, 'end_reading', e.target.value === '' ? null : parseFloat(e.target.value) || 0)
-                        }
-                        placeholder="0.00"
-                        className="w-full min-h-[48px] text-base font-extrabold text-center bg-white border border-slate-400 rounded-xl px-3 py-2 text-slate-900 focus:ring-2 focus:ring-sky-500 focus:border-sky-500 focus:bg-sky-50"
-                      />
-                    )}
-                  </div>
-
-                  {/* Quantity Sold */}
-                  <div>
-                    <label className="block text-xs font-bold text-slate-700 mb-1">Quantity Sold (L)</label>
-                    {isReadOnly ? (
-                      <div className="bg-slate-100 border border-slate-300 rounded-xl px-3 py-2.5 text-slate-900 font-mono text-sm font-black text-center min-h-[48px] flex items-center justify-center">
-                        {item.quantity_sold != null ? `${formatNumber(item.quantity_sold)} L` : '-'}
-                      </div>
-                    ) : (
-                      <input
-                        type="number"
-                        step="0.01"
-                        inputMode="decimal"
-                        value={item.quantity_sold ?? ''}
-                        onChange={(e) =>
-                          onItemChange &&
-                          onItemChange(item.fuel_type, pumpNo, 'quantity_sold', e.target.value === '' ? null : parseFloat(e.target.value) || 0)
-                        }
-                        placeholder="0.00"
-                        className="w-full min-h-[48px] text-base font-extrabold text-center bg-white border border-slate-400 rounded-xl px-3 py-2 text-slate-900 focus:ring-2 focus:ring-sky-500 focus:border-sky-500 focus:bg-sky-50"
-                      />
-                    )}
-                  </div>
-
-                  {/* Sales Amount */}
-                  <div>
-                    <label className="block text-xs font-bold text-slate-700 mb-1">Sales Amount (SAR)</label>
-                    {isReadOnly ? (
-                      <div className="bg-slate-100 border border-slate-300 rounded-xl px-3 py-2.5 text-slate-900 font-mono text-sm font-black text-center min-h-[48px] flex items-center justify-center">
-                        {formatCurrency(item.amount)}
-                      </div>
-                    ) : (
-                      <input
-                        type="number"
-                        step="0.01"
-                        inputMode="decimal"
-                        value={item.amount ?? ''}
-                        onChange={(e) =>
-                          onItemChange &&
-                          onItemChange(item.fuel_type, pumpNo, 'amount', e.target.value === '' ? null : parseFloat(e.target.value) || 0)
-                        }
-                        placeholder="0.00"
-                        className="w-full min-h-[48px] text-base font-extrabold text-center bg-white border border-slate-400 rounded-xl px-3 py-2 text-slate-900 focus:ring-2 focus:ring-sky-500 focus:border-sky-500 focus:bg-sky-50"
-                      />
-                    )}
-                  </div>
-                </div>
-              </div>
-            );
-          })}
-        </div>
-
-        {/* Section Final Closing & Totals Summary Card for Mobile */}
-        <div className="p-4 bg-gradient-to-r from-blue-50 via-sky-50 to-emerald-50 border border-sky-200 rounded-2xl flex flex-col space-y-3 text-xs font-black shadow-sm">
-          <div className="flex items-center justify-between border-b border-sky-200/60 pb-2">
-            <span className="text-slate-900 font-extrabold uppercase tracking-wider">{title} TOTAL:</span>
-          </div>
-
-          <div className="grid grid-cols-2 gap-3 text-xs">
-            <div>
-              <label className="block text-[11px] font-bold text-slate-700 mb-1">Start Reading (Manual Entry)</label>
-              {isReadOnly ? (
-                <div className="bg-white border border-slate-300 rounded-xl px-3 py-2 text-slate-900 font-mono font-bold text-center">
-                  {sectionTotals.total_opening_reading != null ? formatMeterReading(sectionTotals.total_opening_reading) : '-'}
-                </div>
-              ) : (
-                <input
-                  type="text"
-                  inputMode="decimal"
-                  pattern="[0-9.]*"
-                  value={sectionTotals.total_opening_reading ?? ''}
-                  onClick={(e) => e.stopPropagation()}
-                  onTouchStart={(e) => e.stopPropagation()}
-                  onChange={(e) => {
-                    const raw = e.target.value;
-                    if (raw === '') {
-                      if (onTotalOpeningChange) onTotalOpeningChange(fuelTypeKey, null);
-                      return;
-                    }
-                    if (/^[0-9]*\.?[0-9]*$/.test(raw)) {
-                      const parsed = parseFloat(raw);
-                      if (onTotalOpeningChange) onTotalOpeningChange(fuelTypeKey, isNaN(parsed) ? null : parsed);
-                    }
-                  }}
-                  placeholder="Manual Entry"
-                  className="w-full text-sm font-black text-center bg-yellow-50 border border-amber-300 rounded-xl px-3 py-2 text-slate-900 focus:ring-2 focus:ring-amber-500 font-mono touch-manipulation cursor-text"
-                />
-              )}
-            </div>
-
-            <div>
-              <label className="block text-[11px] font-bold text-slate-700 mb-1">End Reading (Auto Calculated)</label>
-              <div className="bg-blue-100/70 border border-blue-300 rounded-xl px-3 py-2 text-blue-950 font-mono font-black text-center text-sm">
-                {formatMeterReading(sectionTotals.final_closing_reading)} L
-              </div>
-            </div>
-          </div>
-
-          <div className="flex items-center justify-between pt-2 border-t border-sky-200/60 font-mono">
-            <span className="text-sky-900 font-black">Sold: {formatNumber(sectionTotals.total_quantity)} L</span>
-            <span className="text-emerald-900 font-black">Sales: {formatCurrency(sectionTotals.total_sales)} SAR</span>
-          </div>
-        </div>
-      </div>
-    );
-  }
 
   // FUEL TABLE RENDERER WITH VERTICALLY MERGED PRICE COLUMN (rowSpan=15)
   function renderFuelTable(
