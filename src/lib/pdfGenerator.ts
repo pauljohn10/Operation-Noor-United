@@ -76,15 +76,27 @@ function prepareElementForPdfExport(element: HTMLElement): { clone: HTMLElement;
   // Hide non-printable interactive elements
   const noPrintElements = clone.querySelectorAll('.no-print');
   noPrintElements.forEach((el) => {
-    (el as HTMLElement).style.display = 'none';
+    (el as HTMLElement).style.setProperty('display', 'none', 'important');
   });
 
-  // Force all printable paper table containers and hidden paper sections to be visible
-  const paperTables = clone.querySelectorAll('.paper-tables-container');
-  paperTables.forEach((pt) => {
+  // Force-hide mobile responsive elements (e.g. mobile stacked cards) regardless of device screen width
+  const mobileElements = clone.querySelectorAll('.md\\:hidden, .sm\\:hidden, .block.md\\:hidden');
+  mobileElements.forEach((el) => {
+    (el as HTMLElement).style.setProperty('display', 'none', 'important');
+  });
+
+  // Force-show desktop A4 print sections and tables regardless of device screen width
+  const desktopSections = clone.querySelectorAll('.hidden.md\\:block, .hidden.sm\\:block, .paper-tables-container');
+  desktopSections.forEach((pt) => {
     const htmlPt = pt as HTMLElement;
     htmlPt.classList.remove('hidden');
-    htmlPt.style.display = 'block';
+    htmlPt.style.setProperty('display', 'block', 'important');
+  });
+
+  const desktopTables = clone.querySelectorAll('.paper-table');
+  desktopTables.forEach((tbl) => {
+    const htmlTbl = tbl as HTMLElement;
+    htmlTbl.style.setProperty('display', 'table', 'important');
   });
 
   // Make header & margins ultra-compact for full A4 printable area
