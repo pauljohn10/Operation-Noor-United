@@ -354,7 +354,51 @@ export async function exportAuditToPdf(
       width: 794,
       windowWidth: 1200,
       onclone: (clonedDoc) => {
-        // Sanitize oklch colors in all <style> tags to prevent html2canvas color parsing errors
+        // 1. Intercept getComputedStyle in the cloned document context to sanitize any property containing oklch
+        if (clonedDoc.defaultView) {
+          const win = clonedDoc.defaultView;
+          const origGetComputedStyle = win.getComputedStyle.bind(win);
+          const tempCanvas = clonedDoc.createElement('canvas');
+          const tempCtx = tempCanvas.getContext('2d');
+
+          const sanitizeColorStr = (str: string): string => {
+            if (!str || (!str.includes('oklch') && !str.includes('color(') && !str.includes('lab('))) return str;
+            if (tempCtx) {
+              try {
+                tempCtx.fillStyle = '#000000';
+                tempCtx.fillStyle = str;
+                return tempCtx.fillStyle;
+              } catch {
+                return '#000000';
+              }
+            }
+            return '#000000';
+          };
+
+          (win as any).getComputedStyle = function (el: Element, pseudoElt?: string | null) {
+            const style = origGetComputedStyle(el, pseudoElt);
+            return new Proxy(style, {
+              get(target, prop) {
+                if (prop === 'getPropertyValue') {
+                  return function (propertyName: string) {
+                    const rawVal = target.getPropertyValue(propertyName);
+                    return sanitizeColorStr(rawVal);
+                  };
+                }
+                const val = (target as any)[prop];
+                if (typeof val === 'string') {
+                  return sanitizeColorStr(val);
+                }
+                if (typeof val === 'function') {
+                  return val.bind(target);
+                }
+                return val;
+              },
+            });
+          };
+        }
+
+        // 2. Sanitize oklch colors in all <style> tags
         const styleTags = clonedDoc.querySelectorAll('style');
         styleTags.forEach((s) => {
           if (s.textContent && s.textContent.includes('oklch')) {
@@ -362,7 +406,7 @@ export async function exportAuditToPdf(
           }
         });
 
-        // Sanitize element inline styles
+        // 3. Sanitize element inline styles
         const allEls = clonedDoc.querySelectorAll('*');
         allEls.forEach((el) => {
           const htmlEl = el as HTMLElement;
@@ -371,7 +415,7 @@ export async function exportAuditToPdf(
           }
         });
 
-        // Convert computed oklch colors into standard RGB
+        // 4. Convert computed oklch colors into standard RGB
         convertOklchColorsInClone(clonedDoc.body);
       },
     });
