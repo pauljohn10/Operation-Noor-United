@@ -7,14 +7,30 @@ import { jsPDF } from 'jspdf';
  */
 async function preloadImagesInClone(clone: HTMLElement): Promise<void> {
   const images = Array.from(clone.querySelectorAll('img'));
-  const promises = images.map((img) => {
-    if (img.complete && img.naturalWidth !== 0) {
-      return Promise.resolve();
+  const promises = images.map(async (img) => {
+    try {
+      if (!img.complete || img.naturalWidth === 0) {
+        await new Promise<void>((resolve) => {
+          img.onload = () => resolve();
+          img.onerror = () => resolve();
+        });
+      }
+
+      // Convert image src to inline base64 Data URL so iOS Mobile Safari renders logo & handwritten signatures 100% reliably in SVG toCanvas
+      if (img.src && !img.src.startsWith('data:')) {
+        const c = document.createElement('canvas');
+        c.width = img.naturalWidth || img.width || 100;
+        c.height = img.naturalHeight || img.height || 100;
+        const ctx = c.getContext('2d');
+        if (ctx) {
+          ctx.drawImage(img, 0, 0);
+          const dataUrl = c.toDataURL('image/png');
+          img.src = dataUrl;
+        }
+      }
+    } catch {
+      // Continue if cross-origin image fails
     }
-    return new Promise<void>((resolve) => {
-      img.onload = () => resolve();
-      img.onerror = () => resolve(); // continue even if 1 image fails
-    });
   });
 
   await Promise.all(promises);
@@ -72,15 +88,47 @@ function prepareElementForPdfExport(element: HTMLElement): { clone: HTMLElement;
   // Hide non-printable interactive elements
   const noPrintElements = clone.querySelectorAll('.no-print');
   noPrintElements.forEach((el) => {
-    (el as HTMLElement).style.display = 'none';
+    (el as HTMLElement).style.setProperty('display', 'none', 'important');
   });
 
-  // Force all printable paper table containers and hidden paper sections to be visible
-  const paperTables = clone.querySelectorAll('.paper-tables-container');
-  paperTables.forEach((pt) => {
+  // Force-hide mobile responsive elements (e.g. mobile stacked cards) regardless of device screen width
+  const mobileElements = clone.querySelectorAll('.md\\:hidden, .sm\\:hidden, .block.md\\:hidden');
+  mobileElements.forEach((el) => {
+    (el as HTMLElement).style.setProperty('display', 'none', 'important');
+  });
+
+  // Force-show desktop A4 print sections and tables regardless of device screen width
+  const desktopSections = clone.querySelectorAll('.hidden.md\\:block, .hidden.sm\\:block, .paper-tables-container');
+  desktopSections.forEach((pt) => {
     const htmlPt = pt as HTMLElement;
     htmlPt.classList.remove('hidden');
-    htmlPt.style.display = 'block';
+    htmlPt.style.setProperty('display', 'block', 'important');
+  });
+
+  const desktopTables = clone.querySelectorAll('.paper-table');
+  desktopTables.forEach((tbl) => {
+    const htmlTbl = tbl as HTMLElement;
+    htmlTbl.style.setProperty('display', 'table', 'important');
+  });
+
+  // Force metadata grid to stay in 2 equal horizontal columns regardless of screen width
+  const metaGrid = clone.querySelector('.paper-meta-grid') as HTMLElement;
+  if (metaGrid) {
+    metaGrid.style.setProperty('display', 'flex', 'important');
+    metaGrid.style.setProperty('flex-direction', 'row', 'important');
+    metaGrid.style.setProperty('flex-wrap', 'nowrap', 'important');
+    metaGrid.style.setProperty('justify-content', 'space-between', 'important');
+    metaGrid.style.setProperty('width', '100%', 'important');
+  }
+
+  const metaCols = clone.querySelectorAll('.paper-meta-grid > div');
+  metaCols.forEach((col) => {
+    const htmlCol = col as HTMLElement;
+    htmlCol.style.setProperty('width', '49%', 'important');
+    htmlCol.style.setProperty('min-width', '49%', 'important');
+    htmlCol.style.setProperty('max-width', '49%', 'important');
+    htmlCol.style.setProperty('flex', '0 0 49%', 'important');
+    htmlCol.style.setProperty('box-sizing', 'border-box', 'important');
   });
 
   // Make header & margins ultra-compact for full A4 printable area
@@ -145,7 +193,7 @@ function prepareElementForPdfExport(element: HTMLElement): { clone: HTMLElement;
     htmlCell.style.borderRadius = '0';
   });
 
-  // Make signature block ultra-compact without card shadows
+  // Make signature block ultra-compact without card shadows and force 5 signature cards in 1 single horizontal row
   const sigBlock = clone.querySelector('.paper-signatory-section') as HTMLElement;
   if (sigBlock) {
     sigBlock.style.marginTop = '4px';
@@ -155,9 +203,23 @@ function prepareElementForPdfExport(element: HTMLElement): { clone: HTMLElement;
     sigBlock.style.borderRadius = '0';
   }
 
+  const sigContainer = clone.querySelector('.paper-signatory-section > div') as HTMLElement;
+  if (sigContainer) {
+    sigContainer.style.setProperty('display', 'flex', 'important');
+    sigContainer.style.setProperty('flex-direction', 'row', 'important');
+    sigContainer.style.setProperty('flex-wrap', 'nowrap', 'important');
+    sigContainer.style.setProperty('justify-content', 'space-between', 'important');
+    sigContainer.style.setProperty('width', '100%', 'important');
+  }
+
   const sigCards = clone.querySelectorAll('.paper-signatory-section > div > div');
   sigCards.forEach((card) => {
     const htmlCard = card as HTMLElement;
+    htmlCard.style.setProperty('width', '19.2%', 'important');
+    htmlCard.style.setProperty('min-width', '19.2%', 'important');
+    htmlCard.style.setProperty('max-width', '19.2%', 'important');
+    htmlCard.style.setProperty('flex', '0 0 19.2%', 'important');
+    htmlCard.style.setProperty('box-sizing', 'border-box', 'important');
     htmlCard.style.minHeight = '48px';
     htmlCard.style.padding = '2px';
     htmlCard.style.overflow = 'visible';
