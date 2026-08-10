@@ -1,4 +1,4 @@
-import { toCanvas } from 'html-to-image';
+import html2canvas from 'html2canvas';
 import { jsPDF } from 'jspdf';
 
 /**
@@ -319,12 +319,36 @@ export async function exportAuditToPdf(
     // 2. Preload all images (logo & handwritten signatures) in clone
     await preloadImagesInClone(prepared.clone);
 
-    // 3. Render to high-res canvas using html-to-image (native browser SVG rendering, no oklch parser errors)
-    const canvas = await toCanvas(prepared.clone, {
-      pixelRatio: 2,
+    // 3. Render to high-res canvas using html2canvas (forces 1200px desktop windowWidth for 100% iPhone/Safari, Android & Desktop parity)
+    const canvas = await html2canvas(prepared.clone, {
+      scale: 2,
       backgroundColor: '#ffffff',
-      cacheBust: true,
+      useCORS: true,
+      allowTaint: true,
+      logging: false,
       width: 794,
+      windowWidth: 1200,
+      onclone: (clonedDoc) => {
+        // Sanitize oklch colors in all <style> tags to prevent html2canvas color parsing errors
+        const styleTags = clonedDoc.querySelectorAll('style');
+        styleTags.forEach((s) => {
+          if (s.textContent && s.textContent.includes('oklch')) {
+            s.textContent = s.textContent.replace(/oklch\([^)]+\)/g, '#000000');
+          }
+        });
+
+        // Sanitize element inline styles
+        const allEls = clonedDoc.querySelectorAll('*');
+        allEls.forEach((el) => {
+          const htmlEl = el as HTMLElement;
+          if (htmlEl.style && htmlEl.style.cssText && htmlEl.style.cssText.includes('oklch')) {
+            htmlEl.style.cssText = htmlEl.style.cssText.replace(/oklch\([^)]+\)/g, '#000000');
+          }
+        });
+
+        // Convert computed oklch colors into standard RGB
+        convertOklchColorsInClone(clonedDoc.body);
+      },
     });
 
     const imgData = canvas.toDataURL('image/jpeg', 0.98);
