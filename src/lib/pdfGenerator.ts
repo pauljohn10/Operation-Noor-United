@@ -36,6 +36,8 @@ function prepareElementForPdfExport(element: HTMLElement): { clone: HTMLElement;
   wrapper.style.width = '794px';
   wrapper.style.backgroundColor = '#ffffff';
   wrapper.style.zIndex = '-9999';
+  (wrapper.style as any).webkitTextSizeAdjust = '100%';
+  (wrapper.style as any).textSizeAdjust = '100%';
 
   const clone = element.cloneNode(true) as HTMLElement;
 
@@ -57,6 +59,8 @@ function prepareElementForPdfExport(element: HTMLElement): { clone: HTMLElement;
   clone.style.overflow = 'visible';
   clone.style.overflowX = 'visible';
   clone.style.overflowY = 'visible';
+  (clone.style as any).webkitTextSizeAdjust = '100%';
+  (clone.style as any).textSizeAdjust = '100%';
 
   // 2. Strip boxShadow, borderRadius, and scrollbars from all child elements in the clone
   const allNodes = clone.querySelectorAll('*') as NodeListOf<HTMLElement>;
@@ -339,27 +343,18 @@ export async function exportAuditToPdf(
     const printableWidth = pdfWidth - margin * 2; // 200mm
     const printableHeight = pdfHeight - margin * 2; // 287mm
 
-    const naturalImgWidth = printableWidth;
-    let naturalImgHeight = (canvas.height * naturalImgWidth) / canvas.width;
+    let renderWidth = printableWidth;
+    let renderHeight = (canvas.height * renderWidth) / canvas.width;
 
-    const xPos = margin + (printableWidth - naturalImgWidth) / 2;
-
-    if (naturalImgHeight <= printableHeight * 1.15) {
-      // --- PERFECT SINGLE PAGE A4 OUTPUT ---
-      // Scale height proportionally to fit 100% cleanly on 1 single A4 page
-      const finalImgHeight = Math.min(printableHeight, naturalImgHeight);
-      pdf.addImage(imgData, 'JPEG', xPos, margin, naturalImgWidth, finalImgHeight);
-    } else {
-      // --- FALLBACK MULTI-PAGE OUTPUT (If audit content is exceptionally large) ---
-      let pageIndex = 0;
-      while (true) {
-        const yOffset = margin - pageIndex * printableHeight;
-        if (pageIndex > 0) pdf.addPage();
-        pdf.addImage(imgData, 'JPEG', xPos, yOffset, naturalImgWidth, naturalImgHeight);
-        pageIndex++;
-        if (pageIndex * printableHeight >= naturalImgHeight) break;
-      }
+    // Scale height proportionally if canvas height exceeds printable A4 page height
+    if (renderHeight > printableHeight) {
+      const ratio = printableHeight / renderHeight;
+      renderHeight = printableHeight;
+      renderWidth = renderWidth * ratio;
     }
+
+    const xPos = margin + (printableWidth - renderWidth) / 2;
+    pdf.addImage(imgData, 'JPEG', xPos, margin, renderWidth, renderHeight);
 
     // 5. Save PDF file
     const sanitizedStation = stationName.replace(/[^a-zA-Z0-9]/g, '_');
