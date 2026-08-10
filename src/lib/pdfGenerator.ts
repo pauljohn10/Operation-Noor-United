@@ -275,11 +275,36 @@ function convertOklchColorsInClone(targetElement: HTMLElement): void {
     return colorStr;
   }
 
+  // 1. Sanitize all <style> tags in the owner document
+  const ownerDoc = targetElement.ownerDocument || document;
+  const styleTags = Array.from(ownerDoc.querySelectorAll('style'));
+  styleTags.forEach((s) => {
+    if (s.textContent && (s.textContent.includes('oklch') || s.textContent.includes('color(') || s.textContent.includes('lab('))) {
+      s.textContent = s.textContent.replace(/oklch\([^)]+\)/g, '#000000');
+    }
+  });
+
+  // 2. Convert computed styles & inline styles for all elements
   const allElements = [targetElement, ...Array.from(targetElement.querySelectorAll('*'))] as HTMLElement[];
   allElements.forEach((el) => {
     try {
+      if (el.style && el.style.cssText && (el.style.cssText.includes('oklch') || el.style.cssText.includes('color(') || el.style.cssText.includes('lab('))) {
+        el.style.cssText = el.style.cssText.replace(/oklch\([^)]+\)/g, '#000000');
+      }
+
       const computed = window.getComputedStyle(el);
-      const colorProps = ['color', 'backgroundColor', 'borderColor', 'borderTopColor', 'borderBottomColor', 'borderLeftColor', 'borderRightColor'];
+      const colorProps = [
+        'color',
+        'backgroundColor',
+        'borderColor',
+        'borderTopColor',
+        'borderBottomColor',
+        'borderLeftColor',
+        'borderRightColor',
+        'outlineColor',
+        'fill',
+        'stroke',
+      ];
 
       colorProps.forEach((prop) => {
         const val = computed.getPropertyValue(prop);
