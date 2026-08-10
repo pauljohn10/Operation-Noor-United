@@ -1,4 +1,4 @@
-import html2canvas from 'html2canvas';
+import { toCanvas } from 'html-to-image';
 import { jsPDF } from 'jspdf';
 
 /**
@@ -344,103 +344,12 @@ export async function exportAuditToPdf(
     // 2. Preload all images (logo & handwritten signatures) in clone
     await preloadImagesInClone(prepared.clone);
 
-    // 3. Render to high-res canvas using html2canvas (forces 1200px desktop windowWidth for 100% iPhone/Safari, Android & Desktop parity)
-    const canvas = await html2canvas(prepared.clone, {
-      scale: 2,
+    // 3. Render to high-res canvas using html-to-image (native browser SVG rendering for 100% perfect un-squished typography)
+    const canvas = await toCanvas(prepared.clone, {
+      pixelRatio: 2,
       backgroundColor: '#ffffff',
-      useCORS: true,
-      allowTaint: true,
-      logging: false,
+      cacheBust: true,
       width: 794,
-      windowWidth: 1200,
-      onclone: (clonedDoc) => {
-        // 1. Intercept getComputedStyle in the cloned document context to sanitize any property containing oklch
-        if (clonedDoc.defaultView) {
-          const win = clonedDoc.defaultView;
-          const origGetComputedStyle = win.getComputedStyle.bind(win);
-          const tempCanvas = clonedDoc.createElement('canvas');
-          const tempCtx = tempCanvas.getContext('2d');
-
-          const sanitizeColorStr = (str: string): string => {
-            if (!str || (!str.includes('oklch') && !str.includes('color(') && !str.includes('lab('))) return str;
-            if (tempCtx) {
-              try {
-                tempCtx.fillStyle = '#000000';
-                tempCtx.fillStyle = str;
-                return tempCtx.fillStyle;
-              } catch {
-                return '#000000';
-              }
-            }
-            return '#000000';
-          };
-
-          (win as any).getComputedStyle = function (el: Element, pseudoElt?: string | null) {
-            const style = origGetComputedStyle(el, pseudoElt);
-            return new Proxy(style, {
-              get(target, prop) {
-                if (prop === 'getPropertyValue') {
-                  return function (propertyName: string) {
-                    const rawVal = target.getPropertyValue(propertyName);
-                    return sanitizeColorStr(rawVal);
-                  };
-                }
-                const val = (target as any)[prop];
-                if (typeof val === 'string') {
-                  return sanitizeColorStr(val);
-                }
-                if (typeof val === 'function') {
-                  return val.bind(target);
-                }
-                return val;
-              },
-            });
-          };
-        }
-
-        // 2. Delete any CSS rule containing oklch directly from clonedDoc.styleSheets
-        if (clonedDoc.styleSheets) {
-          Array.from(clonedDoc.styleSheets).forEach((sheet) => {
-            try {
-              const rules = sheet.cssRules || sheet.rules;
-              if (rules) {
-                for (let i = rules.length - 1; i >= 0; i--) {
-                  const rule = rules[i] as CSSStyleRule;
-                  if (rule.cssText && (rule.cssText.includes('oklch') || rule.cssText.includes('color(') || rule.cssText.includes('lab('))) {
-                    try {
-                      sheet.deleteRule(i);
-                    } catch {
-                      // Ignore deletion errors for locked rules
-                    }
-                  }
-                }
-              }
-            } catch {
-              // Ignore cross-origin stylesheet errors if any
-            }
-          });
-        }
-
-        // 3. Sanitize oklch colors in all <style> tags
-        const styleTags = clonedDoc.querySelectorAll('style');
-        styleTags.forEach((s) => {
-          if (s.textContent && (s.textContent.includes('oklch') || s.textContent.includes('color(') || s.textContent.includes('lab('))) {
-            s.textContent = s.textContent.replace(/oklch\([^)]+\)/g, '#000000');
-          }
-        });
-
-        // 4. Sanitize element inline styles
-        const allEls = clonedDoc.querySelectorAll('*');
-        allEls.forEach((el) => {
-          const htmlEl = el as HTMLElement;
-          if (htmlEl.style && htmlEl.style.cssText && (htmlEl.style.cssText.includes('oklch') || htmlEl.style.cssText.includes('color(') || htmlEl.style.cssText.includes('lab('))) {
-            htmlEl.style.cssText = htmlEl.style.cssText.replace(/oklch\([^)]+\)/g, '#000000');
-          }
-        });
-
-        // 5. Convert computed oklch colors into standard RGB
-        convertOklchColorsInClone(clonedDoc.body);
-      },
     });
 
     const imgData = canvas.toDataURL('image/jpeg', 0.98);
