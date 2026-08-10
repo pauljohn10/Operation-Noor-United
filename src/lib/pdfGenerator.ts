@@ -29,17 +29,56 @@ async function preloadImagesInClone(clone: HTMLElement): Promise<void> {
  * 5. Strips all scrollbars to ensure a clean, professional printed executive report.
  */
 function prepareElementForPdfExport(element: HTMLElement): { clone: HTMLElement; cleanup: () => void } {
-  const wrapper = document.createElement('div');
-  wrapper.style.position = 'absolute';
-  wrapper.style.left = '-9999px';
-  wrapper.style.top = '0';
-  wrapper.style.width = '794px';
-  wrapper.style.backgroundColor = '#ffffff';
-  wrapper.style.zIndex = '-9999';
+  // 1. Create an off-screen iframe with a fixed 794px desktop viewport width
+  // This isolates rendering completely from mobile browser screen size and responsive CSS
+  const iframe = document.createElement('iframe');
+  iframe.style.position = 'fixed';
+  iframe.style.left = '-9999px';
+  iframe.style.top = '-9999px';
+  iframe.style.width = '794px';
+  iframe.style.height = '1123px';
+  iframe.style.border = 'none';
+  iframe.style.zIndex = '-9999';
+  document.body.appendChild(iframe);
+
+  const doc = iframe.contentDocument || iframe.contentWindow?.document;
+  if (!doc) {
+    throw new Error('Failed to access iframe document for PDF export.');
+  }
+
+  // Copy all stylesheets from main document head into iframe head
+  const headElements = Array.from(document.head.querySelectorAll('style, link[rel="stylesheet"]'));
+  const headStylesHTML = headElements.map((el) => el.outerHTML).join('\n');
+
+  doc.open();
+  doc.write(`<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=794">
+  ${headStylesHTML}
+  <style>
+    html, body {
+      width: 794px !important;
+      min-width: 794px !important;
+      max-width: 794px !important;
+      margin: 0 !important;
+      padding: 0 !important;
+      background-color: #ffffff !important;
+      color: #000000 !important;
+      box-sizing: border-box !important;
+      -webkit-print-color-adjust: exact !important;
+      print-color-adjust: exact !important;
+    }
+  </style>
+</head>
+<body></body>
+</html>`);
+  doc.close();
 
   const clone = element.cloneNode(true) as HTMLElement;
 
-  // 1. Remove all Web UI Card styling (drop shadow, box shadow, rounded corners, outer borders)
+  // 2. Remove all Web UI Card styling (drop shadow, box shadow, rounded corners, outer borders)
   clone.style.display = 'block';
   clone.classList.remove('hidden', 'shadow-2xl', 'shadow-xl', 'shadow-lg', 'shadow-md', 'shadow-sm', 'shadow', 'rounded-2xl', 'rounded-xl', 'rounded-lg', 'rounded');
   clone.style.width = '794px';
@@ -58,7 +97,7 @@ function prepareElementForPdfExport(element: HTMLElement): { clone: HTMLElement;
   clone.style.overflowX = 'visible';
   clone.style.overflowY = 'visible';
 
-  // 2. Strip boxShadow, borderRadius, and scrollbars from all child elements in the clone
+  // 3. Strip boxShadow, borderRadius, and scrollbars from all child elements in the clone
   const allNodes = clone.querySelectorAll('*') as NodeListOf<HTMLElement>;
   allNodes.forEach((node) => {
     node.style.boxShadow = 'none';
@@ -230,17 +269,17 @@ function prepareElementForPdfExport(element: HTMLElement): { clone: HTMLElement;
     }
   });
 
-  // Sanitize oklch colors before adding to DOM
+  // Sanitize oklch colors inside clone
   convertOklchColorsInClone(clone);
 
-  wrapper.appendChild(clone);
-  document.body.appendChild(wrapper);
+  // Append clone into iframe document body
+  doc.body.appendChild(clone);
 
   return {
     clone,
     cleanup: () => {
-      if (wrapper.parentNode) {
-        wrapper.parentNode.removeChild(wrapper);
+      if (iframe.parentNode) {
+        iframe.parentNode.removeChild(iframe);
       }
     },
   };
