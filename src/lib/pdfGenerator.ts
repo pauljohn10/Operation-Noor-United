@@ -398,24 +398,47 @@ export async function exportAuditToPdf(
           };
         }
 
-        // 2. Sanitize oklch colors in all <style> tags
+        // 2. Delete any CSS rule containing oklch directly from clonedDoc.styleSheets
+        if (clonedDoc.styleSheets) {
+          Array.from(clonedDoc.styleSheets).forEach((sheet) => {
+            try {
+              const rules = sheet.cssRules || sheet.rules;
+              if (rules) {
+                for (let i = rules.length - 1; i >= 0; i--) {
+                  const rule = rules[i] as CSSStyleRule;
+                  if (rule.cssText && (rule.cssText.includes('oklch') || rule.cssText.includes('color(') || rule.cssText.includes('lab('))) {
+                    try {
+                      sheet.deleteRule(i);
+                    } catch {
+                      // Ignore deletion errors for locked rules
+                    }
+                  }
+                }
+              }
+            } catch {
+              // Ignore cross-origin stylesheet errors if any
+            }
+          });
+        }
+
+        // 3. Sanitize oklch colors in all <style> tags
         const styleTags = clonedDoc.querySelectorAll('style');
         styleTags.forEach((s) => {
-          if (s.textContent && s.textContent.includes('oklch')) {
+          if (s.textContent && (s.textContent.includes('oklch') || s.textContent.includes('color(') || s.textContent.includes('lab('))) {
             s.textContent = s.textContent.replace(/oklch\([^)]+\)/g, '#000000');
           }
         });
 
-        // 3. Sanitize element inline styles
+        // 4. Sanitize element inline styles
         const allEls = clonedDoc.querySelectorAll('*');
         allEls.forEach((el) => {
           const htmlEl = el as HTMLElement;
-          if (htmlEl.style && htmlEl.style.cssText && htmlEl.style.cssText.includes('oklch')) {
+          if (htmlEl.style && htmlEl.style.cssText && (htmlEl.style.cssText.includes('oklch') || htmlEl.style.cssText.includes('color(') || htmlEl.style.cssText.includes('lab('))) {
             htmlEl.style.cssText = htmlEl.style.cssText.replace(/oklch\([^)]+\)/g, '#000000');
           }
         });
 
-        // 4. Convert computed oklch colors into standard RGB
+        // 5. Convert computed oklch colors into standard RGB
         convertOklchColorsInClone(clonedDoc.body);
       },
     });
