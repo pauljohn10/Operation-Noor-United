@@ -212,11 +212,27 @@ function AppContent() {
     return true; // Super Admin & Approval Roles see system/pipeline audits
   });
 
-  // Filter notifications so each user sees workflow alerts & activity notifications
+  // Filter notifications so each user sees workflow alerts & activity notifications relevant to their role and owned audits
   const visibleNotifications = notifications.filter((notif) => {
     if (currentUser.role === 'Super Admin') return true;
-    if (notif.recipient_role === 'ALL' || notif.recipient_role === currentUser.role) return true;
-    if (currentUser.role === 'Operation Supervisor') return true; // Operation Supervisors see audit activity notifications
+
+    // Cross-reference parent audit to verify creator/ownership
+    const targetAudit = audits.find((a) => a.id === notif.audit_id || a.audit_number === notif.audit_number);
+
+    if (currentUser.role === 'Operation Supervisor') {
+      // Operation Supervisors ONLY see notifications for audits THEY created
+      // (e.g. when their audit is approved, returned, or commented on)
+      if (targetAudit && targetAudit.created_by === currentUser.id) {
+        return notif.recipient_role === 'Operation Supervisor' || notif.recipient_role === 'ALL';
+      }
+      return false;
+    }
+
+    // For approval roles (Accountant, Account Manager, Management Executive):
+    if (notif.recipient_role === 'ALL' || notif.recipient_role === currentUser.role) {
+      return true;
+    }
+
     return false;
   });
 
@@ -298,11 +314,16 @@ function AppContent() {
       const notificationsToCreate: Array<{ role: UserRole | 'ALL'; action: AuditNotification['action_type']; msg: string }> = [];
 
       if (savedAudit.current_status === 'pending_accountant') {
-        // Step 1: Operation Supervisor submits -> notify Accountant AND Management Executive
+        // Step 1: Operation Supervisor submits -> notify Accountant, Account Manager, AND Management Executive
         notificationsToCreate.push({
           role: 'Accountant',
           action: 'submitted',
           msg: `New Audit #${savedAudit.audit_number} for ${savedAudit.station_name} (${savedAudit.audit_date}) submitted by ${currentUser.full_name} for Accountant review.`,
+        });
+        notificationsToCreate.push({
+          role: 'Account Manager',
+          action: 'submitted',
+          msg: `New Audit #${savedAudit.audit_number} for ${savedAudit.station_name} (${savedAudit.audit_date}) submitted by ${currentUser.full_name} — pending Accountant review.`,
         });
         notificationsToCreate.push({
           role: 'Management',
