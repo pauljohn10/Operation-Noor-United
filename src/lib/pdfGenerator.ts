@@ -1,12 +1,14 @@
 import { toCanvas } from 'html-to-image';
 import { jsPDF } from 'jspdf';
+import React from 'react';
+import { createRoot } from 'react-dom/client';
+import { StationAuditPdfLayout } from '../components/AuditForm/StationAuditPdfLayout';
 
 /**
  * Preloads all <img> tags inside the cloned DOM element (including the official logo and signatures)
  * to ensure images are fully loaded before rendering to canvas.
  */
 async function preloadImagesInClone(clone: HTMLElement): Promise<void> {
-  const isMobile = typeof window !== 'undefined' && (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || window.innerWidth < 768);
   const images = Array.from(clone.querySelectorAll('img'));
   const promises = images.map(async (img) => {
     try {
@@ -17,8 +19,8 @@ async function preloadImagesInClone(clone: HTMLElement): Promise<void> {
         });
       }
 
-      // On Mobile devices, convert image src to inline base64 Data URL so iOS Mobile Safari renders logo & handwritten signatures 100% reliably in SVG toCanvas
-      if (isMobile && img.src && !img.src.startsWith('data:')) {
+      // Convert image src to inline base64 Data URL so iOS Mobile Safari renders logo & handwritten signatures 100% reliably in SVG toCanvas
+      if (img.src && !img.src.startsWith('data:')) {
         const c = document.createElement('canvas');
         c.width = img.naturalWidth || img.width || 100;
         c.height = img.naturalHeight || img.height || 100;
@@ -92,57 +94,13 @@ function prepareElementForPdfExport(element: HTMLElement): { clone: HTMLElement;
     (el as HTMLElement).style.display = 'none';
   });
 
-  const isMobile = typeof window !== 'undefined' && (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || window.innerWidth < 768);
-
-  if (isMobile) {
-    // On mobile devices, force-hide mobile responsive elements (e.g. mobile stacked cards)
-    const mobileElements = clone.querySelectorAll('.md\\:hidden, .sm\\:hidden, .block.md\\:hidden');
-    mobileElements.forEach((el) => {
-      (el as HTMLElement).style.setProperty('display', 'none', 'important');
-    });
-
-    // Force-show desktop A4 print sections and tables on mobile devices
-    const desktopSections = clone.querySelectorAll('.hidden.md\\:block, .hidden.sm\\:block, .paper-tables-container');
-    desktopSections.forEach((pt) => {
-      const htmlPt = pt as HTMLElement;
-      htmlPt.classList.remove('hidden');
-      htmlPt.style.setProperty('display', 'block', 'important');
-    });
-
-    const desktopTables = clone.querySelectorAll('.paper-table');
-    desktopTables.forEach((tbl) => {
-      const htmlTbl = tbl as HTMLElement;
-      htmlTbl.style.setProperty('display', 'table', 'important');
-    });
-
-    // Force metadata grid to stay in 2 equal horizontal columns on mobile devices
-    const metaGrid = clone.querySelector('.paper-meta-grid') as HTMLElement;
-    if (metaGrid) {
-      metaGrid.style.setProperty('display', 'flex', 'important');
-      metaGrid.style.setProperty('flex-direction', 'row', 'important');
-      metaGrid.style.setProperty('flex-wrap', 'nowrap', 'important');
-      metaGrid.style.setProperty('justify-content', 'space-between', 'important');
-      metaGrid.style.setProperty('width', '100%', 'important');
-    }
-
-    const metaCols = clone.querySelectorAll('.paper-meta-grid > div');
-    metaCols.forEach((col) => {
-      const htmlCol = col as HTMLElement;
-      htmlCol.style.setProperty('width', '49%', 'important');
-      htmlCol.style.setProperty('min-width', '49%', 'important');
-      htmlCol.style.setProperty('max-width', '49%', 'important');
-      htmlCol.style.setProperty('flex', '0 0 49%', 'important');
-      htmlCol.style.setProperty('box-sizing', 'border-box', 'important');
-    });
-  } else {
-    // Force all printable paper table containers and hidden paper sections to be visible
-    const paperTables = clone.querySelectorAll('.paper-tables-container');
-    paperTables.forEach((pt) => {
-      const htmlPt = pt as HTMLElement;
-      htmlPt.classList.remove('hidden');
-      htmlPt.style.display = 'block';
-    });
-  }
+  // Force all printable paper table containers and hidden paper sections to be visible
+  const paperTables = clone.querySelectorAll('.paper-tables-container');
+  paperTables.forEach((pt) => {
+    const htmlPt = pt as HTMLElement;
+    htmlPt.classList.remove('hidden');
+    htmlPt.style.display = 'block';
+  });
 
   // Make header & margins ultra-compact for full A4 printable area
   const header = clone.querySelector('.paper-header') as HTMLElement;
@@ -216,41 +174,15 @@ function prepareElementForPdfExport(element: HTMLElement): { clone: HTMLElement;
     sigBlock.style.borderRadius = '0';
   }
 
-  if (isMobile) {
-    const sigContainer = clone.querySelector('.paper-signatory-section > div') as HTMLElement;
-    if (sigContainer) {
-      sigContainer.style.setProperty('display', 'flex', 'important');
-      sigContainer.style.setProperty('flex-direction', 'row', 'important');
-      sigContainer.style.setProperty('flex-wrap', 'nowrap', 'important');
-      sigContainer.style.setProperty('justify-content', 'space-between', 'important');
-      sigContainer.style.setProperty('width', '100%', 'important');
-    }
-
-    const sigCards = clone.querySelectorAll('.paper-signatory-section > div > div');
-    sigCards.forEach((card) => {
-      const htmlCard = card as HTMLElement;
-      htmlCard.style.setProperty('width', '19.2%', 'important');
-      htmlCard.style.setProperty('min-width', '19.2%', 'important');
-      htmlCard.style.setProperty('max-width', '19.2%', 'important');
-      htmlCard.style.setProperty('flex', '0 0 19.2%', 'important');
-      htmlCard.style.setProperty('box-sizing', 'border-box', 'important');
-      htmlCard.style.minHeight = '48px';
-      htmlCard.style.padding = '2px';
-      htmlCard.style.overflow = 'visible';
-      htmlCard.style.boxShadow = 'none';
-      htmlCard.style.borderRadius = '0';
-    });
-  } else {
-    const sigCards = clone.querySelectorAll('.paper-signatory-section > div > div');
-    sigCards.forEach((card) => {
-      const htmlCard = card as HTMLElement;
-      htmlCard.style.minHeight = '48px';
-      htmlCard.style.padding = '2px';
-      htmlCard.style.overflow = 'visible';
-      htmlCard.style.boxShadow = 'none';
-      htmlCard.style.borderRadius = '0';
-    });
-  }
+  const sigCards = clone.querySelectorAll('.paper-signatory-section > div > div');
+  sigCards.forEach((card) => {
+    const htmlCard = card as HTMLElement;
+    htmlCard.style.minHeight = '48px';
+    htmlCard.style.padding = '2px';
+    htmlCard.style.overflow = 'visible';
+    htmlCard.style.boxShadow = 'none';
+    htmlCard.style.borderRadius = '0';
+  });
 
   const sigImgs = clone.querySelectorAll('.paper-signatory-section img');
   sigImgs.forEach((imgNode) => {
@@ -384,8 +316,80 @@ function convertOklchColorsInClone(targetElement: HTMLElement): void {
 export async function exportAuditToPdf(
   auditNumber: string,
   stationName: string,
-  elementId: string = 'paper-form-document'
+  elementId: string = 'paper-form-document',
+  auditData?: any,
+  items?: any[],
+  prices?: any
 ): Promise<void> {
+  const isMobile = typeof window !== 'undefined' && (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || window.innerWidth < 768);
+
+  if (isMobile && auditData && items) {
+    try {
+      // --- MOBILE DEVICE ISOLATED PDF EXPORT ---
+      // Render fixed Desktop React template in off-screen memory at 794px width
+      const container = document.createElement('div');
+      container.style.position = 'absolute';
+      container.style.left = '-9999px';
+      container.style.top = '0';
+      container.style.width = '794px';
+      container.style.backgroundColor = '#ffffff';
+      document.body.appendChild(container);
+
+      const root = createRoot(container);
+      root.render(React.createElement(StationAuditPdfLayout, { audit: auditData, items, prices }));
+
+      await new Promise((resolve) => setTimeout(resolve, 300));
+      await preloadImagesInClone(container);
+
+      const canvas = await toCanvas(container, {
+        pixelRatio: 2,
+        backgroundColor: '#ffffff',
+        cacheBust: true,
+        width: 794,
+      });
+
+      root.unmount();
+      if (container.parentNode) {
+        container.parentNode.removeChild(container);
+      }
+
+      const imgData = canvas.toDataURL('image/jpeg', 0.98);
+
+      const pdf = new jsPDF({
+        orientation: 'portrait',
+        unit: 'mm',
+        format: 'a4',
+      });
+
+      const pdfWidth = 210;
+      const pdfHeight = 297;
+      const margin = 5;
+
+      const printableWidth = pdfWidth - margin * 2;
+      const printableHeight = pdfHeight - margin * 2;
+
+      let renderWidth = printableWidth;
+      let renderHeight = (canvas.height * renderWidth) / canvas.width;
+
+      if (renderHeight > printableHeight) {
+        const ratio = printableHeight / renderHeight;
+        renderHeight = printableHeight;
+        renderWidth = renderWidth * ratio;
+      }
+
+      const xPos = margin + (printableWidth - renderWidth) / 2;
+      pdf.addImage(imgData, 'JPEG', xPos, margin, renderWidth, renderHeight);
+
+      const sanitizedStation = stationName.replace(/[^a-zA-Z0-9]/g, '_');
+      const fileName = `Station_Audit_${auditNumber}_${sanitizedStation}.pdf`;
+      pdf.save(fileName);
+      return;
+    } catch (err) {
+      console.warn('Mobile offscreen PDF export error, falling back to DOM capture:', err);
+    }
+  }
+
+  // --- DESKTOP DEVICE PDF EXPORT (100% UNTOUCHED RESTORED WORKING MASTER CODE) ---
   const element = document.getElementById(elementId);
   if (!element) {
     console.error(`PDF export failed: Element #${elementId} not found in DOM.`);
