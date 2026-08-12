@@ -1,6 +1,16 @@
 import { toCanvas } from 'html-to-image';
 import { jsPDF } from 'jspdf';
 
+let cachedLogoBase64: string | null = null;
+
+// Pre-fetch official logo as Base64 Data URL immediately on module import
+if (typeof window !== 'undefined') {
+  const logoUrl = window.location.origin + '/logo_transparent.png';
+  getBase64FromUrl(logoUrl).then((b64) => {
+    if (b64) cachedLogoBase64 = b64;
+  }).catch(() => {});
+}
+
 /**
  * Converts an image URL into a Base64 Data URL using fetch + FileReader
  * to bypass canvas taint / CORS restrictions on mobile browsers (iOS Safari & Android).
@@ -30,25 +40,32 @@ async function preloadImagesInClone(clone: HTMLElement): Promise<void> {
   const images = Array.from(clone.querySelectorAll('img'));
   const promises = images.map(async (img) => {
     try {
-      if (!img.complete || img.naturalWidth === 0) {
-        await new Promise<void>((resolve) => {
-          img.onload = () => resolve();
-          img.onerror = () => resolve();
-        });
+      let srcUrl = img.getAttribute('src') || img.src || '';
+
+      // 1. Handle official top-left logo specially
+      if (srcUrl.includes('logo_transparent.png')) {
+        if (!cachedLogoBase64) {
+          const fullLogoUrl = window.location.origin + '/logo_transparent.png';
+          cachedLogoBase64 = await getBase64FromUrl(fullLogoUrl);
+        }
+        if (cachedLogoBase64) {
+          img.src = cachedLogoBase64;
+          img.setAttribute('src', cachedLogoBase64);
+          srcUrl = cachedLogoBase64;
+        }
       }
 
-      // Convert image src to inline Base64 Data URL so iOS Mobile Safari and Android browsers render logo & signatures
-      let srcUrl = img.getAttribute('src') || img.src;
-      if (srcUrl && !srcUrl.startsWith('data:') && !srcUrl.startsWith('http://') && !srcUrl.startsWith('https://')) {
-        srcUrl = window.location.origin + (srcUrl.startsWith('/') ? '' : '/') + srcUrl;
-      }
-
+      // 2. Convert external or relative signature image URLs to inline Base64 Data URLs
       if (srcUrl && !srcUrl.startsWith('data:')) {
+        if (!srcUrl.startsWith('http://') && !srcUrl.startsWith('https://')) {
+          srcUrl = window.location.origin + (srcUrl.startsWith('/') ? '' : '/') + srcUrl;
+        }
         const base64Data = await getBase64FromUrl(srcUrl);
         if (base64Data) {
           img.src = base64Data;
+          img.setAttribute('src', base64Data);
         } else {
-          // Fallback to canvas conversion
+          // Canvas fallback
           const c = document.createElement('canvas');
           c.width = img.naturalWidth || img.width || 200;
           c.height = img.naturalHeight || img.height || 60;
@@ -58,20 +75,27 @@ async function preloadImagesInClone(clone: HTMLElement): Promise<void> {
             const dataUrl = c.toDataURL('image/png');
             if (dataUrl && dataUrl.length > 50) {
               img.src = dataUrl;
+              img.setAttribute('src', dataUrl);
             }
           }
         }
       }
 
-      // CRITICAL FOR MOBILE BROWSER RENDERERS (iOS WebKit & Android Blink):
-      // Force GPU bitmap decoding before html-to-image toCanvas captures the DOM
-      if ('decode' in img && typeof (img as any).decode === 'function') {
-        try {
-          await (img as any).decode();
-        } catch {
-          // Ignore decoding errors if already decoded
-        }
-      }
+      // 3. CRITICAL FOR MOBILE BROWSER RENDERERS (iOS WebKit & Android Blink):
+      // Force GPU bitmap decoding via an active in-memory HTMLImageElement before canvas capture
+      await new Promise<void>((resolve) => {
+        const tempImg = new Image();
+        tempImg.crossOrigin = 'anonymous';
+        tempImg.onload = () => {
+          if ('decode' in tempImg && typeof (tempImg as any).decode === 'function') {
+            (tempImg as any).decode().then(() => resolve()).catch(() => resolve());
+          } else {
+            resolve();
+          }
+        };
+        tempImg.onerror = () => resolve();
+        tempImg.src = img.src;
+      });
     } catch {
       // Continue if image preloading fails
     }
