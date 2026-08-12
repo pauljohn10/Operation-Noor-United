@@ -939,10 +939,7 @@ export const StationAuditForm: React.FC<Props> = ({
               exportAuditToPdf(
                 currentAuditData.audit_number,
                 currentAuditData.station_name,
-                'paper-form-document',
-                currentAuditData,
-                items,
-                sectionPrices
+                'paper-form-document'
               )
             }
             className="flex items-center gap-1.5 px-3 py-1.5 bg-white/80 hover:bg-white text-slate-700 font-extrabold text-xs rounded-lg transition-all border border-sky-200/80 shadow-xs"
