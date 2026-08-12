@@ -125,7 +125,9 @@ function prepareElementForPdfExport(element: HTMLElement): { clone: HTMLElement;
 
   const clone = element.cloneNode(true) as HTMLElement;
 
-  // 1. Remove all Web UI Card styling (drop shadow, box shadow, rounded corners, outer borders)
+  // 1. Remove all Web UI Card styling and enforce Mobile WebKit 100% text size adjust
+  clone.style.webkitTextSizeAdjust = '100%';
+  (clone.style as any).textSizeAdjust = '100%';
   clone.style.display = 'block';
   clone.classList.remove('hidden', 'shadow-2xl', 'shadow-xl', 'shadow-lg', 'shadow-md', 'shadow-sm', 'shadow', 'rounded-2xl', 'rounded-xl', 'rounded-lg', 'rounded');
   clone.style.width = '794px';
@@ -153,6 +155,8 @@ function prepareElementForPdfExport(element: HTMLElement): { clone: HTMLElement;
     node.style.overflowX = 'visible';
     node.style.overflowY = 'visible';
     node.style.maxHeight = 'none';
+    (node.style as any).webkitTextSizeAdjust = '100%';
+    (node.style as any).textSizeAdjust = '100%';
   });
 
   // Hide non-printable interactive elements
@@ -168,6 +172,13 @@ function prepareElementForPdfExport(element: HTMLElement): { clone: HTMLElement;
     htmlPt.classList.remove('hidden');
     htmlPt.style.display = 'block';
   });
+
+  // Enforce explicit non-responsive grid template columns on metadata header
+  const metaGrid = clone.querySelector('.paper-meta-grid') as HTMLElement;
+  if (metaGrid) {
+    metaGrid.style.display = 'grid';
+    metaGrid.style.gridTemplateColumns = 'repeat(2, minmax(0, 1fr))';
+  }
 
   // Make header & margins ultra-compact for full A4 printable area
   const header = clone.querySelector('.paper-header') as HTMLElement;
@@ -231,7 +242,7 @@ function prepareElementForPdfExport(element: HTMLElement): { clone: HTMLElement;
     htmlCell.style.borderRadius = '0';
   });
 
-  // Make signature block ultra-compact without card shadows
+  // Make signature block ultra-compact without card shadows & enforce explicit 5 or 6 columns
   const sigBlock = clone.querySelector('.paper-signatory-section') as HTMLElement;
   if (sigBlock) {
     sigBlock.style.marginTop = '2px';
@@ -239,6 +250,13 @@ function prepareElementForPdfExport(element: HTMLElement): { clone: HTMLElement;
     sigBlock.style.overflow = 'visible';
     sigBlock.style.boxShadow = 'none';
     sigBlock.style.borderRadius = '0';
+
+    const sigGridContainer = sigBlock.querySelector('div:nth-child(2)') as HTMLElement;
+    if (sigGridContainer) {
+      sigGridContainer.style.display = 'grid';
+      const is6Col = sigGridContainer.classList.contains('grid-cols-6');
+      sigGridContainer.style.gridTemplateColumns = is6Col ? 'repeat(6, minmax(0, 1fr))' : 'repeat(5, minmax(0, 1fr))';
+    }
   }
 
   const sigCards = clone.querySelectorAll('.paper-signatory-section > div > div');
@@ -413,6 +431,13 @@ export async function exportAuditToPdf(
       backgroundColor: '#ffffff',
       cacheBust: true,
       width: 794,
+      style: {
+        width: '794px',
+        maxWidth: '794px',
+        minWidth: '794px',
+        webkitTextSizeAdjust: '100%',
+        transform: 'none',
+      },
     });
 
     if (!canvas || canvas.width === 0 || canvas.height === 0) {
