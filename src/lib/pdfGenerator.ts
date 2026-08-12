@@ -38,21 +38,27 @@ async function preloadImagesInClone(clone: HTMLElement): Promise<void> {
       }
 
       // Convert image src to inline Base64 Data URL so iOS Mobile Safari and Android browsers render logo & signatures
-      if (img.src && !img.src.startsWith('data:')) {
-        // Try fetch-based blob conversion first
-        const base64Data = await getBase64FromUrl(img.src);
+      let srcUrl = img.getAttribute('src') || img.src;
+      if (srcUrl && !srcUrl.startsWith('data:') && !srcUrl.startsWith('http://') && !srcUrl.startsWith('https://')) {
+        srcUrl = window.location.origin + (srcUrl.startsWith('/') ? '' : '/') + srcUrl;
+      }
+
+      if (srcUrl && !srcUrl.startsWith('data:')) {
+        const base64Data = await getBase64FromUrl(srcUrl);
         if (base64Data) {
           img.src = base64Data;
         } else {
           // Fallback to canvas conversion
           const c = document.createElement('canvas');
-          c.width = img.naturalWidth || img.width || 100;
-          c.height = img.naturalHeight || img.height || 100;
+          c.width = img.naturalWidth || img.width || 200;
+          c.height = img.naturalHeight || img.height || 60;
           const ctx = c.getContext('2d');
           if (ctx) {
             ctx.drawImage(img, 0, 0);
             const dataUrl = c.toDataURL('image/png');
-            img.src = dataUrl;
+            if (dataUrl && dataUrl.length > 50) {
+              img.src = dataUrl;
+            }
           }
         }
       }
@@ -385,23 +391,15 @@ export async function exportAuditToPdf(
 
     const pdfWidth = 210; // A4 width in mm
     const pdfHeight = 297; // A4 height in mm
-    const margin = 5; // 5mm standard printable margin
+    const margin = 5; // 5mm standard printable margin (matches Desktop PDF reference exactly)
 
     const printableWidth = pdfWidth - margin * 2; // 200mm
     const printableHeight = pdfHeight - margin * 2; // 287mm
 
-    let renderWidth = printableWidth;
-    let renderHeight = (canvas.height * renderWidth) / canvas.width;
+    const renderWidth = printableWidth; // Exact 200mm width matching Desktop reference
+    const renderHeight = Math.min(printableHeight, (canvas.height * renderWidth) / canvas.width);
 
-    // --- GUARANTEED SINGLE PAGE A4 OUTPUT ---
-    // Scale height proportionally to fit 100% cleanly on 1 single A4 page with 0 page overflow
-    if (renderHeight > printableHeight) {
-      const ratio = printableHeight / renderHeight;
-      renderHeight = printableHeight;
-      renderWidth = renderWidth * ratio;
-    }
-
-    const xPos = margin + (printableWidth - renderWidth) / 2;
+    const xPos = margin; // Exact 5mm left margin matching Desktop reference
     pdf.addImage(imgData, 'JPEG', xPos, margin, renderWidth, renderHeight);
 
     // 5. Save PDF file
