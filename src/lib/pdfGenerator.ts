@@ -62,6 +62,16 @@ async function preloadImagesInClone(clone: HTMLElement): Promise<void> {
           }
         }
       }
+
+      // CRITICAL FOR MOBILE BROWSER RENDERERS (iOS WebKit & Android Blink):
+      // Force GPU bitmap decoding before html-to-image toCanvas captures the DOM
+      if ('decode' in img && typeof (img as any).decode === 'function') {
+        try {
+          await (img as any).decode();
+        } catch {
+          // Ignore decoding errors if already decoded
+        }
+      }
     } catch {
       // Continue if image preloading fails
     }
@@ -98,7 +108,7 @@ function prepareElementForPdfExport(element: HTMLElement): { clone: HTMLElement;
   clone.style.maxWidth = '794px';
   clone.style.minWidth = '794px';
   clone.style.margin = '0';
-  clone.style.padding = '4px 8px';
+  clone.style.padding = '2px 6px';
   clone.style.backgroundColor = '#ffffff';
   clone.style.color = '#000000';
   clone.style.boxSizing = 'border-box';
@@ -138,16 +148,16 @@ function prepareElementForPdfExport(element: HTMLElement): { clone: HTMLElement;
   // Make header & margins ultra-compact for full A4 printable area
   const header = clone.querySelector('.paper-header') as HTMLElement;
   if (header) {
-    header.style.paddingBottom = '2px';
-    header.style.marginBottom = '4px';
+    header.style.paddingBottom = '1px';
+    header.style.marginBottom = '2px';
     header.style.boxShadow = 'none';
     header.style.borderRadius = '0';
   }
 
   const logo = clone.querySelector('.paper-header img') as HTMLElement;
   if (logo) {
-    logo.style.maxHeight = '60px';
-    logo.style.height = '60px';
+    logo.style.maxHeight = '55px';
+    logo.style.height = '55px';
     logo.style.width = 'auto';
     logo.style.objectFit = 'contain';
   }
@@ -159,7 +169,7 @@ function prepareElementForPdfExport(element: HTMLElement): { clone: HTMLElement;
     tw.style.overflowX = 'visible';
     tw.style.overflowY = 'visible';
     tw.style.width = '100%';
-    tw.style.margin = '0 0 4px 0';
+    tw.style.margin = '0 0 2px 0';
     tw.style.boxShadow = 'none';
     tw.style.borderRadius = '0';
   });
@@ -167,7 +177,7 @@ function prepareElementForPdfExport(element: HTMLElement): { clone: HTMLElement;
   const fuelSections = clone.querySelectorAll('.paper-fuel-section');
   fuelSections.forEach((sec) => {
     const htmlSec = sec as HTMLElement;
-    htmlSec.style.marginBottom = '4px';
+    htmlSec.style.marginBottom = '2px';
     htmlSec.style.overflow = 'visible';
     htmlSec.style.overflowX = 'visible';
     htmlSec.style.overflowY = 'visible';
@@ -200,8 +210,8 @@ function prepareElementForPdfExport(element: HTMLElement): { clone: HTMLElement;
   // Make signature block ultra-compact without card shadows
   const sigBlock = clone.querySelector('.paper-signatory-section') as HTMLElement;
   if (sigBlock) {
-    sigBlock.style.marginTop = '4px';
-    sigBlock.style.paddingTop = '2px';
+    sigBlock.style.marginTop = '2px';
+    sigBlock.style.paddingTop = '1px';
     sigBlock.style.overflow = 'visible';
     sigBlock.style.boxShadow = 'none';
     sigBlock.style.borderRadius = '0';
@@ -210,7 +220,7 @@ function prepareElementForPdfExport(element: HTMLElement): { clone: HTMLElement;
   const sigCards = clone.querySelectorAll('.paper-signatory-section > div > div');
   sigCards.forEach((card) => {
     const htmlCard = card as HTMLElement;
-    htmlCard.style.minHeight = '48px';
+    htmlCard.style.minHeight = '46px';
     htmlCard.style.padding = '2px';
     htmlCard.style.overflow = 'visible';
     htmlCard.style.boxShadow = 'none';
@@ -368,7 +378,12 @@ export async function exportAuditToPdf(
     // 2. Preload all images (logo & handwritten signatures) and convert to Base64 in clone
     await preloadImagesInClone(prepared.clone);
 
-    // 3. Render to high-res canvas using html-to-image (native browser SVG rendering)
+    // 3. Wait for all fonts to be ready before canvas capture
+    if (document.fonts && document.fonts.ready) {
+      await document.fonts.ready;
+    }
+
+    // 4. Render to high-res canvas using html-to-image (native browser SVG rendering)
     const canvas = await toCanvas(prepared.clone, {
       pixelRatio: 2,
       backgroundColor: '#ffffff',
@@ -382,7 +397,7 @@ export async function exportAuditToPdf(
 
     const imgData = canvas.toDataURL('image/jpeg', 0.98);
 
-    // 4. Setup A4 PDF document (210mm x 297mm) with 5mm equal standard printable margins
+    // 5. Setup A4 PDF document (210mm x 297mm) with 5mm equal standard printable margins
     const pdf = new jsPDF({
       orientation: 'portrait',
       unit: 'mm',
@@ -397,12 +412,13 @@ export async function exportAuditToPdf(
     const printableHeight = pdfHeight - margin * 2; // 287mm
 
     const renderWidth = printableWidth; // Exact 200mm width matching Desktop reference
-    const renderHeight = Math.min(printableHeight, (canvas.height * renderWidth) / canvas.width);
+    const naturalHeight = (canvas.height * renderWidth) / canvas.width;
+    const renderHeight = Math.min(printableHeight, naturalHeight); // Exact natural height, clipped cleanly at 287mm max
 
     const xPos = margin; // Exact 5mm left margin matching Desktop reference
     pdf.addImage(imgData, 'JPEG', xPos, margin, renderWidth, renderHeight);
 
-    // 5. Save PDF file
+    // 6. Save PDF file
     const sanitizedStation = stationName.replace(/[^a-zA-Z0-9]/g, '_');
     const fileName = `Station_Audit_${auditNumber}_${sanitizedStation}.pdf`;
     pdf.save(fileName);
