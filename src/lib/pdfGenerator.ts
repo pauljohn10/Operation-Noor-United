@@ -2,6 +2,26 @@ import { toCanvas } from 'html-to-image';
 import { jsPDF } from 'jspdf';
 
 /**
+ * Converts an image URL into a Base64 Data URL using fetch + FileReader
+ * to bypass canvas taint / CORS restrictions on mobile browsers (iOS Safari & Android).
+ */
+async function getBase64FromUrl(url: string): Promise<string | null> {
+  try {
+    const res = await fetch(url, { mode: 'cors' });
+    if (!res.ok) return null;
+    const blob = await res.blob();
+    return new Promise((resolve) => {
+      const reader = new FileReader();
+      reader.onloadend = () => resolve(reader.result as string);
+      reader.onerror = () => resolve(null);
+      reader.readAsDataURL(blob);
+    });
+  } catch {
+    return null;
+  }
+}
+
+/**
  * Preloads all <img> tags inside the cloned DOM element (including official logo and signatures)
  * and converts them to inline Base64 Data URLs so all browsers (Desktop, Android, iOS Safari)
  * render images 100% reliably in SVG toCanvas captures.
@@ -19,18 +39,25 @@ async function preloadImagesInClone(clone: HTMLElement): Promise<void> {
 
       // Convert image src to inline Base64 Data URL so iOS Mobile Safari and Android browsers render logo & signatures
       if (img.src && !img.src.startsWith('data:')) {
-        const c = document.createElement('canvas');
-        c.width = img.naturalWidth || img.width || 100;
-        c.height = img.naturalHeight || img.height || 100;
-        const ctx = c.getContext('2d');
-        if (ctx) {
-          ctx.drawImage(img, 0, 0);
-          const dataUrl = c.toDataURL('image/png');
-          img.src = dataUrl;
+        // Try fetch-based blob conversion first
+        const base64Data = await getBase64FromUrl(img.src);
+        if (base64Data) {
+          img.src = base64Data;
+        } else {
+          // Fallback to canvas conversion
+          const c = document.createElement('canvas');
+          c.width = img.naturalWidth || img.width || 100;
+          c.height = img.naturalHeight || img.height || 100;
+          const ctx = c.getContext('2d');
+          if (ctx) {
+            ctx.drawImage(img, 0, 0);
+            const dataUrl = c.toDataURL('image/png');
+            img.src = dataUrl;
+          }
         }
       }
     } catch {
-      // Continue if cross-origin image fails
+      // Continue if image preloading fails
     }
   });
 
@@ -363,27 +390,19 @@ export async function exportAuditToPdf(
     const printableWidth = pdfWidth - margin * 2; // 200mm
     const printableHeight = pdfHeight - margin * 2; // 287mm
 
-    const naturalImgWidth = printableWidth;
-    let naturalImgHeight = (canvas.height * naturalImgWidth) / canvas.width;
+    let renderWidth = printableWidth;
+    let renderHeight = (canvas.height * renderWidth) / canvas.width;
 
-    const xPos = margin + (printableWidth - naturalImgWidth) / 2;
-
-    if (naturalImgHeight <= printableHeight * 1.15) {
-      // --- PERFECT SINGLE PAGE A4 OUTPUT ---
-      // Scale height proportionally to fit 100% cleanly on 1 single A4 page
-      const finalImgHeight = Math.min(printableHeight, naturalImgHeight);
-      pdf.addImage(imgData, 'JPEG', xPos, margin, naturalImgWidth, finalImgHeight);
-    } else {
-      // --- FALLBACK MULTI-PAGE OUTPUT (If audit content is exceptionally large) ---
-      let pageIndex = 0;
-      while (true) {
-        const yOffset = margin - pageIndex * printableHeight;
-        if (pageIndex > 0) pdf.addPage();
-        pdf.addImage(imgData, 'JPEG', xPos, yOffset, naturalImgWidth, naturalImgHeight);
-        pageIndex++;
-        if (pageIndex * printableHeight >= naturalImgHeight) break;
-      }
+    // --- GUARANTEED SINGLE PAGE A4 OUTPUT ---
+    // Scale height proportionally to fit 100% cleanly on 1 single A4 page with 0 page overflow
+    if (renderHeight > printableHeight) {
+      const ratio = printableHeight / renderHeight;
+      renderHeight = printableHeight;
+      renderWidth = renderWidth * ratio;
     }
+
+    const xPos = margin + (printableWidth - renderWidth) / 2;
+    pdf.addImage(imgData, 'JPEG', xPos, margin, renderWidth, renderHeight);
 
     // 5. Save PDF file
     const sanitizedStation = stationName.replace(/[^a-zA-Z0-9]/g, '_');
