@@ -414,13 +414,16 @@ export async function exportAuditToPdf(
   let prepared: { clone: HTMLElement; cleanup: () => void } | null = null;
 
   try {
-    // 1. Prepare clone with exact single-page A4 styling, logo & text replacement
+    // 1. Convert all images (official logo & handwritten signatures) to Base64 Data URLs on source element BEFORE cloning
+    await preloadImagesInClone(element);
+
+    // 2. Prepare clone with exact single-page A4 styling, logo & text replacement
     prepared = prepareElementForPdfExport(element);
 
-    // 2. Preload all images (logo & handwritten signatures) and convert to Base64 in clone
+    // 3. Preload and force GPU bitmap decoding on all images in the clone
     await preloadImagesInClone(prepared.clone);
 
-    // 3. Wait for all fonts to be ready before canvas capture
+    // 4. Wait for all fonts to be ready before canvas capture
     if (document.fonts && document.fonts.ready) {
       await document.fonts.ready;
     }
