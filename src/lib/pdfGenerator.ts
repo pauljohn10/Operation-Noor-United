@@ -319,36 +319,23 @@ async function exportAuditToPdfMobile(
   auditNumber: string,
   stationName: string
 ): Promise<void> {
-  const wrapper = document.createElement('div');
-  wrapper.style.position = 'fixed';
-  wrapper.style.left = '0';
-  wrapper.style.top = '0';
-  wrapper.style.width = '794px';
-  wrapper.style.backgroundColor = '#ffffff';
-  wrapper.style.zIndex = '-9999';
-  wrapper.style.opacity = '0.01';
-  wrapper.style.pointerEvents = 'none';
+  // 1. Prepare clone using the exact master Desktop transformation rules
+  const prepared = prepareElementForPdfExport(element);
 
-  const clone = element.cloneNode(true) as HTMLElement;
+  // 2. Adjust wrapper for mobile viewports (in-viewport position so iOS/Android canvas captures correctly)
+  const wrapper = prepared.clone.parentNode as HTMLElement;
+  if (wrapper) {
+    wrapper.style.position = 'fixed';
+    wrapper.style.left = '0';
+    wrapper.style.top = '0';
+    wrapper.style.zIndex = '-9999';
+    wrapper.style.opacity = '0.01';
+    wrapper.style.pointerEvents = 'none';
+  }
 
-  // 1. Remove Card UI styling
-  clone.style.display = 'block';
-  clone.classList.remove('hidden', 'shadow-2xl', 'shadow-xl', 'shadow-lg', 'shadow-md', 'shadow-sm', 'shadow', 'rounded-2xl', 'rounded-xl', 'rounded-lg', 'rounded');
-  clone.style.width = '794px';
-  clone.style.maxWidth = '794px';
-  clone.style.minWidth = '794px';
-  clone.style.margin = '0';
-  clone.style.padding = '4px 8px';
-  clone.style.backgroundColor = '#ffffff';
-  clone.style.color = '#000000';
-  clone.style.boxSizing = 'border-box';
-  clone.style.boxShadow = 'none';
-  clone.style.borderRadius = '0';
-  clone.style.border = 'none';
-  clone.style.outline = 'none';
-  clone.style.overflow = 'visible';
+  const clone = prepared.clone;
 
-  // 2. Hide mobile responsive stacked cards & force desktop A4 print layout
+  // 3. Hide mobile responsive stacked cards & force desktop A4 print layout rules on clone
   const mobileElements = clone.querySelectorAll('.md\\:hidden, .sm\\:hidden, .block.md\\:hidden');
   mobileElements.forEach((el) => {
     (el as HTMLElement).style.setProperty('display', 'none', 'important');
@@ -367,7 +354,7 @@ async function exportAuditToPdfMobile(
     htmlTbl.style.setProperty('display', 'table', 'important');
   });
 
-  // 3. Force 2-Column Metadata Grid
+  // 4. Force 2-Column Metadata Grid
   const metaGrid = clone.querySelector('.paper-meta-grid') as HTMLElement;
   if (metaGrid) {
     metaGrid.style.setProperty('display', 'flex', 'important');
@@ -387,7 +374,7 @@ async function exportAuditToPdfMobile(
     htmlCol.style.setProperty('box-sizing', 'border-box', 'important');
   });
 
-  // 4. Force 5 Signature Cards into 1 Single Horizontal Row
+  // 5. Force 5 Signature Cards into 1 Single Horizontal Row
   const sigContainer = clone.querySelector('.paper-signatory-section > div') as HTMLElement;
   if (sigContainer) {
     sigContainer.style.setProperty('display', 'flex', 'important');
@@ -409,46 +396,8 @@ async function exportAuditToPdfMobile(
     htmlCard.style.padding = '2px';
   });
 
-  // 5. Replace inputs with text spans
-  const inputs = clone.querySelectorAll('input, select, textarea');
-  inputs.forEach((inputNode) => {
-    const el = inputNode as HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement;
-    let textVal = el.value || '';
-    if (el.tagName.toLowerCase() === 'select') {
-      const selectEl = el as HTMLSelectElement;
-      const selectedOption = selectEl.options[selectEl.selectedIndex];
-      if (selectedOption) textVal = selectedOption.text || textVal;
-    }
-
-    const isInsideCell = Boolean(el.closest('td, th'));
-    const isTextRight = el.classList.contains('text-right') || el.style.textAlign === 'right';
-    const isTextLeft = el.classList.contains('text-left') || el.type === 'date' || el.tagName.toLowerCase() === 'textarea' || el.style.textAlign === 'left';
-    let align = isInsideCell ? (isTextRight ? 'right' : isTextLeft ? 'left' : 'center') : (isTextRight ? 'right' : 'left');
-
-    let displayVal = textVal;
-    if (!isInsideCell && el.type === 'number' && displayVal !== '' && !isNaN(Number(displayVal)) && !displayVal.includes('SAR')) {
-      displayVal = `${parseFloat(displayVal).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} SAR`;
-    }
-
-    const textSpan = document.createElement('span');
-    textSpan.textContent = displayVal;
-    textSpan.style.fontFamily = 'inherit';
-    textSpan.style.fontSize = '8.5px';
-    textSpan.style.fontWeight = 'bold';
-    textSpan.style.color = '#000000';
-    textSpan.style.textAlign = align;
-    textSpan.style.display = 'inline-block';
-    textSpan.style.width = '100%';
-    textSpan.style.lineHeight = '1.05';
-
-    if (el.parentNode) el.parentNode.replaceChild(textSpan, el);
-  });
-
-  convertOklchColorsInClone(clone);
-  wrapper.appendChild(clone);
-  document.body.appendChild(wrapper);
-
   try {
+    // 6. Preload images with Base64 inline conversion for mobile browser SVG rendering
     await preloadImagesInClone(clone, true);
 
     const canvas = await toCanvas(clone, {
@@ -459,29 +408,52 @@ async function exportAuditToPdfMobile(
     });
 
     if (!canvas || canvas.width === 0 || canvas.height === 0) {
-      throw new Error('Canvas render failed');
+      throw new Error('Canvas render resulted in empty image');
     }
 
     const imgData = canvas.toDataURL('image/jpeg', 0.98);
-    const pdf = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
-    const printableWidth = 200;
-    const printableHeight = 287;
 
-    let renderWidth = printableWidth;
-    let renderHeight = (canvas.height * renderWidth) / canvas.width;
-    if (renderHeight > printableHeight) {
-      const ratio = printableHeight / renderHeight;
-      renderHeight = printableHeight;
-      renderWidth = renderWidth * ratio;
+    // 7. Setup A4 PDF document matching Desktop jsPDF parameters exactly
+    const pdf = new jsPDF({
+      orientation: 'portrait',
+      unit: 'mm',
+      format: 'a4',
+    });
+
+    const pdfWidth = 210; // A4 width in mm
+    const pdfHeight = 297; // A4 height in mm
+    const margin = 5; // 5mm standard printable margin
+
+    const printableWidth = pdfWidth - margin * 2; // 200mm
+    const printableHeight = pdfHeight - margin * 2; // 287mm
+
+    const naturalImgWidth = printableWidth;
+    let naturalImgHeight = (canvas.height * naturalImgWidth) / canvas.width;
+
+    const xPos = margin + (printableWidth - naturalImgWidth) / 2;
+
+    if (naturalImgHeight <= printableHeight * 1.15) {
+      const finalImgHeight = Math.min(printableHeight, naturalImgHeight);
+      pdf.addImage(imgData, 'JPEG', xPos, margin, naturalImgWidth, finalImgHeight);
+    } else {
+      let pageIndex = 0;
+      while (true) {
+        const yOffset = margin - pageIndex * printableHeight;
+        if (pageIndex > 0) pdf.addPage();
+        pdf.addImage(imgData, 'JPEG', xPos, yOffset, naturalImgWidth, naturalImgHeight);
+        pageIndex++;
+        if (pageIndex * printableHeight >= naturalImgHeight) break;
+      }
     }
 
-    const xPos = 5 + (printableWidth - renderWidth) / 2;
-    pdf.addImage(imgData, 'JPEG', xPos, 5, renderWidth, renderHeight);
-
     const sanitizedStation = stationName.replace(/[^a-zA-Z0-9]/g, '_');
-    pdf.save(`Station_Audit_${auditNumber}_${sanitizedStation}.pdf`);
+    const fileName = `Station_Audit_${auditNumber}_${sanitizedStation}.pdf`;
+    pdf.save(fileName);
+  } catch (error: any) {
+    console.error('Mobile PDF Generation Error:', error);
+    alert(`An error occurred while generating the PDF: ${error?.message || 'Export error'}`);
   } finally {
-    if (wrapper.parentNode) wrapper.parentNode.removeChild(wrapper);
+    prepared.cleanup();
   }
 }
 
