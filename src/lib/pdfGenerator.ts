@@ -2,14 +2,11 @@ import { toCanvas } from 'html-to-image';
 import { jsPDF } from 'jspdf';
 
 /**
- * Preloads all <img> tags inside the cloned DOM element (including the official logo and signatures)
- * to ensure images are fully loaded before rendering to canvas.
+ * Preloads all <img> tags inside the cloned DOM element (including official logo and signatures)
+ * and converts them to inline Base64 Data URLs so all browsers (Desktop, Android, iOS Safari)
+ * render images 100% reliably in SVG toCanvas captures.
  */
-/**
- * Preloads all <img> tags inside the cloned DOM element (including the official logo and signatures)
- * to ensure images are fully loaded before rendering to canvas.
- */
-async function preloadImagesInClone(clone: HTMLElement, convertToBase64: boolean = false): Promise<void> {
+async function preloadImagesInClone(clone: HTMLElement): Promise<void> {
   const images = Array.from(clone.querySelectorAll('img'));
   const promises = images.map(async (img) => {
     try {
@@ -20,8 +17,8 @@ async function preloadImagesInClone(clone: HTMLElement, convertToBase64: boolean
         });
       }
 
-      // If convertToBase64 is true (mobile browsers), convert img.src to inline Data URL so iOS Mobile Safari renders logo & signatures
-      if (convertToBase64 && img.src && !img.src.startsWith('data:')) {
+      // Convert image src to inline Base64 Data URL so iOS Mobile Safari and Android browsers render logo & signatures
+      if (img.src && !img.src.startsWith('data:')) {
         const c = document.createElement('canvas');
         c.width = img.naturalWidth || img.width || 100;
         c.height = img.naturalHeight || img.height || 100;
@@ -41,7 +38,7 @@ async function preloadImagesInClone(clone: HTMLElement, convertToBase64: boolean
 }
 
 /**
- * Pre-processes a cloned DOM node for DESKTOP PDF generation (RESTORED MASTER UNTOUCHED CODE):
+ * Pre-processes a cloned DOM node for PDF generation to ensure 100% WYSIWYG A4 print perfection:
  * 1. Forces exact A4 paper dimensions (794px width) and edge-to-edge print padding.
  * 2. Completely removes web card UI styling (drop shadows, box shadows, rounded corners, outer margins).
  * 3. Replaces interactive input/select elements with clean inline text spans.
@@ -50,12 +47,14 @@ async function preloadImagesInClone(clone: HTMLElement, convertToBase64: boolean
  */
 function prepareElementForPdfExport(element: HTMLElement): { clone: HTMLElement; cleanup: () => void } {
   const wrapper = document.createElement('div');
-  wrapper.style.position = 'absolute';
-  wrapper.style.left = '-9999px';
+  wrapper.style.position = 'fixed';
+  wrapper.style.left = '0';
   wrapper.style.top = '0';
   wrapper.style.width = '794px';
   wrapper.style.backgroundColor = '#ffffff';
   wrapper.style.zIndex = '-9999';
+  wrapper.style.opacity = '0.01';
+  wrapper.style.pointerEvents = 'none';
 
   const clone = element.cloneNode(true) as HTMLElement;
 
@@ -311,155 +310,9 @@ function convertOklchColorsInClone(targetElement: HTMLElement): void {
 }
 
 /**
- * ISOLATED MOBILE PDF EXPORT FUNCTION
- * Operates strictly on mobile web browsers without touching or modifying the Desktop PDF generator.
- */
-async function exportAuditToPdfMobile(
-  element: HTMLElement,
-  auditNumber: string,
-  stationName: string
-): Promise<void> {
-  // 1. Prepare clone using the exact master Desktop transformation rules
-  const prepared = prepareElementForPdfExport(element);
-
-  // 2. Adjust wrapper for mobile viewports (in-viewport position so iOS/Android canvas captures correctly)
-  const wrapper = prepared.clone.parentNode as HTMLElement;
-  if (wrapper) {
-    wrapper.style.position = 'fixed';
-    wrapper.style.left = '0';
-    wrapper.style.top = '0';
-    wrapper.style.zIndex = '-9999';
-    wrapper.style.opacity = '0.01';
-    wrapper.style.pointerEvents = 'none';
-  }
-
-  const clone = prepared.clone;
-
-  // 3. Hide mobile responsive stacked cards & force desktop A4 print layout rules on clone
-  const mobileElements = clone.querySelectorAll('.md\\:hidden, .sm\\:hidden, .block.md\\:hidden');
-  mobileElements.forEach((el) => {
-    (el as HTMLElement).style.setProperty('display', 'none', 'important');
-  });
-
-  const desktopSections = clone.querySelectorAll('.hidden.md\\:block, .hidden.sm\\:block, .paper-tables-container');
-  desktopSections.forEach((pt) => {
-    const htmlPt = pt as HTMLElement;
-    htmlPt.classList.remove('hidden');
-    htmlPt.style.setProperty('display', 'block', 'important');
-  });
-
-  const desktopTables = clone.querySelectorAll('.paper-table');
-  desktopTables.forEach((tbl) => {
-    const htmlTbl = tbl as HTMLElement;
-    htmlTbl.style.setProperty('display', 'table', 'important');
-  });
-
-  // 4. Force 2-Column Metadata Grid
-  const metaGrid = clone.querySelector('.paper-meta-grid') as HTMLElement;
-  if (metaGrid) {
-    metaGrid.style.setProperty('display', 'flex', 'important');
-    metaGrid.style.setProperty('flex-direction', 'row', 'important');
-    metaGrid.style.setProperty('flex-wrap', 'nowrap', 'important');
-    metaGrid.style.setProperty('justify-content', 'space-between', 'important');
-    metaGrid.style.setProperty('width', '100%', 'important');
-  }
-
-  const metaCols = clone.querySelectorAll('.paper-meta-grid > div');
-  metaCols.forEach((col) => {
-    const htmlCol = col as HTMLElement;
-    htmlCol.style.setProperty('width', '49%', 'important');
-    htmlCol.style.setProperty('min-width', '49%', 'important');
-    htmlCol.style.setProperty('max-width', '49%', 'important');
-    htmlCol.style.setProperty('flex', '0 0 49%', 'important');
-    htmlCol.style.setProperty('box-sizing', 'border-box', 'important');
-  });
-
-  // 5. Force 5 Signature Cards into 1 Single Horizontal Row
-  const sigContainer = clone.querySelector('.paper-signatory-section > div') as HTMLElement;
-  if (sigContainer) {
-    sigContainer.style.setProperty('display', 'flex', 'important');
-    sigContainer.style.setProperty('flex-direction', 'row', 'important');
-    sigContainer.style.setProperty('flex-wrap', 'nowrap', 'important');
-    sigContainer.style.setProperty('justify-content', 'space-between', 'important');
-    sigContainer.style.setProperty('width', '100%', 'important');
-  }
-
-  const sigCards = clone.querySelectorAll('.paper-signatory-section > div > div');
-  sigCards.forEach((card) => {
-    const htmlCard = card as HTMLElement;
-    htmlCard.style.setProperty('width', '19.2%', 'important');
-    htmlCard.style.setProperty('min-width', '19.2%', 'important');
-    htmlCard.style.setProperty('max-width', '19.2%', 'important');
-    htmlCard.style.setProperty('flex', '0 0 19.2%', 'important');
-    htmlCard.style.setProperty('box-sizing', 'border-box', 'important');
-    htmlCard.style.minHeight = '48px';
-    htmlCard.style.padding = '2px';
-  });
-
-  try {
-    // 6. Preload images with Base64 inline conversion for mobile browser SVG rendering
-    await preloadImagesInClone(clone, true);
-
-    const canvas = await toCanvas(clone, {
-      pixelRatio: 2,
-      backgroundColor: '#ffffff',
-      cacheBust: true,
-      width: 794,
-    });
-
-    if (!canvas || canvas.width === 0 || canvas.height === 0) {
-      throw new Error('Canvas render resulted in empty image');
-    }
-
-    const imgData = canvas.toDataURL('image/jpeg', 0.98);
-
-    // 7. Setup A4 PDF document matching Desktop jsPDF parameters exactly
-    const pdf = new jsPDF({
-      orientation: 'portrait',
-      unit: 'mm',
-      format: 'a4',
-    });
-
-    const pdfWidth = 210; // A4 width in mm
-    const pdfHeight = 297; // A4 height in mm
-    const margin = 5; // 5mm standard printable margin
-
-    const printableWidth = pdfWidth - margin * 2; // 200mm
-    const printableHeight = pdfHeight - margin * 2; // 287mm
-
-    const naturalImgWidth = printableWidth;
-    let naturalImgHeight = (canvas.height * naturalImgWidth) / canvas.width;
-
-    const xPos = margin + (printableWidth - naturalImgWidth) / 2;
-
-    if (naturalImgHeight <= printableHeight * 1.15) {
-      const finalImgHeight = Math.min(printableHeight, naturalImgHeight);
-      pdf.addImage(imgData, 'JPEG', xPos, margin, naturalImgWidth, finalImgHeight);
-    } else {
-      let pageIndex = 0;
-      while (true) {
-        const yOffset = margin - pageIndex * printableHeight;
-        if (pageIndex > 0) pdf.addPage();
-        pdf.addImage(imgData, 'JPEG', xPos, yOffset, naturalImgWidth, naturalImgHeight);
-        pageIndex++;
-        if (pageIndex * printableHeight >= naturalImgHeight) break;
-      }
-    }
-
-    const sanitizedStation = stationName.replace(/[^a-zA-Z0-9]/g, '_');
-    const fileName = `Station_Audit_${auditNumber}_${sanitizedStation}.pdf`;
-    pdf.save(fileName);
-  } catch (error: any) {
-    console.error('Mobile PDF Generation Error:', error);
-    alert(`An error occurred while generating the PDF: ${error?.message || 'Export error'}`);
-  } finally {
-    prepared.cleanup();
-  }
-}
-
-/**
  * Exports the station audit paper form to a high-resolution single-page A4 PDF document
  * with 100% WYSIWYG layout, official logo, and clean edge-to-edge printable format.
+ * Produces 100% identical output on Desktop Browser, Android Chrome, and iPhone Safari.
  */
 export async function exportAuditToPdf(
   auditNumber: string,
@@ -473,31 +326,26 @@ export async function exportAuditToPdf(
     return;
   }
 
-  const isMobile = typeof window !== 'undefined' && (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || window.innerWidth < 768);
-
-  if (isMobile) {
-    // --- ISOLATED MOBILE PDF EXPORT EXECUTION PATH ---
-    await exportAuditToPdfMobile(element, auditNumber, stationName);
-    return;
-  }
-
-  // --- RESTORED MASTER UNTOUCHED DESKTOP PDF EXPORT EXECUTION PATH ---
   let prepared: { clone: HTMLElement; cleanup: () => void } | null = null;
 
   try {
-    // 1. Prepare clone with exact single-page A4 styling, logo & text replacement (no card shadows or margins)
+    // 1. Prepare clone with exact single-page A4 styling, logo & text replacement
     prepared = prepareElementForPdfExport(element);
 
-    // 2. Preload all images (logo & handwritten signatures) in clone
-    await preloadImagesInClone(prepared.clone, false);
+    // 2. Preload all images (logo & handwritten signatures) and convert to Base64 in clone
+    await preloadImagesInClone(prepared.clone);
 
-    // 3. Render to high-res canvas using html-to-image (native browser SVG rendering, no oklch parser errors)
+    // 3. Render to high-res canvas using html-to-image (native browser SVG rendering)
     const canvas = await toCanvas(prepared.clone, {
       pixelRatio: 2,
       backgroundColor: '#ffffff',
       cacheBust: true,
       width: 794,
     });
+
+    if (!canvas || canvas.width === 0 || canvas.height === 0) {
+      throw new Error('Canvas render resulted in empty image');
+    }
 
     const imgData = canvas.toDataURL('image/jpeg', 0.98);
 

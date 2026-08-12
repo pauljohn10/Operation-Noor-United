@@ -101,8 +101,8 @@ export const PaperFormLayout: React.FC<Props> = ({
         <div className="w-16"></div>
       </div>
 
-      {/* 2. COMPACT METADATA HEADER GRID */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-0.5 text-[11px] font-semibold pb-1.5 mb-2 border-b border-gray-300">
+      {/* 2. COMPACT METADATA HEADER GRID (FIXED 2 COLUMNS ON ALL DEVICES FOR PERFECT A4 EXPORT) */}
+      <div className="paper-meta-grid grid grid-cols-2 gap-x-8 gap-y-0.5 text-[11px] font-semibold pb-1.5 mb-2 border-b border-gray-300">
         {/* Left Column */}
         <div className="space-y-0.5">
           <div className="flex items-center h-5">
@@ -378,7 +378,7 @@ export const PaperFormLayout: React.FC<Props> = ({
           Authorization & Inspection Signatures
         </div>
 
-        <div className={`grid grid-cols-2 sm:grid-cols-3 ${getApprovalSlot('super_admin')?.approver_name ? 'md:grid-cols-6' : 'md:grid-cols-5'} gap-1.5 text-center text-[9px]`}>
+        <div className={`grid ${getApprovalSlot('super_admin')?.approver_name ? 'grid-cols-6' : 'grid-cols-5'} gap-1.5 text-center text-[9px]`}>
           
           {/* 1. Station Supervisor */}
           <div
