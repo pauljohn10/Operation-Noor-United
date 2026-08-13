@@ -614,6 +614,9 @@ export async function saveStation(station: Station): Promise<Station> {
 
     if (error) {
       console.error(`[SAVE STATION FAILURE] Table: stations | Code: ${error.code} | Message: ${error.message} | Details: ${error.details}`);
+      if (error.code === '23505' || error.message?.includes('duplicate key') || error.message?.includes('stations_station_no_key')) {
+        throw new Error(`Noor # "${station.station_no}" is already assigned to another station. Please enter a unique Noor #.`);
+      }
       throw new Error(`[Database Error: stations] ${error.message} (Code: ${error.code})`);
     }
 

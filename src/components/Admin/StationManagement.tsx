@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import type { Station, User } from '../../types/audit';
-import { Building, Plus, Search, Edit2, Trash2, CheckCircle, XCircle } from 'lucide-react';
+import { Building, Plus, Search, Edit2, Trash2, CheckCircle, XCircle, AlertCircle } from 'lucide-react';
 import { generateUUID } from '../../lib/supabaseClient';
 
 interface Props {
@@ -19,6 +19,7 @@ export const StationManagement: React.FC<Props> = ({
   const [searchTerm, setSearchTerm] = useState('');
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingStation, setEditingStation] = useState<Partial<Station> | null>(null);
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
   const operationSupervisors = users.filter((u) => u.role === 'Operation Supervisor' || u.role === 'Super Admin');
 
@@ -50,6 +51,7 @@ export const StationManagement: React.FC<Props> = ({
   };
 
   const handleOpenAdd = () => {
+    setErrorMsg(null);
     const nextCode = getNextStationCode();
     setEditingStation({
       id: generateUUID(),
@@ -64,20 +66,31 @@ export const StationManagement: React.FC<Props> = ({
   };
 
   const handleOpenEdit = (station: Station) => {
+    setErrorMsg(null);
     setEditingStation(station);
     setIsModalOpen(true);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setErrorMsg(null);
     if (!editingStation || !editingStation.name || !editingStation.station_no) return;
+
+    const trimmedNoor = editingStation.station_no.trim();
+    const duplicate = stations.find(
+      (s) => s.id !== editingStation.id && s.station_no.trim().toLowerCase() === trimmedNoor.toLowerCase()
+    );
+    if (duplicate) {
+      setErrorMsg(`Noor # "${trimmedNoor}" is already assigned to station "${duplicate.name}". Please enter a unique Noor #.`);
+      return;
+    }
 
     const assignedSuper = operationSupervisors.find((u) => u.id === editingStation.operation_supervisor_id);
 
     const stationObj: Station = {
       id: editingStation.id || generateUUID(),
-      station_no: editingStation.station_no,
-      name: editingStation.name,
+      station_no: trimmedNoor,
+      name: editingStation.name.trim(),
       location: editingStation.location || 'Saudi Arabia',
       region: editingStation.region || 'Central Region',
       status: editingStation.status || 'active',
@@ -86,9 +99,13 @@ export const StationManagement: React.FC<Props> = ({
       created_at: editingStation.created_at || new Date().toISOString(),
     };
 
-    await onSaveStation(stationObj);
-    setIsModalOpen(false);
-    setEditingStation(null);
+    try {
+      await onSaveStation(stationObj);
+      setIsModalOpen(false);
+      setEditingStation(null);
+    } catch (err: any) {
+      setErrorMsg(err.message || 'Failed to save station record. Please try again.');
+    }
   };
 
   const handleToggleStatus = async (station: Station) => {
@@ -228,6 +245,13 @@ export const StationManagement: React.FC<Props> = ({
                 ? 'Edit Fuel Station'
                 : 'Create New Fuel Station'}
             </h3>
+
+            {errorMsg && (
+              <div className="mb-4 p-3 bg-rose-50 border border-rose-200 rounded-xl text-rose-800 font-extrabold text-xs flex items-center gap-2">
+                <AlertCircle className="w-4 h-4 text-rose-600 shrink-0" />
+                <span>{errorMsg}</span>
+              </div>
+            )}
 
             <form onSubmit={handleSubmit} className="space-y-4 text-xs">
               <div className="grid grid-cols-2 gap-4">
