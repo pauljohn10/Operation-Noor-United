@@ -1,5 +1,6 @@
 import { createClient } from '@supabase/supabase-js';
 import type { Station, StationAudit, AuditNotification, User, AuditLog, SystemSettings } from '../types/audit';
+import { INITIAL_STATIONS } from './mockData';
 
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || 'https://gpljpjnzpyvmvlndcnfb.supabase.co';
 const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdwbGpwam56cHl2bXZsbmRjbmZiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQ2MjQ3NTAsImV4cCI6MjEwMDIwMDc1MH0.q2s63JSKo6j6LJdNzipnXtMxU6T6O94JsWFV2WWJPKI';
@@ -562,46 +563,8 @@ export function loadSession(): User | null {
 }
 
 export async function normalizeStationCodes(stationList: Station[]): Promise<Station[]> {
-  // Sort stations deterministically by creation time or name
-  const sorted = [...stationList].sort((a, b) => {
-    const timeA = new Date(a.created_at || 0).getTime();
-    const timeB = new Date(b.created_at || 0).getTime();
-    if (timeA !== timeB) return timeA - timeB;
-    return a.name.localeCompare(b.name);
-  });
-
-  const normalizedList: Station[] = [];
-  let updatedInDbCount = 0;
-
-  for (let i = 0; i < sorted.length; i++) {
-    const expectedCode = (i + 1).toString();
-    const st = sorted[i];
-
-    if (st.station_no !== expectedCode) {
-      const updatedSt: Station = { ...st, station_no: expectedCode };
-      normalizedList.push(updatedSt);
-
-      if (isSupabaseConfigured && supabase) {
-        try {
-          await supabase
-            .from('stations')
-            .update({ station_no: expectedCode })
-            .eq('id', st.id);
-          updatedInDbCount++;
-        } catch (err) {
-          console.warn(`[NORMALIZE STATIONS] Failed to update station_no for ${st.name}:`, err);
-        }
-      }
-    } else {
-      normalizedList.push(st);
-    }
-  }
-
-  if (updatedInDbCount > 0) {
-    console.log(`[NORMALIZE STATIONS] Successfully reindexed ${updatedInDbCount} station codes to sequential order 1..${sorted.length}`);
-  }
-
-  return normalizedList;
+  // Return station list preserving custom user-entered station_no (Noor #)
+  return stationList;
 }
 
 export async function fetchStations(): Promise<Station[]> {
@@ -612,15 +575,13 @@ export async function fetchStations(): Promise<Station[]> {
         .select('*')
         .order('created_at', { ascending: true });
       if (!error && data && data.length > 0) {
-        const rawStations = data as Station[];
-        const normalized = await normalizeStationCodes(rawStations);
-        return normalized;
+        return data as Station[];
       }
     } catch (e) {
       console.warn('Supabase fetchStations error:', e);
     }
   }
-  return [];
+  return INITIAL_STATIONS;
 }
 
 export async function saveStation(station: Station): Promise<Station> {

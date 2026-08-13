@@ -129,7 +129,8 @@ export const StationManagement: React.FC<Props> = ({
           <table className="w-full text-left text-xs">
             <thead className="bg-slate-50 text-slate-700 uppercase font-extrabold border-b border-slate-200">
               <tr>
-                <th className="p-4 text-center w-16">Station #</th>
+                <th className="p-4 text-center w-16">SN</th>
+                <th className="p-4 text-center w-36">Noor # (Sequential)</th>
                 <th className="p-4">Station Name</th>
                 <th className="p-4">Location & Region</th>
                 <th className="p-4">Operation Supervisor</th>
@@ -140,23 +141,23 @@ export const StationManagement: React.FC<Props> = ({
             <tbody className="divide-y divide-slate-100 text-slate-900">
               {filtered.length === 0 ? (
                 <tr>
-                  <td colSpan={6} className="p-8 text-center text-slate-500 font-medium italic">
+                  <td colSpan={7} className="p-8 text-center text-slate-500 font-medium italic">
                     No stations found.
                   </td>
                 </tr>
               ) : (
                 filtered.map((st, index) => (
                   <tr key={st.id} className="hover:bg-slate-50/80 transition-colors">
-                    <td className="p-4 font-black text-sky-900 font-mono text-center">{index + 1}</td>
+                    <td className="p-4 font-black text-slate-500 font-mono text-center">{index + 1}</td>
+                    <td className="p-4 text-center">
+                      <span className="inline-block text-xs text-sky-950 font-mono font-black bg-sky-50 px-3 py-1 rounded-lg border border-sky-200 shadow-2xs">
+                        {st.station_no}
+                      </span>
+                    </td>
                     <td className="p-4 font-bold text-slate-900">
                       <div className="flex items-center gap-2">
                         <Building className="w-4 h-4 text-sky-600 shrink-0" />
-                        <div>
-                          <span className="block font-black text-slate-900 text-xs">{st.name}</span>
-                          <span className="inline-block text-[10px] text-sky-900 font-mono font-extrabold bg-sky-50 px-2 py-0.5 rounded-md border border-sky-200 mt-0.5">
-                            Noor: {st.station_no.replace(/^ST-0*/i, '').replace(/^ST-/i, '')}
-                          </span>
-                        </div>
+                        <span className="font-black text-slate-900 text-xs">{st.name}</span>
                       </div>
                     </td>
                     <td className="p-4">
@@ -235,6 +236,7 @@ export const StationManagement: React.FC<Props> = ({
                   <input
                     type="text"
                     required
+                    placeholder="e.g. 301"
                     value={editingStation.station_no || ''}
                     onChange={(e) => setEditingStation({ ...editingStation, station_no: e.target.value })}
                     className="w-full bg-white border border-sky-200 rounded-xl p-2.5 text-slate-900 font-mono font-bold"
