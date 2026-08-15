@@ -932,19 +932,36 @@ export const StationAuditForm: React.FC<Props> = ({
     }
   };
 
-  const handleAddThreadComment = () => {
-    if (!newCommentInput.trim()) return;
+  const handleAddThreadComment = async () => {
+    const text = newCommentInput.trim();
+    if (!text) return;
+
     const newComment: AuditComment = {
       id: generateUUID(),
       audit_id: (initialAudit?.id && isValidUuid(initialAudit.id)) ? initialAudit.id : generateUUID(),
       user_id: isValidUuid(currentUser?.id) ? currentUser.id : '00000000-0000-0000-0000-000000000001',
-      user_name: currentUser.full_name,
-      user_role: currentUser.role,
-      comment_text: newCommentInput,
+      user_name: currentUser?.full_name || 'User',
+      user_role: currentUser?.role || 'Staff',
+      comment_text: text,
       created_at: new Date().toISOString(),
     };
-    setComments((prev) => [newComment, ...prev]);
+
+    const updatedComments = [newComment, ...comments];
+    setComments(updatedComments);
     setNewCommentInput('');
+
+    // Persist comment directly to Supabase / audit store
+    if (onSave) {
+      try {
+        const updatedAuditObj = {
+          ...buildAuditObject(),
+          comments: updatedComments,
+        };
+        await onSave(updatedAuditObj);
+      } catch (err) {
+        console.error('Error saving discussion comment:', err);
+      }
+    }
   };
 
   const currentAuditData = buildAuditObject();
@@ -1185,12 +1202,20 @@ export const StationAuditForm: React.FC<Props> = ({
             type="text"
             value={newCommentInput}
             onChange={(e) => setNewCommentInput(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' && newCommentInput.trim()) {
+                e.preventDefault();
+                handleAddThreadComment();
+              }
+            }}
             placeholder="Add a comment or query regarding this audit..."
             className="flex-1 bg-white/90 backdrop-blur-md border border-sky-200/80 rounded-xl px-3.5 py-2 text-xs font-medium text-slate-900 placeholder-slate-400 focus:outline-none focus:bg-white focus:border-sky-500 focus:ring-2 focus:ring-sky-500/15 transition-all shadow-inner"
           />
           <button
+            type="button"
             onClick={handleAddThreadComment}
-            className="px-4 py-2 bg-gradient-to-r from-sky-600 via-blue-600 to-indigo-600 hover:from-sky-500 hover:to-indigo-500 text-white font-extrabold text-xs rounded-xl shadow-md transition-all flex items-center gap-1.5"
+            disabled={!newCommentInput.trim()}
+            className="px-4 py-2 bg-gradient-to-r from-sky-600 via-blue-600 to-indigo-600 hover:from-sky-500 hover:to-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed text-white font-extrabold text-xs rounded-xl shadow-md transition-all flex items-center gap-1.5 active:scale-95 cursor-pointer"
           >
             <Send className="w-3.5 h-3.5" />
             <span>Post</span>
