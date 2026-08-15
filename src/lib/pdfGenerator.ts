@@ -2,29 +2,78 @@ import { toCanvas } from 'html-to-image';
 import { jsPDF } from 'jspdf';
 
 let cachedLogoBase64: string | null = null;
+let exportClickCount = 0;
 
-// Pre-fetch official logo as Base64 Data URL immediately on module import
+// Immediately preload official logo as Base64 Data URL on module initialization
 if (typeof window !== 'undefined') {
-  const logoUrl = window.location.origin + '/logo_transparent.png';
-  getBase64FromUrl(logoUrl).then((b64) => {
-    if (b64) cachedLogoBase64 = b64;
-  }).catch(() => {});
+  const logoImg = new Image();
+  logoImg.crossOrigin = 'anonymous';
+  logoImg.onload = () => {
+    try {
+      const c = document.createElement('canvas');
+      c.width = logoImg.naturalWidth || 180;
+      c.height = logoImg.naturalHeight || 60;
+      const ctx = c.getContext('2d');
+      if (ctx) {
+        ctx.drawImage(logoImg, 0, 0);
+        cachedLogoBase64 = c.toDataURL('image/png');
+      }
+    } catch {
+      // Ignore
+    }
+  };
+  logoImg.src = window.location.origin + '/logo_transparent.png';
 }
 
 /**
  * Converts an image URL into a Base64 Data URL using fetch + FileReader
- * to bypass canvas taint / CORS restrictions on mobile browsers (iOS Safari & Android).
+ * with HTMLImageElement + canvas fallback for maximum compatibility.
  */
 async function getBase64FromUrl(url: string): Promise<string | null> {
+  if (!url) return null;
+  if (url.startsWith('data:')) return url;
+
+  // Strategy 1: fetch + blob + FileReader
   try {
-    const res = await fetch(url, { mode: 'cors' });
-    if (!res.ok) return null;
-    const blob = await res.blob();
-    return new Promise((resolve) => {
-      const reader = new FileReader();
-      reader.onloadend = () => resolve(reader.result as string);
-      reader.onerror = () => resolve(null);
-      reader.readAsDataURL(blob);
+    const res = await fetch(url, { mode: 'cors', cache: 'force-cache' });
+    if (res.ok) {
+      const blob = await res.blob();
+      const b64 = await new Promise<string | null>((resolve) => {
+        const reader = new FileReader();
+        reader.onloadend = () => resolve(reader.result as string);
+        reader.onerror = () => resolve(null);
+        reader.readAsDataURL(blob);
+      });
+      if (b64 && b64.length > 50) return b64;
+    }
+  } catch {
+    // Continue to strategy 2
+  }
+
+  // Strategy 2: HTMLImageElement + Canvas
+  try {
+    return await new Promise<string | null>((resolve) => {
+      const img = new Image();
+      img.crossOrigin = 'anonymous';
+      img.onload = () => {
+        try {
+          const c = document.createElement('canvas');
+          c.width = img.naturalWidth || 180;
+          c.height = img.naturalHeight || 60;
+          const ctx = c.getContext('2d');
+          if (ctx) {
+            ctx.drawImage(img, 0, 0);
+            const dataUrl = c.toDataURL('image/png');
+            resolve(dataUrl && dataUrl.length > 50 ? dataUrl : null);
+          } else {
+            resolve(null);
+          }
+        } catch {
+          resolve(null);
+        }
+      };
+      img.onerror = () => resolve(null);
+      img.src = url;
     });
   } catch {
     return null;
@@ -32,12 +81,12 @@ async function getBase64FromUrl(url: string): Promise<string | null> {
 }
 
 /**
- * Preloads all <img> tags inside the cloned DOM element (including official logo and signatures)
+ * Preloads all <img> tags inside a DOM element (including official logo and signatures)
  * and converts them to inline Base64 Data URLs so all browsers (Desktop, Android, iOS Safari)
- * render images 100% reliably in SVG toCanvas captures.
+ * render images 100% reliably in SVG toCanvas captures on the VERY FIRST CLICK.
  */
-async function preloadImagesInClone(clone: HTMLElement): Promise<void> {
-  const images = Array.from(clone.querySelectorAll('img'));
+async function preloadImagesInClone(container: HTMLElement): Promise<void> {
+  const images = Array.from(container.querySelectorAll('img'));
   const promises = images.map(async (img) => {
     try {
       let srcUrl = img.getAttribute('src') || img.src || '';
@@ -64,51 +113,36 @@ async function preloadImagesInClone(clone: HTMLElement): Promise<void> {
         if (base64Data) {
           img.src = base64Data;
           img.setAttribute('src', base64Data);
-        } else {
-          // Canvas fallback
-          const c = document.createElement('canvas');
-          c.width = img.naturalWidth || img.width || 200;
-          c.height = img.naturalHeight || img.height || 60;
-          const ctx = c.getContext('2d');
-          if (ctx) {
-            ctx.drawImage(img, 0, 0);
-            const dataUrl = c.toDataURL('image/png');
-            if (dataUrl && dataUrl.length > 50) {
-              img.src = dataUrl;
-              img.setAttribute('src', dataUrl);
-            }
-          }
         }
       }
 
-      // 3. CRITICAL FOR MOBILE BROWSER RENDERERS (iOS WebKit & Android Blink):
-      // Force GPU bitmap decoding via an active in-memory HTMLImageElement before canvas capture
+      // 3. Force HTMLImageElement decode so GPU texture memory is populated
       await new Promise<void>((resolve) => {
-        const tempImg = new Image();
-        tempImg.crossOrigin = 'anonymous';
-        
-        let resolved = false;
-        const done = () => {
-          if (resolved) return;
-          resolved = true;
-          if ('decode' in tempImg && typeof (tempImg as any).decode === 'function') {
-            (tempImg as any).decode().then(() => resolve()).catch(() => resolve());
+        const loader = new Image();
+        loader.crossOrigin = 'anonymous';
+
+        let done = false;
+        const finish = () => {
+          if (done) return;
+          done = true;
+          if ('decode' in loader && typeof (loader as any).decode === 'function') {
+            (loader as any).decode().then(() => resolve()).catch(() => resolve());
           } else {
             resolve();
           }
         };
 
-        tempImg.onload = done;
-        tempImg.onerror = () => {
-          if (!resolved) {
-            resolved = true;
+        loader.onload = finish;
+        loader.onerror = () => {
+          if (!done) {
+            done = true;
             resolve();
           }
         };
-        tempImg.src = img.src;
+        loader.src = img.src;
 
-        if (tempImg.complete && tempImg.naturalWidth > 0) {
-          done();
+        if (loader.complete && loader.naturalWidth > 0) {
+          finish();
         }
       });
     } catch {
@@ -410,6 +444,41 @@ function convertOklchColorsInClone(targetElement: HTMLElement): void {
 }
 
 /**
+ * Diagnostic logger to verify logo & signature presence, load state, and dimensions
+ * on 1st click vs 2nd click.
+ */
+function runExportDiagnostics(clone: HTMLElement, clickNumber: number) {
+  console.log(`=== PDF EXPORT DIAGNOSTICS (EXPORT CLICK #${clickNumber}) ===`);
+  
+  // 1. Logo check
+  const logoEl = clone.querySelector('.paper-header img') as HTMLImageElement;
+  const logoFound = Boolean(logoEl);
+  const logoLoaded = logoEl ? (logoEl.complete && logoEl.naturalWidth > 0) : false;
+  const logoNatWidth = logoEl ? logoEl.naturalWidth : 0;
+  const logoRect = logoEl ? logoEl.getBoundingClientRect() : { width: 0, height: 0 };
+  
+  console.log(`* Logo element found: ${logoFound ? 'YES' : 'NO'}`);
+  console.log(`* Logo image loaded: ${logoLoaded ? 'YES' : 'NO'}`);
+  console.log(`* Logo naturalWidth: ${logoNatWidth}`);
+  console.log(`* Logo rendered width/height: ${logoRect.width}px x ${logoRect.height}px`);
+
+  // 2. Signatures check
+  const sigEls = Array.from(clone.querySelectorAll('img')).filter((img) => !img.src.includes('logo_transparent.png'));
+  console.log(`* Signature elements found: ${sigEls.length}`);
+
+  sigEls.forEach((sigImg, idx) => {
+    const isLoaded = sigImg.complete && sigImg.naturalWidth > 0;
+    const rect = sigImg.getBoundingClientRect();
+    console.log(`  - Signature #${idx + 1}: loaded=${isLoaded ? 'YES' : 'NO'}, naturalWidth=${sigImg.naturalWidth}, rendered=${rect.width}px x ${rect.height}px, srcPrefix=${sigImg.src.substring(0, 30)}...`);
+  });
+
+  // 3. Final clone dimensions
+  const cloneRect = clone.getBoundingClientRect();
+  console.log(`* Final clone dimensions immediately before capture: ${cloneRect.width}px x ${cloneRect.height}px`);
+  console.log(`=======================================================`);
+}
+
+/**
  * Exports the station audit paper form to a high-resolution single-page A4 PDF document
  * with 100% WYSIWYG layout, official logo, and clean edge-to-edge printable format.
  * Produces 100% identical output on Desktop Browser, Android Chrome, and iPhone Safari.
@@ -419,6 +488,7 @@ export async function exportAuditToPdf(
   stationName: string,
   elementId: string = 'paper-form-document'
 ): Promise<void> {
+  exportClickCount++;
   const element = document.getElementById(elementId);
   if (!element) {
     console.error(`PDF export failed: Element #${elementId} not found in DOM.`);
@@ -443,31 +513,10 @@ export async function exportAuditToPdf(
       await document.fonts.ready;
     }
 
-    // 5. FLUSH WEBKIT GPU RASTERIZATION & PAINT THREAD (Crucial for 1st click on Mobile Safari / Android)
-    await new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve)));
-    await new Promise((resolve) => setTimeout(resolve, 200));
+    // 5. Run diagnostic logger to log 1st click vs 2nd click DOM state
+    runExportDiagnostics(prepared.clone, exportClickCount);
 
-    // 6. Verify every img element in clone is 100% loaded & decoded before taking snapshot
-    const cloneImages = Array.from(prepared.clone.querySelectorAll('img'));
-    await Promise.all(
-      cloneImages.map(async (img) => {
-        if (!img.complete || img.naturalWidth === 0) {
-          await new Promise<void>((resolve) => {
-            if (img.complete && img.naturalWidth > 0) return resolve();
-            img.onload = () => resolve();
-            img.onerror = () => resolve();
-            setTimeout(resolve, 300);
-          });
-        }
-        if ('decode' in img && typeof (img as any).decode === 'function') {
-          try {
-            await (img as any).decode();
-          } catch {}
-        }
-      })
-    );
-
-    // 7. Render to high-res canvas using html-to-image (native browser SVG rendering)
+    // 6. Render to high-res canvas using html-to-image (native browser SVG rendering)
     const canvas = await toCanvas(prepared.clone, {
       pixelRatio: 2,
       backgroundColor: '#ffffff',
