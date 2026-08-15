@@ -391,6 +391,7 @@ export const PaperFormLayout: React.FC<Props> = ({
           
           {/* 1. Station Supervisor */}
           <div
+            data-signatory="station_supervisor"
             onClick={() => onSignatoryClick && onSignatoryClick('station_supervisor')}
             className={`border border-black p-1 flex flex-col justify-between min-h-[55px] bg-white relative transition-all ${
               !isReadOnly ? 'cursor-pointer hover:border-amber-600 hover:shadow-md hover:bg-amber-50/50' : ''
@@ -427,6 +428,7 @@ export const PaperFormLayout: React.FC<Props> = ({
 
           {/* 2. Operation Supervisor */}
           <div
+            data-signatory="operation_supervisor"
             onClick={() => onSignatoryClick && onSignatoryClick('operation_supervisor')}
             className={`border border-black p-1 flex flex-col justify-between min-h-[55px] bg-white relative transition-all ${
               !isReadOnly ? 'cursor-pointer hover:border-amber-600 hover:shadow-md hover:bg-amber-50/50' : ''
@@ -661,6 +663,7 @@ export const PaperFormLayout: React.FC<Props> = ({
 
     return (
       <div
+        data-signatory={roleKey}
         onClick={() => onSignatoryClick && !isSkipped && onSignatoryClick(roleKey)}
         className={`border border-black p-1.5 flex flex-col justify-between min-h-[100px] bg-white relative transition-all ${
           !isApproved && !isSkipped ? 'cursor-pointer hover:border-amber-600 hover:shadow-md hover:bg-amber-50/50' : ''

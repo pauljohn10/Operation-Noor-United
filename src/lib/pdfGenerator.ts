@@ -468,16 +468,99 @@ function runExportDiagnostics(clone: HTMLElement, clickNumber: number) {
 }
 
 /**
+ * Ensures all required signature image nodes exist in the element/clone according to audit data.
+ * If a signature URL exists in auditData but the DOM node doesn't have an <img> tag yet,
+ * injects the signature <img> tag directly into the corresponding signatory slot.
+ */
+function ensureSignaturesInDom(container: HTMLElement, audit?: Partial<any>): void {
+  if (!audit) return;
+
+  // 1. Station Supervisor signature
+  if (audit.station_supervisor_signature_url) {
+    const slot = container.querySelector('[data-signatory="station_supervisor"]');
+    if (slot && !slot.querySelector('img')) {
+      const imgContainer = document.createElement('div');
+      imgContainer.className = 'my-auto py-0.5';
+      const innerWrapper = document.createElement('div');
+      innerWrapper.className = 'h-6 my-0.5 flex items-center justify-center';
+      const img = document.createElement('img');
+      img.src = audit.station_supervisor_signature_url;
+      img.alt = 'Station Supervisor Handwritten Signature';
+      img.className = 'max-h-full object-contain mx-auto';
+      innerWrapper.appendChild(img);
+      imgContainer.appendChild(innerWrapper);
+      slot.appendChild(imgContainer);
+    }
+  }
+
+  // 2. Operation Supervisor signature
+  if (audit.operation_supervisor_signature_url) {
+    const slot = container.querySelector('[data-signatory="operation_supervisor"]');
+    if (slot && !slot.querySelector('img')) {
+      const imgContainer = document.createElement('div');
+      imgContainer.className = 'my-auto py-0.5';
+      const innerWrapper = document.createElement('div');
+      innerWrapper.className = 'h-6 my-0.5 flex items-center justify-center';
+      const img = document.createElement('img');
+      img.src = audit.operation_supervisor_signature_url;
+      img.alt = 'Operation Supervisor Handwritten Signature';
+      img.className = 'max-h-full object-contain mx-auto';
+      innerWrapper.appendChild(img);
+      imgContainer.appendChild(innerWrapper);
+      slot.appendChild(imgContainer);
+    }
+  }
+
+  // 3. Approval slots signatures
+  if (audit.approvals && Array.isArray(audit.approvals)) {
+    audit.approvals.forEach((app: any) => {
+      if (app.signature_url && (app.status === 'approved' || app.signature_url.length > 5)) {
+        const slot = container.querySelector(`[data-signatory="${app.role}"]`);
+        if (slot && !slot.querySelector('img')) {
+          const imgContainer = document.createElement('div');
+          imgContainer.className = 'my-auto py-1';
+          const innerWrapper = document.createElement('div');
+          innerWrapper.className = 'h-10 my-0.5 flex items-center justify-center';
+          const img = document.createElement('img');
+          img.src = app.signature_url;
+          img.alt = 'Handwritten Signature';
+          img.className = 'max-h-full object-contain mx-auto';
+          innerWrapper.appendChild(img);
+          imgContainer.appendChild(innerWrapper);
+          slot.appendChild(imgContainer);
+        }
+      }
+    });
+  }
+}
+
+/**
  * Exports the station audit paper form to a high-resolution single-page A4 PDF document
  * with 100% WYSIWYG layout, official logo, and clean edge-to-edge printable format.
  * Produces 100% identical output on Desktop Browser, Android Chrome, and iPhone Safari.
  */
 export async function exportAuditToPdf(
-  auditNumber: string,
-  stationName: string,
-  elementId: string = 'paper-form-document'
+  auditInput: string | Partial<any>,
+  stationNameOrElementId: string = 'paper-form-document',
+  elementIdArg: string = 'paper-form-document'
 ): Promise<void> {
   exportClickCount++;
+
+  let auditObj: Partial<any> | null = null;
+  let auditNumber = 'SA-2026-AUDIT';
+  let stationName = 'Station';
+  let elementId = elementIdArg;
+
+  if (typeof auditInput === 'object' && auditInput !== null) {
+    auditObj = auditInput;
+    auditNumber = auditInput.audit_number || auditNumber;
+    stationName = auditInput.station_name || stationName;
+    elementId = typeof stationNameOrElementId === 'string' ? stationNameOrElementId : elementIdArg;
+  } else {
+    auditNumber = auditInput || auditNumber;
+    stationName = stationNameOrElementId || stationName;
+  }
+
   const element = document.getElementById(elementId);
   if (!element) {
     console.error(`PDF export failed: Element #${elementId} not found in DOM.`);
@@ -494,24 +577,34 @@ export async function exportAuditToPdf(
       cachedLogoBase64 = await getBase64FromUrl(fullLogoUrl);
     }
 
-    // 2. Pre-inline all images (official logo & handwritten signatures) as Base64 Data URLs on live element BEFORE cloning
+    // 2. Ensure all signature image nodes exist in target DOM element according to audit data
+    if (auditObj) {
+      ensureSignaturesInDom(element, auditObj);
+    }
+
+    // 3. Pre-inline all images (official logo & handwritten signatures) as Base64 Data URLs on live element BEFORE cloning
     await inlineAllImagesAsBase64(element);
 
-    // 3. Prepare clone with exact single-page A4 styling, logo & text replacement
+    // 4. Prepare clone with exact single-page A4 styling, logo & text replacement
     prepared = prepareElementForPdfExport(element);
 
-    // 4. Pre-inline and force GPU bitmap decoding on all images in the clone
+    // 5. Ensure all signature image nodes exist in clone
+    if (auditObj) {
+      ensureSignaturesInDom(prepared.clone, auditObj);
+    }
+
+    // 6. Pre-inline and force GPU bitmap decoding on all images in the clone
     await inlineAllImagesAsBase64(prepared.clone);
 
-    // 5. Wait for all fonts to be ready before canvas capture
+    // 7. Wait for all fonts to be ready before canvas capture
     if (document.fonts && document.fonts.ready) {
       await document.fonts.ready;
     }
 
-    // 6. Run diagnostic logger to log 1st click vs 2nd click DOM state
+    // 8. Run diagnostic logger to log 1st click vs 2nd click DOM state
     runExportDiagnostics(prepared.clone, exportClickCount);
 
-    // 6. Render to high-res canvas using html-to-image (native browser SVG rendering)
+    // 9. Render to high-res canvas using html-to-image (native browser SVG rendering)
     const canvas = await toCanvas(prepared.clone, {
       pixelRatio: 2,
       backgroundColor: '#ffffff',

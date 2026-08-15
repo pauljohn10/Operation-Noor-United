@@ -188,7 +188,7 @@ export const StationAuditForm: React.FC<Props> = ({
     });
   });
 
-  // Keep section prices and items synchronized whenever initialAudit changes
+  // Keep section prices, items, and signature URLs synchronized whenever initialAudit changes
   useEffect(() => {
     const effectivePrices: Record<FuelType, number> = {
       PETROL_91: getEffectiveAuditPrice('PETROL_91', initialAudit, defaultPrices),
@@ -196,6 +196,42 @@ export const StationAuditForm: React.FC<Props> = ({
       DIESEL: getEffectiveAuditPrice('DIESEL', initialAudit, defaultPrices),
     };
     setSectionPrices(effectivePrices);
+
+    if (initialAudit) {
+      if (initialAudit.station_supervisor_signature_url != null) {
+        setSupervisorSignatureUrl(initialAudit.station_supervisor_signature_url);
+      }
+      if (initialAudit.operation_supervisor_signature_url != null) {
+        setOperationSupervisorSignatureUrl(initialAudit.operation_supervisor_signature_url);
+      }
+      if (initialAudit.station_supervisor_name != null) {
+        setSupervisorName(initialAudit.station_supervisor_name);
+      }
+      if (initialAudit.notes != null) {
+        setNotes(initialAudit.notes);
+      }
+      if (initialAudit.person_responsible_for_shortage != null) {
+        setPersonResponsibleForShortage(initialAudit.person_responsible_for_shortage);
+      }
+      if (initialAudit.shortage_amount !== undefined) {
+        setShortageAmount(initialAudit.shortage_amount);
+      }
+      if (initialAudit.noor_khoy_amount !== undefined) {
+        setNoorKhoy(initialAudit.noor_khoy_amount);
+      }
+      if (initialAudit.atm_amount !== undefined) {
+        setAtm(initialAudit.atm_amount);
+      }
+      if (initialAudit.cash_received_amount !== undefined) {
+        setCashReceived(initialAudit.cash_received_amount);
+      }
+      if (initialAudit.current_status) {
+        setCurrentStatus(initialAudit.current_status);
+      }
+      if (initialAudit.comments) {
+        setComments(initialAudit.comments);
+      }
+    }
 
     if (initialAudit?.items && initialAudit.items.length > 0) {
       const template = generateEmptyItems();
@@ -214,6 +250,8 @@ export const StationAuditForm: React.FC<Props> = ({
     initialAudit?.p91_price,
     initialAudit?.p95_price,
     initialAudit?.diesel_price,
+    initialAudit?.station_supervisor_signature_url,
+    initialAudit?.operation_supervisor_signature_url,
     defaultPrices.p91,
     defaultPrices.p95,
     defaultPrices.diesel,
@@ -937,8 +975,7 @@ export const StationAuditForm: React.FC<Props> = ({
           <button
             onClick={() =>
               exportAuditToPdf(
-                currentAuditData.audit_number,
-                currentAuditData.station_name,
+                currentAuditData,
                 'paper-form-document'
               )
             }
