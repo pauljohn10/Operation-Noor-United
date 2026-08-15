@@ -6,23 +6,10 @@ let exportClickCount = 0;
 
 // Immediately preload official logo as Base64 Data URL on module initialization
 if (typeof window !== 'undefined') {
-  const logoImg = new Image();
-  logoImg.crossOrigin = 'anonymous';
-  logoImg.onload = () => {
-    try {
-      const c = document.createElement('canvas');
-      c.width = logoImg.naturalWidth || 180;
-      c.height = logoImg.naturalHeight || 60;
-      const ctx = c.getContext('2d');
-      if (ctx) {
-        ctx.drawImage(logoImg, 0, 0);
-        cachedLogoBase64 = c.toDataURL('image/png');
-      }
-    } catch {
-      // Ignore
-    }
-  };
-  logoImg.src = window.location.origin + '/logo_transparent.png';
+  const fullLogoUrl = window.location.origin + '/logo_transparent.png';
+  getBase64FromUrl(fullLogoUrl).then((b64) => {
+    if (b64) cachedLogoBase64 = b64;
+  }).catch(() => {});
 }
 
 /**
@@ -85,72 +72,74 @@ async function getBase64FromUrl(url: string): Promise<string | null> {
  * and converts them to inline Base64 Data URLs so all browsers (Desktop, Android, iOS Safari)
  * render images 100% reliably in SVG toCanvas captures on the VERY FIRST CLICK.
  */
-async function preloadImagesInClone(container: HTMLElement): Promise<void> {
+async function inlineAllImagesAsBase64(container: HTMLElement): Promise<void> {
   const images = Array.from(container.querySelectorAll('img'));
-  const promises = images.map(async (img) => {
-    try {
-      let srcUrl = img.getAttribute('src') || img.src || '';
+  await Promise.all(
+    images.map(async (img) => {
+      try {
+        let srcUrl = img.getAttribute('src') || img.src || '';
 
-      // 1. Handle official top-left logo specially
-      if (srcUrl.includes('logo_transparent.png')) {
-        if (!cachedLogoBase64) {
-          const fullLogoUrl = window.location.origin + '/logo_transparent.png';
-          cachedLogoBase64 = await getBase64FromUrl(fullLogoUrl);
-        }
-        if (cachedLogoBase64) {
-          img.src = cachedLogoBase64;
-          img.setAttribute('src', cachedLogoBase64);
-          srcUrl = cachedLogoBase64;
-        }
-      }
-
-      // 2. Convert external or relative signature image URLs to inline Base64 Data URLs
-      if (srcUrl && !srcUrl.startsWith('data:')) {
-        if (!srcUrl.startsWith('http://') && !srcUrl.startsWith('https://')) {
-          srcUrl = window.location.origin + (srcUrl.startsWith('/') ? '' : '/') + srcUrl;
-        }
-        const base64Data = await getBase64FromUrl(srcUrl);
-        if (base64Data) {
-          img.src = base64Data;
-          img.setAttribute('src', base64Data);
-        }
-      }
-
-      // 3. Force HTMLImageElement decode so GPU texture memory is populated
-      await new Promise<void>((resolve) => {
-        const loader = new Image();
-        loader.crossOrigin = 'anonymous';
-
-        let done = false;
-        const finish = () => {
-          if (done) return;
-          done = true;
-          if ('decode' in loader && typeof (loader as any).decode === 'function') {
-            (loader as any).decode().then(() => resolve()).catch(() => resolve());
-          } else {
-            resolve();
+        // 1. Handle official top-left logo specially
+        if (srcUrl.includes('logo_transparent.png')) {
+          if (!cachedLogoBase64) {
+            cachedLogoBase64 = await getBase64FromUrl(window.location.origin + '/logo_transparent.png');
           }
-        };
-
-        loader.onload = finish;
-        loader.onerror = () => {
-          if (!done) {
-            done = true;
-            resolve();
+          if (cachedLogoBase64) {
+            img.src = cachedLogoBase64;
+            img.setAttribute('src', cachedLogoBase64);
+            srcUrl = cachedLogoBase64;
           }
-        };
-        loader.src = img.src;
-
-        if (loader.complete && loader.naturalWidth > 0) {
-          finish();
         }
-      });
-    } catch {
-      // Continue if image preloading fails
-    }
-  });
 
-  await Promise.all(promises);
+        // 2. Convert external or relative signature image URLs to inline Base64 Data URLs
+        if (srcUrl && !srcUrl.startsWith('data:')) {
+          if (!srcUrl.startsWith('http://') && !srcUrl.startsWith('https://')) {
+            srcUrl = window.location.origin + (srcUrl.startsWith('/') ? '' : '/') + srcUrl;
+          }
+          const base64Data = await getBase64FromUrl(srcUrl);
+          if (base64Data) {
+            img.src = base64Data;
+            img.setAttribute('src', base64Data);
+            srcUrl = base64Data;
+          }
+        }
+
+        // 3. Force HTMLImageElement decode so GPU texture memory is populated
+        if (img.src && img.src.length > 50) {
+          await new Promise<void>((resolve) => {
+            const loader = new Image();
+            loader.crossOrigin = 'anonymous';
+
+            let done = false;
+            const finish = () => {
+              if (done) return;
+              done = true;
+              if ('decode' in loader && typeof (loader as any).decode === 'function') {
+                (loader as any).decode().then(() => resolve()).catch(() => resolve());
+              } else {
+                resolve();
+              }
+            };
+
+            loader.onload = finish;
+            loader.onerror = () => {
+              if (!done) {
+                done = true;
+                resolve();
+              }
+            };
+            loader.src = img.src;
+
+            if (loader.complete && loader.naturalWidth > 0) {
+              finish();
+            }
+          });
+        }
+      } catch {
+        // Continue if image inlining fails
+      }
+    })
+  );
 }
 
 /**
@@ -499,21 +488,27 @@ export async function exportAuditToPdf(
   let prepared: { clone: HTMLElement; cleanup: () => void } | null = null;
 
   try {
-    // 1. Convert all images (official logo & handwritten signatures) to Base64 Data URLs on source element BEFORE cloning
-    await preloadImagesInClone(element);
+    // 1. Guarantee Logo Base64 Data URL is ready
+    if (!cachedLogoBase64) {
+      const fullLogoUrl = window.location.origin + '/logo_transparent.png';
+      cachedLogoBase64 = await getBase64FromUrl(fullLogoUrl);
+    }
 
-    // 2. Prepare clone with exact single-page A4 styling, logo & text replacement
+    // 2. Pre-inline all images (official logo & handwritten signatures) as Base64 Data URLs on live element BEFORE cloning
+    await inlineAllImagesAsBase64(element);
+
+    // 3. Prepare clone with exact single-page A4 styling, logo & text replacement
     prepared = prepareElementForPdfExport(element);
 
-    // 3. Preload and force GPU bitmap decoding on all images in the clone
-    await preloadImagesInClone(prepared.clone);
+    // 4. Pre-inline and force GPU bitmap decoding on all images in the clone
+    await inlineAllImagesAsBase64(prepared.clone);
 
-    // 4. Wait for all fonts to be ready before canvas capture
+    // 5. Wait for all fonts to be ready before canvas capture
     if (document.fonts && document.fonts.ready) {
       await document.fonts.ready;
     }
 
-    // 5. Run diagnostic logger to log 1st click vs 2nd click DOM state
+    // 6. Run diagnostic logger to log 1st click vs 2nd click DOM state
     runExportDiagnostics(prepared.clone, exportClickCount);
 
     // 6. Render to high-res canvas using html-to-image (native browser SVG rendering)
