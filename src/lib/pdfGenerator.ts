@@ -72,7 +72,7 @@ async function getBase64FromUrl(url: string): Promise<string | null> {
  * and converts them to inline Base64 Data URLs so all browsers (Desktop, Android, iOS Safari)
  * render images 100% reliably in SVG toCanvas captures on the VERY FIRST CLICK.
  */
-async function inlineAllImagesAsBase64(container: HTMLElement): Promise<void> {
+export async function inlineAllImagesAsBase64(container: HTMLElement): Promise<void> {
   const images = Array.from(container.querySelectorAll('img'));
   await Promise.all(
     images.map(async (img) => {

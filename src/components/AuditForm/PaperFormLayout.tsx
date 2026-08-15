@@ -1,7 +1,8 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import type { StationAudit, PumpReadingItem, FuelType } from '../../types/audit';
 import { calculateFuelSectionTotals, formatCurrency, formatNumber, formatMeterReading, DEFAULT_FUEL_PRICES } from '../../lib/calculations';
 import { CheckCircle2, XCircle, AlertTriangle, ShieldCheck, PenTool, Banknote } from 'lucide-react';
+import { inlineAllImagesAsBase64 } from '../../lib/pdfGenerator';
 
 interface Props {
   audit: Partial<StationAudit>;
@@ -31,6 +32,14 @@ export const PaperFormLayout: React.FC<Props> = ({
   onSignatoryClick,
   isReadOnly = false,
 }) => {
+  // Pre-inline logo and signature image URLs into Base64 Data URLs immediately when paper layout renders
+  useEffect(() => {
+    const el = document.getElementById('paper-form-document');
+    if (el) {
+      inlineAllImagesAsBase64(el);
+    }
+  }, [audit, items]);
+
   const effectivePrices: Record<FuelType, number> = {
     PETROL_91:
       prices?.PETROL_91 ||
