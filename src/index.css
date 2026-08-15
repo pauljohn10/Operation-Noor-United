@@ -316,8 +316,28 @@
   }
 }
 
-/* Unified Printed Page rules (Identical to A4 Export PDF Layout) */
+/* Off-screen active DOM container for Paper Form (keeps logo & signatures active for WebKit decoding) */
+.paper-form-wrapper {
+  position: fixed;
+  left: -9999px;
+  top: 0;
+  width: 794px;
+  opacity: 0;
+  pointer-events: none;
+  z-index: -9999;
+}
+
 @media print {
+  .paper-form-wrapper {
+    position: static !important;
+    left: auto !important;
+    top: auto !important;
+    width: 100% !important;
+    opacity: 1 !important;
+    pointer-events: auto !important;
+    z-index: auto !important;
+  }
+
   html, body {
     background: #ffffff !important;
     color: #000000 !important;

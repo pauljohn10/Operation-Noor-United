@@ -1121,8 +1121,8 @@ export const StationAuditForm: React.FC<Props> = ({
         />
       </div>
 
-      {/* OFFICIAL PRINTABLE A4 PAPER FORM (HIDDEN ON SCREEN, USED FOR PDF EXPORT & PRINTING) */}
-      <div className="hidden print:block">
+      {/* OFFICIAL PRINTABLE A4 PAPER FORM (OFFSCREEN IN DOM FOR ACTIVE IMAGE DECODING & PRINTING) */}
+      <div className="paper-form-wrapper">
         <PaperFormLayout
           audit={currentAuditData}
           items={items}
