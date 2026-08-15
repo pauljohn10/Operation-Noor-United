@@ -86,15 +86,30 @@ async function preloadImagesInClone(clone: HTMLElement): Promise<void> {
       await new Promise<void>((resolve) => {
         const tempImg = new Image();
         tempImg.crossOrigin = 'anonymous';
-        tempImg.onload = () => {
+        
+        let resolved = false;
+        const done = () => {
+          if (resolved) return;
+          resolved = true;
           if ('decode' in tempImg && typeof (tempImg as any).decode === 'function') {
             (tempImg as any).decode().then(() => resolve()).catch(() => resolve());
           } else {
             resolve();
           }
         };
-        tempImg.onerror = () => resolve();
+
+        tempImg.onload = done;
+        tempImg.onerror = () => {
+          if (!resolved) {
+            resolved = true;
+            resolve();
+          }
+        };
         tempImg.src = img.src;
+
+        if (tempImg.complete && tempImg.naturalWidth > 0) {
+          done();
+        }
       });
     } catch {
       // Continue if image preloading fails
@@ -428,7 +443,31 @@ export async function exportAuditToPdf(
       await document.fonts.ready;
     }
 
-    // 4. Render to high-res canvas using html-to-image (native browser SVG rendering)
+    // 5. FLUSH WEBKIT GPU RASTERIZATION & PAINT THREAD (Crucial for 1st click on Mobile Safari / Android)
+    await new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+    await new Promise((resolve) => setTimeout(resolve, 200));
+
+    // 6. Verify every img element in clone is 100% loaded & decoded before taking snapshot
+    const cloneImages = Array.from(prepared.clone.querySelectorAll('img'));
+    await Promise.all(
+      cloneImages.map(async (img) => {
+        if (!img.complete || img.naturalWidth === 0) {
+          await new Promise<void>((resolve) => {
+            if (img.complete && img.naturalWidth > 0) return resolve();
+            img.onload = () => resolve();
+            img.onerror = () => resolve();
+            setTimeout(resolve, 300);
+          });
+        }
+        if ('decode' in img && typeof (img as any).decode === 'function') {
+          try {
+            await (img as any).decode();
+          } catch {}
+        }
+      })
+    );
+
+    // 7. Render to high-res canvas using html-to-image (native browser SVG rendering)
     const canvas = await toCanvas(prepared.clone, {
       pixelRatio: 2,
       backgroundColor: '#ffffff',
