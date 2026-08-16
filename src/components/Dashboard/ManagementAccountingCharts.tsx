@@ -308,3 +308,195 @@ export const MonthlyAuditsLineChart: React.FC<Props> = ({ audits }) => {
     </div>
   );
 };
+
+import { Coins } from 'lucide-react';
+import { formatCurrency } from '../../lib/calculations';
+
+/**
+ * Monthly Discrepancy Chart
+ * Shows total audit discrepancy in SAR per month (Jan - Dec) grouped by official audit_date
+ */
+export const MonthlyDiscrepancyBarChart: React.FC<Props> = ({ audits }) => {
+  const [hoveredData, setHoveredData] = useState<{ month: string; amount: number; x: number; y: number; width: number } | null>(null);
+
+  const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+
+  // Sum audit discrepancy in SAR per month (0 to 11) using audit_date
+  const monthlyDiscrepancies = new Array(12).fill(0);
+
+  audits.forEach((audit) => {
+    if (audit.audit_date && audit.discrepancy_amount != null) {
+      const dateObj = new Date(audit.audit_date);
+      if (!isNaN(dateObj.getTime())) {
+        const month = dateObj.getMonth();
+        if (month >= 0 && month < 12) {
+          // Take absolute value of shortage/discrepancy amount in SAR
+          const disc = Math.abs(Number(audit.discrepancy_amount));
+          monthlyDiscrepancies[month] += disc;
+        }
+      }
+    }
+  });
+
+  const totalAnnualDiscrepancy = monthlyDiscrepancies.reduce((a, b) => a + b, 0);
+  const maxDiscrepancy = Math.max(...monthlyDiscrepancies, 100); // Minimum 100 SAR for scale headroom
+
+  // SVG Dimensions
+  const svgWidth = 920;
+  const svgHeight = 220;
+  const paddingLeft = 60;
+  const paddingRight = 30;
+  const paddingTop = 30;
+  const paddingBottom = 35;
+
+  const chartWidth = svgWidth - paddingLeft - paddingRight;
+  const chartHeight = svgHeight - paddingTop - paddingBottom;
+
+  const barWidth = 32;
+  const numBars = 12;
+  const gap = (chartWidth - numBars * barWidth) / (numBars - 1);
+
+  const bars = monthlyDiscrepancies.map((amount, i) => {
+    const x = paddingLeft + i * (barWidth + gap);
+    const h = (amount / maxDiscrepancy) * chartHeight;
+    const y = paddingTop + chartHeight - h;
+    return { month: monthNames[i], amount: Number(amount.toFixed(2)), x, y, h, width: barWidth };
+  });
+
+  // Grid line Y values (3 horizontal ticks)
+  const yTicks = [0, Math.round(maxDiscrepancy / 2), Math.round(maxDiscrepancy)];
+
+  return (
+    <div className="bg-white/80 backdrop-blur-xl border border-white/90 rounded-2xl p-5 sm:p-6 shadow-md ring-1 ring-slate-900/5 flex flex-col justify-between">
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-slate-100 mb-4">
+        <div className="flex items-center gap-2.5">
+          <div className="p-2 bg-rose-500/10 text-rose-600 rounded-xl border border-rose-500/20">
+            <Coins className="w-5 h-5" />
+          </div>
+          <div>
+            <h3 className="text-sm font-black text-slate-900 tracking-tight">Monthly Discrepancy (SAR)</h3>
+            <p className="text-[11px] text-slate-500 font-medium">Total audit discrepancy per month grouped by official audit date</p>
+          </div>
+        </div>
+
+        <div className="flex items-center gap-3">
+          <div className="px-3 py-1.5 bg-rose-50 border border-rose-200 text-rose-900 rounded-xl text-xs font-black flex items-center gap-1.5 font-mono">
+            <span className="text-[10px] text-rose-600 uppercase font-sans font-bold">Total Discrepancy:</span>
+            <span>{formatCurrency(totalAnnualDiscrepancy)} SAR</span>
+          </div>
+        </div>
+      </div>
+
+      {/* Bar Chart SVG Container */}
+      <div className="relative w-full overflow-hidden my-auto">
+        <svg viewBox={`0 0 ${svgWidth} ${svgHeight}`} className="w-full h-auto overflow-visible">
+          <defs>
+            <linearGradient id="barGradient" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stopColor="#f43f5e" />
+              <stop offset="100%" stopColor="#e11d48" />
+            </linearGradient>
+            <linearGradient id="barHoverGradient" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stopColor="#fb7185" />
+              <stop offset="100%" stopColor="#f43f5e" />
+            </linearGradient>
+          </defs>
+
+          {/* Y-Axis Grid Lines */}
+          {yTicks.map((val) => {
+            const y = paddingTop + chartHeight - (val / maxDiscrepancy) * chartHeight;
+            return (
+              <g key={val}>
+                <line
+                  x1={paddingLeft - 5}
+                  y1={y}
+                  x2={svgWidth - paddingRight}
+                  y2={y}
+                  stroke="#e2e8f0"
+                  strokeDasharray="4 4"
+                  strokeWidth="1"
+                />
+                <text
+                  x={paddingLeft - 12}
+                  y={y + 4}
+                  textAnchor="end"
+                  fontSize="10"
+                  fontWeight="700"
+                  fill="#64748b"
+                  fontFamily="monospace"
+                >
+                  {val.toLocaleString()}
+                </text>
+              </g>
+            );
+          })}
+
+          {/* Bars */}
+          {bars.map((bar) => {
+            const isHovered = hoveredData?.month === bar.month;
+            return (
+              <g key={bar.month} className="cursor-pointer">
+                {/* Bar Rect */}
+                <rect
+                  x={bar.x}
+                  y={bar.h > 0 ? bar.y : paddingTop + chartHeight - 2}
+                  width={bar.width}
+                  height={bar.h > 0 ? bar.h : 2}
+                  rx="6"
+                  ry="6"
+                  fill={isHovered ? 'url(#barHoverGradient)' : 'url(#barGradient)'}
+                  className="transition-all duration-200 hover:opacity-90"
+                  onMouseEnter={() => setHoveredData(bar)}
+                  onMouseLeave={() => setHoveredData(null)}
+                />
+
+                {/* Top Amount Badge for bars > 0 */}
+                {bar.amount > 0 && (
+                  <text
+                    x={bar.x + bar.width / 2}
+                    y={bar.y - 6}
+                    textAnchor="middle"
+                    fontSize="9"
+                    fontWeight="800"
+                    fill="#be123c"
+                    fontFamily="monospace"
+                  >
+                    {Math.round(bar.amount)}
+                  </text>
+                )}
+
+                {/* X-Axis Month Label */}
+                <text
+                  x={bar.x + bar.width / 2}
+                  y={svgHeight - 10}
+                  textAnchor="middle"
+                  fontSize="11"
+                  fontWeight="800"
+                  fill={isHovered ? '#be123c' : '#475569'}
+                >
+                  {bar.month}
+                </text>
+              </g>
+            );
+          })}
+        </svg>
+
+        {/* Hover Tooltip Overlay */}
+        {hoveredData && (
+          <div
+            className="absolute z-20 pointer-events-none bg-slate-900 text-white text-xs font-black px-3 py-1.5 rounded-xl shadow-xl border border-slate-700 transform -translate-x-1/2 -translate-y-full mb-2 transition-all"
+            style={{
+              left: `${((hoveredData.x + hoveredData.width / 2) / svgWidth) * 100}%`,
+              top: `${(hoveredData.y / svgHeight) * 100}%`,
+            }}
+          >
+            <div className="flex items-center gap-1.5">
+              <span>{hoveredData.month}:</span>
+              <span className="text-rose-400 font-mono">{formatCurrency(hoveredData.amount)} SAR</span>
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};

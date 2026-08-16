@@ -3,7 +3,7 @@ import type { StationAudit, Station } from '../../types/audit';
 import { useAuth } from '../../context/AuthContext';
 import { useLanguage } from '../../context/LanguageContext';
 import { GlassCard } from '../Common/GlassCard';
-import { AuditStatusDonutChart, MonthlyAuditsLineChart } from './ManagementAccountingCharts';
+import { AuditStatusDonutChart, MonthlyAuditsLineChart, MonthlyDiscrepancyBarChart } from './ManagementAccountingCharts';
 import {
   FileText,
   CheckCircle2,
@@ -126,9 +126,12 @@ export const DashboardView: React.FC<Props> = ({
 
       {/* 3. MANAGEMENT & ACCOUNTING GRAPHS (ONLY for Accountant, Account Manager, Management & Super Admin) */}
       {isManagementOrAccounting && (
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 pt-2">
-          <AuditStatusDonutChart audits={audits} />
-          <MonthlyAuditsLineChart audits={audits} />
+        <div className="space-y-6 pt-2">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <AuditStatusDonutChart audits={audits} />
+            <MonthlyAuditsLineChart audits={audits} />
+          </div>
+          <MonthlyDiscrepancyBarChart audits={audits} />
         </div>
       )}
 
