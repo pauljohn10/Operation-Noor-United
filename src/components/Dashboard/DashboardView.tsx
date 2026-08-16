@@ -3,6 +3,7 @@ import type { StationAudit, Station } from '../../types/audit';
 import { useAuth } from '../../context/AuthContext';
 import { useLanguage } from '../../context/LanguageContext';
 import { GlassCard } from '../Common/GlassCard';
+import { AuditStatusDonutChart, MonthlyAuditsLineChart } from './ManagementAccountingCharts';
 import {
   FileText,
   CheckCircle2,
@@ -27,6 +28,13 @@ export const DashboardView: React.FC<Props> = ({
 
   if (!currentUser) return null;
 
+  // Strict role check: ONLY Accountant, Accountant Manager / Account Manager, Executive Management & Super Admin see these graphs
+  const isManagementOrAccounting =
+    currentUser.role === 'Accountant' ||
+    currentUser.role === 'Account Manager' ||
+    currentUser.role === 'Management' ||
+    currentUser.role === 'Super Admin';
+
   // KPI Counts
   const totalAuditsCount = audits.length;
   const completedAuditsCount = audits.filter((a) => a.current_status === 'approved').length;
@@ -38,9 +46,6 @@ export const DashboardView: React.FC<Props> = ({
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
 
-
-
-      
       {/* 1. WELCOME HERO ENTERPRISE BANNER */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 bg-gradient-to-r from-slate-900 via-sky-950 to-indigo-950 p-7 rounded-2xl shadow-md border border-slate-800 relative overflow-hidden transition-all">
         <div className="absolute -right-12 -bottom-12 w-56 h-56 bg-sky-500/10 rounded-full blur-3xl pointer-events-none"></div>
@@ -118,6 +123,14 @@ export const DashboardView: React.FC<Props> = ({
           <p className="text-3xl sm:text-4xl font-black text-rose-900 mt-3 tracking-tight font-mono">{rejectedAuditsCount}</p>
         </GlassCard>
       </div>
+
+      {/* 3. MANAGEMENT & ACCOUNTING GRAPHS (ONLY for Accountant, Account Manager, Management & Super Admin) */}
+      {isManagementOrAccounting && (
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 pt-2">
+          <AuditStatusDonutChart audits={audits} />
+          <MonthlyAuditsLineChart audits={audits} />
+        </div>
+      )}
 
     </div>
   );
