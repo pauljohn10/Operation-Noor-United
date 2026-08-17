@@ -627,7 +627,7 @@ export const ModernAuditForm: React.FC<Props> = ({
                               {t('auditForm.closingReading')} (Auto Calculated)
                             </label>
                             <div className="w-full min-h-[44px] bg-blue-100/90 border border-blue-300 rounded-xl px-3 py-2 text-sm font-black text-end text-blue-950 font-mono flex items-center justify-end">
-                              {totalClosing != null ? `${formatMeterReading(totalClosing)} L` : '-'}
+                              {totalClosing != null ? formatMeterReading(totalClosing) : '-'}
                             </div>
                           </div>
                         </div>
@@ -718,7 +718,7 @@ export const ModernAuditForm: React.FC<Props> = ({
                             <td className="p-3">
                               {isTotalRow ? (
                                 <span className="font-mono font-black text-sky-900 text-xs">
-                                  {item.end_reading != null ? `${formatMeterReading(item.end_reading)} L` : '-'}
+                                  {item.end_reading != null ? formatMeterReading(item.end_reading) : '-'}
                                 </span>
                               ) : isReadOnly ? (
                                 <span className="font-mono font-black text-slate-900 text-xs">
