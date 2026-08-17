@@ -3,7 +3,12 @@ import type { StationAudit, Station } from '../../types/audit';
 import { useAuth } from '../../context/AuthContext';
 import { useLanguage } from '../../context/LanguageContext';
 import { GlassCard } from '../Common/GlassCard';
-import { AuditStatusDonutChart, MonthlyAuditsLineChart, MonthlyDiscrepancyBarChart } from './ManagementAccountingCharts';
+import {
+  AuditStatusDonutChart,
+  MonthlyAuditsLineChart,
+  MonthlyDiscrepancyBarChart,
+  SupervisorPerformanceBarChart,
+} from './ManagementAccountingCharts';
 import {
   FileText,
   CheckCircle2,
@@ -132,6 +137,7 @@ export const DashboardView: React.FC<Props> = ({
             <MonthlyAuditsLineChart audits={audits} />
           </div>
           <MonthlyDiscrepancyBarChart audits={audits} />
+          <SupervisorPerformanceBarChart audits={audits} />
         </div>
       )}
 

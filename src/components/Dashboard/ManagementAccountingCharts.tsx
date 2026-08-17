@@ -500,3 +500,160 @@ export const MonthlyDiscrepancyBarChart: React.FC<Props> = ({ audits }) => {
     </div>
   );
 };
+
+import { UserCheck, ChevronDown, Award } from 'lucide-react';
+
+/**
+ * Operation Supervisor Performance Bar Chart
+ * Shows completed audits per Operation Supervisor for the selected month
+ */
+export const SupervisorPerformanceBarChart: React.FC<Props> = ({ audits }) => {
+  const currentYear = new Date().getFullYear();
+  const monthNames = [
+    'January', 'February', 'March', 'April', 'May', 'June',
+    'July', 'August', 'September', 'October', 'November', 'December'
+  ];
+
+  // Derive available YYYY-MM month keys dynamically from audit_date
+  const availableMonthKeys = Array.from(
+    new Set(
+      audits
+        .map((a) => a.audit_date?.substring(0, 7))
+        .filter((val): val is string => Boolean(val && /^\d{4}-\d{2}$/.test(val)))
+    )
+  ).sort().reverse();
+
+  // Fallback to current month if no dates in audits
+  const todayKey = `${currentYear}-${String(new Date().getMonth() + 1).padStart(2, '0')}`;
+  if (!availableMonthKeys.includes(todayKey)) {
+    availableMonthKeys.unshift(todayKey);
+  }
+
+  const [selectedMonthKey, setSelectedMonthKey] = useState<string>(availableMonthKeys[0] || todayKey);
+
+  // Filter completed audits for selected month
+  const monthAudits = audits.filter((a) => {
+    return a.audit_date?.startsWith(selectedMonthKey) && a.current_status === 'approved';
+  });
+
+  // Group by Operation Supervisor name
+  const supervisorCounts: Record<string, number> = {};
+  monthAudits.forEach((a) => {
+    const name = a.created_by_name || 'Operation Supervisor';
+    supervisorCounts[name] = (supervisorCounts[name] || 0) + 1;
+  });
+
+  const sortedData = Object.entries(supervisorCounts)
+    .map(([name, count]) => ({ name, count }))
+    .sort((a, b) => b.count - a.count);
+
+  // Format month key for display e.g. "2026-08" -> "August 2026"
+  const formatMonthLabel = (key: string) => {
+    const [y, m] = key.split('-');
+    const mIdx = parseInt(m, 10) - 1;
+    return `${monthNames[mIdx] || 'Month'} ${y}`;
+  };
+
+  const maxCount = Math.max(...sortedData.map((d) => d.count), 5);
+  const totalMonthCompleted = sortedData.reduce((acc, d) => acc + d.count, 0);
+
+  return (
+    <div className="bg-white/80 backdrop-blur-xl border border-white/90 rounded-2xl p-5 sm:p-6 shadow-md ring-1 ring-slate-900/5 flex flex-col justify-between">
+      {/* Header & Controls */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-100 mb-5">
+        <div className="flex items-center gap-2.5">
+          <div className="p-2 bg-sky-500/10 text-sky-600 rounded-xl border border-sky-500/20">
+            <UserCheck className="w-5 h-5" />
+          </div>
+          <div>
+            <h3 className="text-sm font-black text-slate-900 tracking-tight">Operation Supervisor Performance</h3>
+            <p className="text-[11px] text-slate-500 font-medium">Completed audits per Operation Supervisor for the selected month</p>
+          </div>
+        </div>
+
+        {/* Month Selector Filter */}
+        <div className="flex items-center gap-2">
+          <span className="text-xs font-black text-slate-700">Month:</span>
+          <div className="relative">
+            <select
+              value={selectedMonthKey}
+              onChange={(e) => setSelectedMonthKey(e.target.value)}
+              className="appearance-none bg-white border border-sky-200/90 rounded-xl px-3.5 py-1.5 pr-8 text-xs font-extrabold text-slate-900 shadow-xs focus:outline-none focus:ring-2 focus:ring-sky-500/20 cursor-pointer"
+            >
+              {availableMonthKeys.map((key) => (
+                <option key={key} value={key}>
+                  {formatMonthLabel(key)}
+                </option>
+              ))}
+            </select>
+            <ChevronDown className="w-3.5 h-3.5 text-slate-500 absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+          </div>
+        </div>
+      </div>
+
+      {/* Main Content Area */}
+      {sortedData.length === 0 ? (
+        <div className="py-12 text-center my-auto">
+          <Award className="w-10 h-10 text-slate-300 mx-auto mb-2" />
+          <p className="text-xs font-bold text-slate-600">No completed audits recorded for {formatMonthLabel(selectedMonthKey)}</p>
+          <p className="text-[11px] text-slate-400 font-medium mt-0.5">Select another month from the dropdown filter above.</p>
+        </div>
+      ) : (
+        <div className="space-y-4 my-auto">
+          {/* Horizontal Bar Visualizations */}
+          <div className="space-y-3">
+            {sortedData.map((item, idx) => {
+              const percent = Math.round((item.count / maxCount) * 100);
+              const totalPercent = totalMonthCompleted > 0 ? Math.round((item.count / totalMonthCompleted) * 100) : 0;
+              return (
+                <div key={item.name} className="space-y-1">
+                  <div className="flex items-center justify-between text-xs font-extrabold">
+                    <span className="text-slate-800 flex items-center gap-1.5">
+                      <span className="w-4 text-[10px] text-slate-400 font-mono">#{idx + 1}</span>
+                      <span>{item.name}</span>
+                    </span>
+                    <span className="font-mono text-sky-700 bg-sky-50 border border-sky-200 px-2 py-0.5 rounded-lg text-[11px]">
+                      {item.count} Audits <span className="text-slate-400 font-sans font-bold">({totalPercent}%)</span>
+                    </span>
+                  </div>
+                  <div className="w-full h-3.5 bg-slate-100 rounded-full overflow-hidden p-0.5 border border-slate-200/60 shadow-inner">
+                    <div
+                      className="h-full bg-gradient-to-r from-sky-500 to-indigo-600 rounded-full transition-all duration-500"
+                      style={{ width: `${Math.max(percent, 4)}%` }}
+                    />
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+
+          {/* Performance Summary Table */}
+          <div className="mt-5 pt-4 border-t border-slate-100">
+            <div className="overflow-x-auto">
+              <table className="w-full text-left text-xs">
+                <thead>
+                  <tr className="border-b border-slate-200 text-[10px] font-black uppercase text-slate-400 tracking-wider">
+                    <th className="py-1.5 px-2">Operation Supervisor</th>
+                    <th className="py-1.5 px-2 text-right">Completed Audits</th>
+                    <th className="py-1.5 px-2 text-right">Share %</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-100 font-medium text-slate-700">
+                  {sortedData.map((item) => (
+                    <tr key={item.name} className="hover:bg-slate-50/80 transition-colors">
+                      <td className="py-2 px-2 font-extrabold text-slate-900">{item.name}</td>
+                      <td className="py-2 px-2 text-right font-mono font-bold text-sky-700">{item.count}</td>
+                      <td className="py-2 px-2 text-right font-mono font-bold text-slate-500">
+                        {totalMonthCompleted > 0 ? ((item.count / totalMonthCompleted) * 100).toFixed(1) : 0}%
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
