@@ -759,6 +759,7 @@ export async function saveAudit(audit: StationAudit): Promise<StationAudit> {
     current_status: audit.current_status || 'draft',
     noor_khoy_amount: audit.noor_khoy_amount != null ? Number(audit.noor_khoy_amount) : 0,
     atm_amount: audit.atm_amount != null ? Number(audit.atm_amount) : 0,
+    atm_pos_attachments: audit.atm_pos_attachments || [],
     cash_amount: audit.cash_amount != null ? Number(audit.cash_amount) : 0,
     cash_received_amount: audit.cash_received_amount != null ? Number(audit.cash_received_amount) : 0,
     total_sales: audit.total_sales != null ? Number(audit.total_sales) : 0,
@@ -772,10 +773,11 @@ export async function saveAudit(audit: StationAudit): Promise<StationAudit> {
 
   let { error: parentErr } = await supabase.from('station_audits').upsert(parentPayload, { onConflict: 'id' });
 
-  // Graceful fallback retry if new shortage columns do not exist in Supabase Postgres schema yet
+  // Graceful fallback retry if new columns do not exist in Supabase Postgres schema yet
   if (parentErr && (parentErr.code === 'PGRST204' || parentErr.message?.includes('column'))) {
-    console.warn('[SAVE AUDIT NOTICE] Missing shortage columns in Supabase station_audits table. Retrying with standard payload...');
+    console.warn('[SAVE AUDIT NOTICE] Missing custom columns in Supabase station_audits table. Retrying with fallback payload...');
     const fallbackPayload = { ...parentPayload };
+    delete (fallbackPayload as any).atm_pos_attachments;
     delete (fallbackPayload as any).person_responsible_for_shortage;
     delete (fallbackPayload as any).shortage_amount;
     const retryRes = await supabase.from('station_audits').upsert(fallbackPayload, { onConflict: 'id' });
