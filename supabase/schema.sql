@@ -97,6 +97,7 @@ CREATE TABLE public.station_audits (
     -- Financial reconciliation fields
     noor_khoy_amount NUMERIC(12, 2) NOT NULL DEFAULT 0.00,
     atm_amount NUMERIC(12, 2) NOT NULL DEFAULT 0.00,
+    atm_pos_attachments JSONB DEFAULT '[]'::jsonb,
     cash_amount NUMERIC(12, 2) NOT NULL DEFAULT 0.00,
     cash_received_amount NUMERIC(12, 2) NOT NULL DEFAULT 0.00,
     
