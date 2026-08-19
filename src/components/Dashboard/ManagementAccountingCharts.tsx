@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import type { StationAudit } from '../../types/audit';
 import { PieChart, TrendingUp, Calendar } from 'lucide-react';
 
@@ -13,10 +13,44 @@ interface Props {
 export const AuditStatusDonutChart: React.FC<Props> = ({ audits }) => {
   const [hoveredIdx, setHoveredIdx] = useState<number | null>(null);
 
-  const total = audits.length;
-  const completed = audits.filter((a) => a.current_status === 'approved').length;
-  const returned = audits.filter((a) => a.current_status === 'returned_for_correction').length;
-  const rejected = audits.filter((a) => a.current_status === 'rejected').length;
+  // Month & Year filter state (defaults to current month and year)
+  const [selectedMonth, setSelectedMonth] = useState<number>(() => new Date().getMonth() + 1); // 1-12
+  const [selectedYear, setSelectedYear] = useState<number>(() => new Date().getFullYear());
+
+  const monthNames = [
+    'January', 'February', 'March', 'April', 'May', 'June',
+    'July', 'August', 'September', 'October', 'November', 'December'
+  ];
+
+  // Available Years dropdown choices
+  const years = useMemo(() => {
+    const currentYr = new Date().getFullYear();
+    const yrSet = new Set<number>([2024, 2025, 2026, 2027, currentYr]);
+    audits.forEach((a) => {
+      if (a.audit_date) {
+        const yr = parseInt(a.audit_date.split('-')[0], 10);
+        if (!isNaN(yr)) yrSet.add(yr);
+      }
+    });
+    return Array.from(yrSet).sort((a, b) => b - a);
+  }, [audits]);
+
+  // Filter audits matching selected official audit_date month and year
+  const filteredAudits = useMemo(() => {
+    return audits.filter((a) => {
+      if (!a.audit_date) return false;
+      const parts = a.audit_date.split('-'); // Format: YYYY-MM-DD
+      if (parts.length < 2) return false;
+      const yr = parseInt(parts[0], 10);
+      const mo = parseInt(parts[1], 10);
+      return yr === selectedYear && mo === selectedMonth;
+    });
+  }, [audits, selectedMonth, selectedYear]);
+
+  const total = filteredAudits.length;
+  const completed = filteredAudits.filter((a) => a.current_status === 'approved').length;
+  const returned = filteredAudits.filter((a) => a.current_status === 'returned_for_correction').length;
+  const rejected = filteredAudits.filter((a) => a.current_status === 'rejected').length;
   const pending = total - (completed + returned + rejected);
 
   const statusItems = [
@@ -51,7 +85,7 @@ export const AuditStatusDonutChart: React.FC<Props> = ({ audits }) => {
   return (
     <div className="bg-white/80 backdrop-blur-xl border border-white/90 rounded-2xl p-5 sm:p-6 shadow-md ring-1 ring-slate-900/5 flex flex-col justify-between">
       {/* Header */}
-      <div className="flex items-center justify-between pb-4 border-b border-slate-100 mb-4">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-slate-100 mb-4">
         <div className="flex items-center gap-2.5">
           <div className="p-2 bg-sky-500/10 text-sky-600 rounded-xl border border-sky-500/20">
             <PieChart className="w-5 h-5" />
@@ -61,9 +95,45 @@ export const AuditStatusDonutChart: React.FC<Props> = ({ audits }) => {
             <p className="text-[11px] text-slate-500 font-medium">Distribution by workflow status</p>
           </div>
         </div>
-        <span className="px-2.5 py-1 bg-slate-100 text-slate-700 text-xs font-black rounded-lg font-mono">
-          Total: {total}
-        </span>
+
+        {/* Separate Month and Year Selectors */}
+        <div className="flex flex-wrap items-center gap-2">
+          {/* Month Dropdown */}
+          <div className="flex items-center gap-1">
+            <span className="text-[11px] font-extrabold text-slate-600">Month:</span>
+            <select
+              value={selectedMonth}
+              onChange={(e) => setSelectedMonth(Number(e.target.value))}
+              className="bg-slate-50 border border-slate-200 text-slate-900 text-xs font-bold rounded-lg px-2 py-1 focus:outline-none focus:ring-1 focus:ring-sky-500 cursor-pointer shadow-2xs"
+            >
+              {monthNames.map((name, idx) => (
+                <option key={idx + 1} value={idx + 1}>
+                  {name}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          {/* Year Dropdown */}
+          <div className="flex items-center gap-1">
+            <span className="text-[11px] font-extrabold text-slate-600">Year:</span>
+            <select
+              value={selectedYear}
+              onChange={(e) => setSelectedYear(Number(e.target.value))}
+              className="bg-slate-50 border border-slate-200 text-slate-900 text-xs font-bold rounded-lg px-2 py-1 focus:outline-none focus:ring-1 focus:ring-sky-500 font-mono cursor-pointer shadow-2xs"
+            >
+              {years.map((yr) => (
+                <option key={yr} value={yr}>
+                  {yr}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <span className="px-2.5 py-1 bg-slate-100 text-slate-700 text-xs font-black rounded-lg font-mono ms-1">
+            Total: {total}
+          </span>
+        </div>
       </div>
 
       {/* Donut & Legend Container */}
