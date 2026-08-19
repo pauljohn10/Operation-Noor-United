@@ -115,7 +115,7 @@ export const DashboardView: React.FC<Props> = ({
             {t('dashboard.title')}
           </h2>
           <p className="text-xs text-sky-200/90 font-medium max-w-xl">
-            {t('dashboard.loggedInAs', { role: currentUser.role, position: currentUser.position })}
+            {t('dashboard.loggedInAs', { role: currentUser.role })}
           </p>
         </div>
 
