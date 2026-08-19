@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import type { StationAudit, PumpReadingItem, FuelType, Station } from '../../types/audit';
 import { calculateFuelSectionTotals, formatCurrency, formatNumber, formatMeterReading, DEFAULT_FUEL_PRICES } from '../../lib/calculations';
+import { compressImage } from '../../lib/imageCompression';
 import { useLanguage } from '../../context/LanguageContext';
 import { GlassCard } from '../Common/GlassCard';
 import {
@@ -17,6 +18,12 @@ import {
   ShieldCheck,
   ShieldAlert,
   FileText,
+  Camera,
+  Trash2,
+  Eye,
+  X,
+  Loader2,
+  PlusCircle,
 } from 'lucide-react';
 
 interface Props {
@@ -60,6 +67,40 @@ export const ModernAuditForm: React.FC<Props> = ({
     PETROL_95: true,
     DIESEL: true,
   });
+
+  const [isCompressing, setIsCompressing] = useState(false);
+  const [selectedImagePreview, setSelectedImagePreview] = useState<string | null>(null);
+
+  const handlePosPhotoSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files || files.length === 0) return;
+
+    const currentAttachments = audit.atm_pos_attachments || [];
+    if (currentAttachments.length >= 3) {
+      alert('Maximum of 3 photo attachments allowed for ATM POS Terminal Sales.');
+      return;
+    }
+
+    const file = files[0];
+    try {
+      setIsCompressing(true);
+      const compressedDataUrl = await compressImage(file, 1200, 0.75);
+      const updated = [...currentAttachments, compressedDataUrl];
+      onMetaChange('atm_pos_attachments', updated);
+    } catch (err) {
+      console.error('Failed to compress POS photo attachment:', err);
+      alert('Could not process photo attachment. Please try again.');
+    } finally {
+      setIsCompressing(false);
+      e.target.value = '';
+    }
+  };
+
+  const handleRemovePosPhoto = (indexToRemove: number) => {
+    const currentAttachments = audit.atm_pos_attachments || [];
+    const updated = currentAttachments.filter((_, idx) => idx !== indexToRemove);
+    onMetaChange('atm_pos_attachments', updated);
+  };
 
   const toggleSection = (sectionKey: string) => {
     setCollapsedSections((prev) => ({ ...prev, [sectionKey]: !prev[sectionKey] }));
@@ -292,10 +333,15 @@ export const ModernAuditForm: React.FC<Props> = ({
           </div>
 
           {/* ATM POS */}
-          <div>
-            <label className="block text-[11px] font-extrabold text-slate-800 mb-0.5">
-              {t('auditForm.atmPos')}
-            </label>
+          <div className="space-y-2">
+            <div className="flex items-center justify-between">
+              <label className="block text-[11px] font-extrabold text-slate-800">
+                {t('auditForm.atmPos')}
+              </label>
+              <span className="text-[10px] font-bold text-sky-800 bg-sky-50 px-2 py-0.5 rounded-full border border-sky-200">
+                {(audit.atm_pos_attachments || []).length}/3 Photos
+              </span>
+            </div>
             {isReadOnly ? (
               <div className="w-full bg-slate-100 border border-slate-300 rounded-xl px-3 py-1.5 text-xs font-black text-right text-slate-900 font-mono min-h-[38px] flex items-center justify-end">
                 {atmVal > 0 ? formatCurrency(atmVal) : '0.00'}
@@ -313,6 +359,80 @@ export const ModernAuditForm: React.FC<Props> = ({
                 className="w-full min-h-[38px] text-sm font-black text-right bg-white border border-slate-300 rounded-xl px-3 py-1.5 text-slate-900 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-sky-500 font-mono shadow-2xs"
               />
             )}
+
+            {/* ATM POS PHOTO ATTACHMENTS (UP TO 3) */}
+            <div className="pt-2 border-t border-slate-100/80">
+              <div className="flex items-center justify-between mb-1.5">
+                <span className="text-[10px] font-black text-slate-700 uppercase tracking-wider flex items-center gap-1">
+                  <Camera className="w-3.5 h-3.5 text-sky-600" />
+                  Receipt Photos (Max 3)
+                </span>
+                {!isReadOnly && (audit.atm_pos_attachments || []).length < 3 && (
+                  <label className="cursor-pointer inline-flex items-center gap-1 px-2.5 py-1 bg-sky-50 hover:bg-sky-100 text-sky-700 border border-sky-300 rounded-lg text-[10px] font-black transition-all shadow-2xs">
+                    {isCompressing ? (
+                      <>
+                        <Loader2 className="w-3 h-3 animate-spin text-sky-600" />
+                        <span>Optimizing...</span>
+                      </>
+                    ) : (
+                      <>
+                        <PlusCircle className="w-3 h-3 text-sky-600" />
+                        <span>Add Photo</span>
+                      </>
+                    )}
+                    <input
+                      type="file"
+                      accept="image/*"
+                      capture="environment"
+                      disabled={isCompressing}
+                      onChange={handlePosPhotoSelect}
+                      className="hidden"
+                    />
+                  </label>
+                )}
+              </div>
+
+              {/* Thumbnails Display */}
+              <div className="flex flex-wrap items-center gap-2">
+                {(audit.atm_pos_attachments || []).map((imgUrl, idx) => (
+                  <div
+                    key={idx}
+                    className="relative group w-14 h-14 rounded-xl border border-slate-300 overflow-hidden bg-slate-100 shadow-2xs flex-shrink-0"
+                  >
+                    <img
+                      src={imgUrl}
+                      alt={`POS Receipt ${idx + 1}`}
+                      className="w-full h-full object-cover cursor-pointer hover:scale-105 transition-transform"
+                      onClick={() => setSelectedImagePreview(imgUrl)}
+                    />
+                    <div className="absolute inset-0 bg-slate-900/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-1">
+                      <button
+                        type="button"
+                        onClick={() => setSelectedImagePreview(imgUrl)}
+                        className="p-1 bg-white/90 text-slate-900 rounded-full hover:bg-white transition-all shadow-2xs"
+                        title="Preview Photo"
+                      >
+                        <Eye className="w-3.5 h-3.5" />
+                      </button>
+                      {!isReadOnly && (
+                        <button
+                          type="button"
+                          onClick={() => handleRemovePosPhoto(idx)}
+                          className="p-1 bg-rose-600 text-white rounded-full hover:bg-rose-700 transition-all shadow-2xs"
+                          title="Remove Photo"
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                ))}
+
+                {(audit.atm_pos_attachments || []).length === 0 && (
+                  <span className="text-[10px] text-slate-400 font-bold italic">No POS receipt photos attached</span>
+                )}
+              </div>
+            </div>
           </div>
 
           {/* Actual Cash Received */}
@@ -1041,6 +1161,41 @@ export const ModernAuditForm: React.FC<Props> = ({
           })()}
         </div>
       </div>
+
+      {/* FULL-SCREEN LIGHTBOX MODAL PREVIEW FOR POS ATTACHMENTS */}
+      {selectedImagePreview && (
+        <div
+          className="fixed inset-0 z-50 bg-slate-950/85 backdrop-blur-md flex items-center justify-center p-4"
+          onClick={() => setSelectedImagePreview(null)}
+        >
+          <div
+            className="relative max-w-4xl max-h-[90vh] bg-white rounded-2xl overflow-hidden shadow-2xl p-2 border border-slate-200"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-between p-3.5 border-b border-slate-200 bg-slate-50">
+              <span className="text-xs font-black text-slate-800 uppercase tracking-wider flex items-center gap-2">
+                <Camera className="w-4 h-4 text-sky-600" />
+                ATM POS Terminal Sales Receipt Attachment
+              </span>
+              <button
+                type="button"
+                onClick={() => setSelectedImagePreview(null)}
+                className="p-1.5 text-slate-500 hover:text-slate-900 bg-slate-200/80 hover:bg-slate-300 rounded-xl transition-all"
+                title="Close Lightbox"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            <div className="p-3 flex items-center justify-center bg-slate-950 rounded-b-xl overflow-auto max-h-[78vh]">
+              <img
+                src={selectedImagePreview}
+                alt="ATM POS Attachment Full Preview"
+                className="max-w-full max-h-[72vh] object-contain rounded-lg shadow-lg"
+              />
+            </div>
+          </div>
+        </div>
+      )}
 
     </div>
   );

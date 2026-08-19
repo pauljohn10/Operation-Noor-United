@@ -145,6 +145,7 @@ export interface StationAudit {
   
   noor_khoy_amount?: number | null;
   atm_amount?: number | null;
+  atm_pos_attachments?: string[];
   cash_amount?: number | null;
   cash_received_amount?: number | null;
   
