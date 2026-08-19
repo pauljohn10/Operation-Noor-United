@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect } from 'react';
 import type { StationAudit, Station } from '../../types/audit';
 import { useLanguage } from '../../context/LanguageContext';
 import {
@@ -39,25 +39,8 @@ export const MonthlyDashboardAuditMonitoring: React.FC<Props> = ({ audits, stati
   const [activeTab, setActiveTab] = useState<'completed' | 'not_completed'>('completed');
   const [searchTerm, setSearchTerm] = useState('');
 
-  // Available Years dropdown dynamically populated from audits & current year
-  const availableYears = useMemo(() => {
-    const yrSet = new Set<number>([currentYear]);
-    audits.forEach((a) => {
-      if (a.audit_date) {
-        const yr = parseInt(a.audit_date.split('-')[0], 10);
-        if (!isNaN(yr) && yr > 2000 && yr < 2100) {
-          yrSet.add(yr);
-        }
-      }
-    });
-    const minYr = Math.min(...Array.from(yrSet));
-    const maxYr = Math.max(...Array.from(yrSet));
-    const fullRange: number[] = [];
-    for (let y = maxYr; y >= minYr; y--) {
-      fullRange.push(y);
-    }
-    return fullRange;
-  }, [audits, currentYear]);
+  // Fixed Year range selector 2026–2031
+  const availableYears = [2026, 2027, 2028, 2029, 2030, 2031];
 
   // Derived YYYY-MM key based on selectedMonth & selectedYear
   const selectedMonthKey = `${selectedYear}-${String(selectedMonth).padStart(2, '0')}`;
