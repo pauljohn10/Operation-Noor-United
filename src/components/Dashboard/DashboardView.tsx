@@ -50,6 +50,10 @@ export const DashboardView: React.FC<Props> = ({
     (a) => a.current_status !== 'approved' && a.current_status !== 'rejected'
   ).length;
 
+  // Role check: Top 4 KPI summary cards (Total, Pending, Completed, Rejected) are visible ONLY to Operation Supervisor & Super Admin
+  const canViewKpiCards =
+    currentUser.role === 'Operation Supervisor' || currentUser.role === 'Super Admin';
+
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
 
@@ -83,53 +87,55 @@ export const DashboardView: React.FC<Props> = ({
         )}
       </div>
 
-      {/* 2. HIGH-CONTRAST KPI CARDS GRID */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+      {/* 2. HIGH-CONTRAST KPI CARDS GRID (VISIBLE ONLY TO OPERATION SUPERVISOR & SUPER ADMIN) */}
+      {canViewKpiCards && (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
 
-        {/* Total Audits */}
-        <GlassCard variant="blue">
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-black text-sky-950 tracking-wider uppercase">{t('dashboard.totalAudits')}</span>
-            <div className="p-3 bg-sky-100 text-sky-700 rounded-2xl border border-sky-200 shadow-2xs">
-              <FileText className="w-5 h-5" />
+          {/* Total Audits */}
+          <GlassCard variant="blue">
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-black text-sky-950 tracking-wider uppercase">{t('dashboard.totalAudits')}</span>
+              <div className="p-3 bg-sky-100 text-sky-700 rounded-2xl border border-sky-200 shadow-2xs">
+                <FileText className="w-5 h-5" />
+              </div>
             </div>
-          </div>
-          <p className="text-3xl sm:text-4xl font-black text-slate-900 mt-3 tracking-tight font-mono">{totalAuditsCount}</p>
-        </GlassCard>
+            <p className="text-3xl sm:text-4xl font-black text-slate-900 mt-3 tracking-tight font-mono">{totalAuditsCount}</p>
+          </GlassCard>
 
-        {/* Pending Audits */}
-        <GlassCard variant="amber">
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-black text-amber-950 tracking-wider uppercase">{t('dashboard.pendingAudits')}</span>
-            <div className="p-3 bg-amber-100 text-amber-700 rounded-2xl border border-amber-200 shadow-2xs">
-              <Clock className="w-5 h-5" />
+          {/* Pending Audits */}
+          <GlassCard variant="amber">
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-black text-amber-950 tracking-wider uppercase">{t('dashboard.pendingAudits')}</span>
+              <div className="p-3 bg-amber-100 text-amber-700 rounded-2xl border border-amber-200 shadow-2xs">
+                <Clock className="w-5 h-5" />
+              </div>
             </div>
-          </div>
-          <p className="text-3xl sm:text-4xl font-black text-amber-900 mt-3 tracking-tight font-mono">{pendingApprovalsCount}</p>
-        </GlassCard>
+            <p className="text-3xl sm:text-4xl font-black text-amber-900 mt-3 tracking-tight font-mono">{pendingApprovalsCount}</p>
+          </GlassCard>
 
-        {/* Completed Audits */}
-        <GlassCard variant="emerald">
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-black text-emerald-950 tracking-wider uppercase">{t('dashboard.completedAudits')}</span>
-            <div className="p-3 bg-emerald-100 text-emerald-700 rounded-2xl border border-emerald-200 shadow-2xs">
-              <CheckCircle2 className="w-5 h-5" />
+          {/* Completed Audits */}
+          <GlassCard variant="emerald">
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-black text-emerald-950 tracking-wider uppercase">{t('dashboard.completedAudits')}</span>
+              <div className="p-3 bg-emerald-100 text-emerald-700 rounded-2xl border border-emerald-200 shadow-2xs">
+                <CheckCircle2 className="w-5 h-5" />
+              </div>
             </div>
-          </div>
-          <p className="text-3xl sm:text-4xl font-black text-emerald-900 mt-3 tracking-tight font-mono">{completedAuditsCount}</p>
-        </GlassCard>
+            <p className="text-3xl sm:text-4xl font-black text-emerald-900 mt-3 tracking-tight font-mono">{completedAuditsCount}</p>
+          </GlassCard>
 
-        {/* Rejected Audits */}
-        <GlassCard variant="rose">
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-black text-rose-950 tracking-wider uppercase">{t('dashboard.rejectedAudits')}</span>
-            <div className="p-3 bg-rose-100 text-rose-700 rounded-2xl border border-rose-200 shadow-2xs">
-              <XCircle className="w-5 h-5" />
+          {/* Rejected Audits */}
+          <GlassCard variant="rose">
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-black text-rose-950 tracking-wider uppercase">{t('dashboard.rejectedAudits')}</span>
+              <div className="p-3 bg-rose-100 text-rose-700 rounded-2xl border border-rose-200 shadow-2xs">
+                <XCircle className="w-5 h-5" />
+              </div>
             </div>
-          </div>
-          <p className="text-3xl sm:text-4xl font-black text-rose-900 mt-3 tracking-tight font-mono">{rejectedAuditsCount}</p>
-        </GlassCard>
-      </div>
+            <p className="text-3xl sm:text-4xl font-black text-rose-900 mt-3 tracking-tight font-mono">{rejectedAuditsCount}</p>
+          </GlassCard>
+        </div>
+      )}
 
       {/* 3. MANAGEMENT & ACCOUNTING GRAPHS & MONTHLY AUDIT MONITORING */}
       {isManagementOrAccounting && (
