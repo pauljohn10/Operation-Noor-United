@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useMemo } from 'react';
 import type { StationAudit, Station } from '../../types/audit';
 import { useAuth } from '../../context/AuthContext';
 import { useLanguage } from '../../context/LanguageContext';
@@ -17,6 +17,7 @@ import {
   PlusCircle,
   Sparkles,
   XCircle,
+  Calendar,
 } from 'lucide-react';
 
 interface Props {
@@ -33,6 +34,38 @@ export const DashboardView: React.FC<Props> = ({
   const { currentUser, canCreateAudit } = useAuth();
   const { t } = useLanguage();
 
+  // State for Operation Supervisor Month and Year filter (defaults to current month/year)
+  const [selectedMonth, setSelectedMonth] = useState<number>(() => new Date().getMonth() + 1); // 1 - 12
+  const [selectedYear, setSelectedYear] = useState<number>(() => new Date().getFullYear());
+
+  const months = [
+    { value: 1, label: 'January' },
+    { value: 2, label: 'February' },
+    { value: 3, label: 'March' },
+    { value: 4, label: 'April' },
+    { value: 5, label: 'May' },
+    { value: 6, label: 'June' },
+    { value: 7, label: 'July' },
+    { value: 8, label: 'August' },
+    { value: 9, label: 'September' },
+    { value: 10, label: 'October' },
+    { value: 11, label: 'November' },
+    { value: 12, label: 'December' },
+  ];
+
+  // Available Years dropdown choices
+  const years = useMemo(() => {
+    const currentYr = new Date().getFullYear();
+    const yrSet = new Set<number>([2024, 2025, 2026, 2027, currentYr]);
+    audits.forEach((a) => {
+      if (a.audit_date) {
+        const yr = parseInt(a.audit_date.split('-')[0], 10);
+        if (!isNaN(yr)) yrSet.add(yr);
+      }
+    });
+    return Array.from(yrSet).sort((a, b) => b - a);
+  }, [audits]);
+
   if (!currentUser) return null;
 
   // Strict role check: ONLY Accountant, Accountant Manager / Account Manager, Executive Management & Super Admin see these graphs
@@ -42,17 +75,29 @@ export const DashboardView: React.FC<Props> = ({
     currentUser.role === 'Management' ||
     currentUser.role === 'Super Admin';
 
-  // KPI Counts
-  const totalAuditsCount = audits.length;
-  const completedAuditsCount = audits.filter((a) => a.current_status === 'approved').length;
-  const rejectedAuditsCount = audits.filter((a) => a.current_status === 'rejected').length;
-  const pendingApprovalsCount = audits.filter(
-    (a) => a.current_status !== 'approved' && a.current_status !== 'rejected'
-  ).length;
-
   // Role check: Top 4 KPI summary cards (Total, Pending, Completed, Rejected) are visible ONLY to Operation Supervisor & Super Admin
   const canViewKpiCards =
     currentUser.role === 'Operation Supervisor' || currentUser.role === 'Super Admin';
+
+  // Filter audits STRICTLY by official audit_date matching selected Month & Year
+  const filteredAudits = useMemo(() => {
+    return audits.filter((a) => {
+      if (!a.audit_date) return false;
+      const parts = a.audit_date.split('-'); // Format: YYYY-MM-DD
+      if (parts.length < 2) return false;
+      const auditYr = parseInt(parts[0], 10);
+      const auditMo = parseInt(parts[1], 10);
+      return auditYr === selectedYear && auditMo === selectedMonth;
+    });
+  }, [audits, selectedMonth, selectedYear]);
+
+  // Recalculated KPI Counts for Selected Official Audit Date Month/Year
+  const totalAuditsCount = filteredAudits.length;
+  const completedAuditsCount = filteredAudits.filter((a) => a.current_status === 'approved').length;
+  const rejectedAuditsCount = filteredAudits.filter((a) => a.current_status === 'rejected').length;
+  const pendingApprovalsCount = filteredAudits.filter(
+    (a) => a.current_status !== 'approved' && a.current_status !== 'rejected'
+  ).length;
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
@@ -87,53 +132,106 @@ export const DashboardView: React.FC<Props> = ({
         )}
       </div>
 
-      {/* 2. HIGH-CONTRAST KPI CARDS GRID (VISIBLE ONLY TO OPERATION SUPERVISOR & SUPER ADMIN) */}
+      {/* 2. OPERATION SUPERVISOR HIGH-CONTRAST KPI CARDS & MONTH/YEAR FILTER */}
       {canViewKpiCards && (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
-
-          {/* Total Audits */}
-          <GlassCard variant="blue">
-            <div className="flex items-center justify-between">
-              <span className="text-xs font-black text-sky-950 tracking-wider uppercase">{t('dashboard.totalAudits')}</span>
-              <div className="p-3 bg-sky-100 text-sky-700 rounded-2xl border border-sky-200 shadow-2xs">
-                <FileText className="w-5 h-5" />
+        <div className="space-y-4">
+          {/* Month & Year Filter Bar */}
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 bg-white/90 backdrop-blur-xl p-3.5 rounded-2xl border border-slate-200/80 shadow-xs">
+            <div className="flex items-center gap-2.5">
+              <div className="p-2 bg-sky-50 text-sky-700 rounded-xl border border-sky-200">
+                <Calendar className="w-4 h-4" />
+              </div>
+              <div>
+                <span className="text-xs font-black text-slate-900 uppercase tracking-wider block">
+                  Audit Date Filter
+                </span>
+                <span className="text-[11px] text-slate-500 font-semibold">
+                  Showing metrics for: <strong className="text-sky-800 font-black">{months.find(m => m.value === selectedMonth)?.label} {selectedYear}</strong>
+                </span>
               </div>
             </div>
-            <p className="text-3xl sm:text-4xl font-black text-slate-900 mt-3 tracking-tight font-mono">{totalAuditsCount}</p>
-          </GlassCard>
 
-          {/* Pending Audits */}
-          <GlassCard variant="amber">
-            <div className="flex items-center justify-between">
-              <span className="text-xs font-black text-amber-950 tracking-wider uppercase">{t('dashboard.pendingAudits')}</span>
-              <div className="p-3 bg-amber-100 text-amber-700 rounded-2xl border border-amber-200 shadow-2xs">
-                <Clock className="w-5 h-5" />
+            <div className="flex items-center gap-2.5">
+              {/* Month Selector */}
+              <div className="flex items-center gap-1.5">
+                <label className="text-xs font-bold text-slate-700">Month:</label>
+                <select
+                  value={selectedMonth}
+                  onChange={(e) => setSelectedMonth(Number(e.target.value))}
+                  className="bg-slate-50 border border-slate-300 text-slate-900 font-extrabold text-xs rounded-xl px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-sky-500 shadow-2xs cursor-pointer"
+                >
+                  {months.map((m) => (
+                    <option key={m.value} value={m.value}>
+                      {m.label}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Year Selector */}
+              <div className="flex items-center gap-1.5">
+                <label className="text-xs font-bold text-slate-700">Year:</label>
+                <select
+                  value={selectedYear}
+                  onChange={(e) => setSelectedYear(Number(e.target.value))}
+                  className="bg-slate-50 border border-slate-300 text-slate-900 font-extrabold text-xs rounded-xl px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-sky-500 font-mono shadow-2xs cursor-pointer"
+                >
+                  {years.map((y) => (
+                    <option key={y} value={y}>
+                      {y}
+                    </option>
+                  ))}
+                </select>
               </div>
             </div>
-            <p className="text-3xl sm:text-4xl font-black text-amber-900 mt-3 tracking-tight font-mono">{pendingApprovalsCount}</p>
-          </GlassCard>
+          </div>
 
-          {/* Completed Audits */}
-          <GlassCard variant="emerald">
-            <div className="flex items-center justify-between">
-              <span className="text-xs font-black text-emerald-950 tracking-wider uppercase">{t('dashboard.completedAudits')}</span>
-              <div className="p-3 bg-emerald-100 text-emerald-700 rounded-2xl border border-emerald-200 shadow-2xs">
-                <CheckCircle2 className="w-5 h-5" />
+          {/* KPI Summary Cards Grid */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+            {/* Total Audits */}
+            <GlassCard variant="blue">
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-black text-sky-950 tracking-wider uppercase">{t('dashboard.totalAudits')}</span>
+                <div className="p-3 bg-sky-100 text-sky-700 rounded-2xl border border-sky-200 shadow-2xs">
+                  <FileText className="w-5 h-5" />
+                </div>
               </div>
-            </div>
-            <p className="text-3xl sm:text-4xl font-black text-emerald-900 mt-3 tracking-tight font-mono">{completedAuditsCount}</p>
-          </GlassCard>
+              <p className="text-3xl sm:text-4xl font-black text-slate-900 mt-3 tracking-tight font-mono">{totalAuditsCount}</p>
+            </GlassCard>
 
-          {/* Rejected Audits */}
-          <GlassCard variant="rose">
-            <div className="flex items-center justify-between">
-              <span className="text-xs font-black text-rose-950 tracking-wider uppercase">{t('dashboard.rejectedAudits')}</span>
-              <div className="p-3 bg-rose-100 text-rose-700 rounded-2xl border border-rose-200 shadow-2xs">
-                <XCircle className="w-5 h-5" />
+            {/* Pending Audits */}
+            <GlassCard variant="amber">
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-black text-amber-950 tracking-wider uppercase">{t('dashboard.pendingAudits')}</span>
+                <div className="p-3 bg-amber-100 text-amber-700 rounded-2xl border border-amber-200 shadow-2xs">
+                  <Clock className="w-5 h-5" />
+                </div>
               </div>
-            </div>
-            <p className="text-3xl sm:text-4xl font-black text-rose-900 mt-3 tracking-tight font-mono">{rejectedAuditsCount}</p>
-          </GlassCard>
+              <p className="text-3xl sm:text-4xl font-black text-amber-900 mt-3 tracking-tight font-mono">{pendingApprovalsCount}</p>
+            </GlassCard>
+
+            {/* Completed Audits */}
+            <GlassCard variant="emerald">
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-black text-emerald-950 tracking-wider uppercase">{t('dashboard.completedAudits')}</span>
+                <div className="p-3 bg-emerald-100 text-emerald-700 rounded-2xl border border-emerald-200 shadow-2xs">
+                  <CheckCircle2 className="w-5 h-5" />
+                </div>
+              </div>
+              <p className="text-3xl sm:text-4xl font-black text-emerald-900 mt-3 tracking-tight font-mono">{completedAuditsCount}</p>
+            </GlassCard>
+
+            {/* Rejected Audits */}
+            <GlassCard variant="rose">
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-black text-rose-950 tracking-wider uppercase">{t('dashboard.rejectedAudits')}</span>
+                <div className="p-3 bg-rose-100 text-rose-700 rounded-2xl border border-rose-200 shadow-2xs">
+                  <XCircle className="w-5 h-5" />
+                </div>
+              </div>
+              <p className="text-3xl sm:text-4xl font-black text-rose-900 mt-3 tracking-tight font-mono">{rejectedAuditsCount}</p>
+            </GlassCard>
+          </div>
         </div>
       )}
 
