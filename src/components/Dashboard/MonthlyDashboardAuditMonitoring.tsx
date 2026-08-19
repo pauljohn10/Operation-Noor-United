@@ -39,16 +39,24 @@ export const MonthlyDashboardAuditMonitoring: React.FC<Props> = ({ audits, stati
   const [activeTab, setActiveTab] = useState<'completed' | 'not_completed'>('completed');
   const [searchTerm, setSearchTerm] = useState('');
 
-  // Available Years dropdown dynamically populated from audits + default years
+  // Available Years dropdown dynamically populated from audits & current year
   const availableYears = useMemo(() => {
-    const yrSet = new Set<number>([2024, 2025, 2026, 2027, currentYear]);
+    const yrSet = new Set<number>([currentYear]);
     audits.forEach((a) => {
       if (a.audit_date) {
         const yr = parseInt(a.audit_date.split('-')[0], 10);
-        if (!isNaN(yr)) yrSet.add(yr);
+        if (!isNaN(yr) && yr > 2000 && yr < 2100) {
+          yrSet.add(yr);
+        }
       }
     });
-    return Array.from(yrSet).sort((a, b) => b - a);
+    const minYr = Math.min(...Array.from(yrSet));
+    const maxYr = Math.max(...Array.from(yrSet));
+    const fullRange: number[] = [];
+    for (let y = maxYr; y >= minYr; y--) {
+      fullRange.push(y);
+    }
+    return fullRange;
   }, [audits, currentYear]);
 
   // Derived YYYY-MM key based on selectedMonth & selectedYear

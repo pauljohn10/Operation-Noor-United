@@ -22,17 +22,25 @@ export const AuditStatusDonutChart: React.FC<Props> = ({ audits }) => {
     'July', 'August', 'September', 'October', 'November', 'December'
   ];
 
-  // Available Years dropdown choices
+  // Available Years dropdown choices (dynamically generated from audit records & current year)
   const years = useMemo(() => {
     const currentYr = new Date().getFullYear();
-    const yrSet = new Set<number>([2024, 2025, 2026, 2027, currentYr]);
+    const yrSet = new Set<number>([currentYr]);
     audits.forEach((a) => {
       if (a.audit_date) {
         const yr = parseInt(a.audit_date.split('-')[0], 10);
-        if (!isNaN(yr)) yrSet.add(yr);
+        if (!isNaN(yr) && yr > 2000 && yr < 2100) {
+          yrSet.add(yr);
+        }
       }
     });
-    return Array.from(yrSet).sort((a, b) => b - a);
+    const minYr = Math.min(...Array.from(yrSet));
+    const maxYr = Math.max(...Array.from(yrSet));
+    const fullRange: number[] = [];
+    for (let y = maxYr; y >= minYr; y--) {
+      fullRange.push(y);
+    }
+    return fullRange;
   }, [audits]);
 
   // Filter audits matching selected official audit_date month and year
