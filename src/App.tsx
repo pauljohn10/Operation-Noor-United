@@ -167,9 +167,12 @@ function AppContent() {
       if (!wasAuthenticated.current) {
         wasAuthenticated.current = true;
 
-        // Every new login session starts fresh on the Dashboard
-        history.replaceState({ tab: 'dashboard' }, '', '#dashboard');
-        setActiveTab('dashboard');
+        // Operation Supervisor & Super Admin start on Dashboard; others start on Audits List
+        const defaultTab = (currentUser?.role === 'Operation Supervisor' || currentUser?.role === 'Super Admin')
+          ? 'dashboard'
+          : 'audits';
+        history.replaceState({ tab: defaultTab }, '', `#${defaultTab}`);
+        setActiveTab(defaultTab);
       }
 
       // Background data loading - completely decoupled from navigation and routing

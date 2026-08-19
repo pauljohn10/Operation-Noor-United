@@ -193,20 +193,22 @@ export const Navbar: React.FC<Props> = ({
               {/* STATION AUDIT SYSTEM TABS (HIDDEN FOR STATION OPENING ACCOUNTS) */}
               {!isStationOpeningUser && (
                 <>
-                  {/* 1. DASHBOARD: SOFT INDIGO / CYAN MICRO-BADGE */}
-                  <button
-                    onClick={() => setActiveTab('dashboard')}
-                    className={`group flex items-center gap-2 px-3 py-1.5 rounded-xl text-xs font-extrabold transition-all ${
-                      activeTab === 'dashboard'
-                        ? 'bg-indigo-500/30 text-white border border-indigo-400/40 shadow-sm ring-1 ring-cyan-400/30'
-                        : 'text-sky-100 hover:text-white hover:bg-white/15'
-                    }`}
-                  >
-                    <div className="p-1 rounded-lg bg-indigo-500/20 text-cyan-300 border border-indigo-400/30 group-hover:scale-110 transition-transform">
-                      <LayoutDashboard className="w-3.5 h-3.5" />
-                    </div>
-                    <span>{t('nav.dashboard')}</span>
-                  </button>
+                  {/* 1. DASHBOARD: RESTRICTED TO OPERATION SUPERVISOR & SUPER ADMIN */}
+                  {(currentUser.role === 'Operation Supervisor' || currentUser.role === 'Super Admin') && (
+                    <button
+                      onClick={() => setActiveTab('dashboard')}
+                      className={`group flex items-center gap-2 px-3 py-1.5 rounded-xl text-xs font-extrabold transition-all ${
+                        activeTab === 'dashboard'
+                          ? 'bg-indigo-500/30 text-white border border-indigo-400/40 shadow-sm ring-1 ring-cyan-400/30'
+                          : 'text-sky-100 hover:text-white hover:bg-white/15'
+                      }`}
+                    >
+                      <div className="p-1 rounded-lg bg-indigo-500/20 text-cyan-300 border border-indigo-400/30 group-hover:scale-110 transition-transform">
+                        <LayoutDashboard className="w-3.5 h-3.5" />
+                      </div>
+                      <span>{t('nav.dashboard')}</span>
+                    </button>
+                  )}
 
                   {/* 2. AUDITS: SOFT TEAL / EMERALD MICRO-BADGE & 3D ISOMETRIC ICON */}
                   <button
