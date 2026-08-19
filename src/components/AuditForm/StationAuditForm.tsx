@@ -163,6 +163,9 @@ export const StationAuditForm: React.FC<Props> = ({
   const [atm, setAtm] = useState<number | null>(
     initialAudit?.atm_amount !== undefined ? initialAudit.atm_amount : null
   );
+  const [atmPosAttachments, setAtmPosAttachments] = useState<string[]>(
+    initialAudit?.atm_pos_attachments || []
+  );
   const [cashReceived, setCashReceived] = useState<number | null>(
     initialAudit?.cash_received_amount !== undefined ? initialAudit.cash_received_amount : null
   );
@@ -221,6 +224,9 @@ export const StationAuditForm: React.FC<Props> = ({
       }
       if (initialAudit.atm_amount !== undefined) {
         setAtm(initialAudit.atm_amount);
+      }
+      if (initialAudit.atm_pos_attachments) {
+        setAtmPosAttachments(initialAudit.atm_pos_attachments);
       }
       if (initialAudit.cash_received_amount !== undefined) {
         setCashReceived(initialAudit.cash_received_amount);
@@ -386,6 +392,7 @@ export const StationAuditForm: React.FC<Props> = ({
     if (field === 'station_id') setSelectedStationId(value);
     if (field === 'noor_khoy_amount') setNoorKhoy(value);
     if (field === 'atm_amount') setAtm(value);
+    if (field === 'atm_pos_attachments') setAtmPosAttachments(value);
     if (field === 'cash_received_amount') setCashReceived(value);
     if (field === 'notes') setNotes(value);
     if (field === 'person_responsible_for_shortage') setPersonResponsibleForShortage(value);
@@ -574,6 +581,7 @@ export const StationAuditForm: React.FC<Props> = ({
       rejection_reason: initialAudit?.rejection_reason,
       noor_khoy_amount: noorKhoy,
       atm_amount: atm,
+      atm_pos_attachments: atmPosAttachments,
       cash_amount: totals.expectedCash,
       cash_received_amount: cashReceived,
       total_sales: totals.grandTotalSales,
