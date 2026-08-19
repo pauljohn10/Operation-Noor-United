@@ -3,6 +3,7 @@ import type { StationAudit, Station } from '../../types/audit';
 import { useAuth } from '../../context/AuthContext';
 import { useLanguage } from '../../context/LanguageContext';
 import { GlassCard } from '../Common/GlassCard';
+import { MonthlyDashboardAuditMonitoring } from './MonthlyDashboardAuditMonitoring';
 import {
   AuditStatusDonutChart,
   MonthlyAuditsLineChart,
@@ -26,6 +27,7 @@ interface Props {
 
 export const DashboardView: React.FC<Props> = ({
   audits,
+  stations = [],
   onCreateNewAudit,
 }) => {
   const { currentUser, canCreateAudit } = useAuth();
@@ -129,9 +131,10 @@ export const DashboardView: React.FC<Props> = ({
         </GlassCard>
       </div>
 
-      {/* 3. MANAGEMENT & ACCOUNTING GRAPHS (ONLY for Accountant, Account Manager, Management & Super Admin) */}
+      {/* 3. MANAGEMENT & ACCOUNTING GRAPHS & MONTHLY AUDIT MONITORING */}
       {isManagementOrAccounting && (
         <div className="space-y-6 pt-2">
+          <MonthlyDashboardAuditMonitoring audits={audits} stations={stations} />
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             <AuditStatusDonutChart audits={audits} />
             <MonthlyAuditsLineChart audits={audits} />
