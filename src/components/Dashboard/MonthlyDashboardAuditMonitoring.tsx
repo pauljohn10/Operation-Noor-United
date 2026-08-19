@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import type { StationAudit, Station } from '../../types/audit';
 import { useLanguage } from '../../context/LanguageContext';
 import {
@@ -27,50 +27,50 @@ export const MonthlyDashboardAuditMonitoring: React.FC<Props> = ({ audits, stati
 
   const currentYear = new Date().getFullYear();
   const currentMonthNum = new Date().getMonth() + 1;
-  const todayKey = `${currentYear}-${String(currentMonthNum).padStart(2, '0')}`;
 
   const monthNames = [
     'January', 'February', 'March', 'April', 'May', 'June',
     'July', 'August', 'September', 'October', 'November', 'December'
   ];
 
-  // Derive available YYYY-MM month keys dynamically from audits
-  const availableMonthKeys = Array.from(
-    new Set(
-      audits
-        .map((a) => a.audit_date?.substring(0, 7))
-        .filter((val): val is string => Boolean(val && /^\d{4}-\d{2}$/.test(val)))
-    )
-  ).sort().reverse();
-
-  if (!availableMonthKeys.includes(todayKey)) {
-    availableMonthKeys.unshift(todayKey);
-  }
-
-  // State
-  const [selectedMonthKey, setSelectedMonthKey] = useState<string>(availableMonthKeys[0] || todayKey);
+  // State for separate Month (1-12) and Year selection
+  const [selectedMonth, setSelectedMonth] = useState<number>(currentMonthNum);
+  const [selectedYear, setSelectedYear] = useState<number>(currentYear);
   const [activeTab, setActiveTab] = useState<'completed' | 'not_completed'>('completed');
   const [searchTerm, setSearchTerm] = useState('');
+
+  // Available Years dropdown dynamically populated from audits + default years
+  const availableYears = useMemo(() => {
+    const yrSet = new Set<number>([2024, 2025, 2026, 2027, currentYear]);
+    audits.forEach((a) => {
+      if (a.audit_date) {
+        const yr = parseInt(a.audit_date.split('-')[0], 10);
+        if (!isNaN(yr)) yrSet.add(yr);
+      }
+    });
+    return Array.from(yrSet).sort((a, b) => b - a);
+  }, [audits, currentYear]);
+
+  // Derived YYYY-MM key based on selectedMonth & selectedYear
+  const selectedMonthKey = `${selectedYear}-${String(selectedMonth).padStart(2, '0')}`;
 
   // Pagination states (strictly 10 stations per page)
   const ITEMS_PER_PAGE = 10;
   const [completedPage, setCompletedPage] = useState(1);
   const [notCompletedPage, setNotCompletedPage] = useState(1);
 
-  // Reset pagination when month, search term, or active tab changes
+  // Reset pagination when month, year, search term, or active tab changes
   useEffect(() => {
     setCompletedPage(1);
     setNotCompletedPage(1);
-  }, [selectedMonthKey, searchTerm, activeTab]);
+  }, [selectedMonth, selectedYear, searchTerm, activeTab]);
 
-  // Format YYYY-MM to Month Year (e.g. "2026-08" -> "August 2026")
-  const formatMonthLabel = (key: string) => {
-    const [y, m] = key.split('-');
-    const mIdx = parseInt(m, 10) - 1;
-    return `${monthNames[mIdx] || 'Month'} ${y}`;
+  // Format Month & Year to display label (e.g. 8, 2026 -> "August 2026")
+  const formatMonthLabel = (m: number, y: number) => {
+    return `${monthNames[m - 1] || 'Month'} ${y}`;
   };
 
-  // Filter audits matching the selected month only
+  // Filter audits matching the selected official audit_date month and year only
   const monthAudits = audits.filter((a) => a.audit_date?.startsWith(selectedMonthKey));
 
   // Determine completion status for every active registered station in master list
@@ -207,7 +207,7 @@ export const MonthlyDashboardAuditMonitoring: React.FC<Props> = ({ audits, stati
 
   return (
     <div className="space-y-6 pt-2">
-      {/* 1. SECTION HEADER & MONTH FILTER SELECTOR */}
+      {/* 1. SECTION HEADER & SEPARATE MONTH & YEAR SELECTORS */}
       <div className="bg-white/80 backdrop-blur-xl border border-white/90 rounded-2xl p-5 sm:p-6 shadow-md ring-1 ring-slate-900/5 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h2 className="text-base font-black text-slate-900 tracking-tight flex items-center gap-2">
@@ -219,23 +219,46 @@ export const MonthlyDashboardAuditMonitoring: React.FC<Props> = ({ audits, stati
           </p>
         </div>
 
-        {/* Month Selector Filter */}
-        <div className="flex items-center gap-2.5 bg-slate-50 border border-slate-200/90 p-2 rounded-xl">
+        {/* Separate Month and Year Selectors */}
+        <div className="flex flex-wrap items-center gap-3 bg-slate-50 border border-slate-200/90 p-2 rounded-xl">
           <Calendar className="w-4 h-4 text-sky-600 ms-1" />
-          <span className="text-xs font-black text-slate-700">Month:</span>
-          <div className="relative">
-            <select
-              value={selectedMonthKey}
-              onChange={(e) => setSelectedMonthKey(e.target.value)}
-              className="appearance-none bg-white border border-sky-200 rounded-lg px-3 py-1.5 pr-8 text-xs font-black text-slate-900 shadow-2xs focus:outline-none focus:ring-2 focus:ring-sky-500/20 cursor-pointer"
-            >
-              {availableMonthKeys.map((key) => (
-                <option key={key} value={key}>
-                  {formatMonthLabel(key)}
-                </option>
-              ))}
-            </select>
-            <ChevronDown className="w-3.5 h-3.5 text-slate-500 absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+          
+          {/* Month Dropdown */}
+          <div className="flex items-center gap-1.5">
+            <span className="text-xs font-black text-slate-700">Month:</span>
+            <div className="relative">
+              <select
+                value={selectedMonth}
+                onChange={(e) => setSelectedMonth(Number(e.target.value))}
+                className="appearance-none bg-white border border-sky-200 rounded-lg px-3 py-1.5 pr-8 text-xs font-black text-slate-900 shadow-2xs focus:outline-none focus:ring-2 focus:ring-sky-500/20 cursor-pointer"
+              >
+                {monthNames.map((name, idx) => (
+                  <option key={idx + 1} value={idx + 1}>
+                    {name}
+                  </option>
+                ))}
+              </select>
+              <ChevronDown className="w-3.5 h-3.5 text-slate-500 absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+            </div>
+          </div>
+
+          {/* Year Dropdown */}
+          <div className="flex items-center gap-1.5">
+            <span className="text-xs font-black text-slate-700">Year:</span>
+            <div className="relative">
+              <select
+                value={selectedYear}
+                onChange={(e) => setSelectedYear(Number(e.target.value))}
+                className="appearance-none bg-white border border-sky-200 rounded-lg px-3 py-1.5 pr-8 text-xs font-black text-slate-900 shadow-2xs focus:outline-none focus:ring-2 focus:ring-sky-500/20 font-mono cursor-pointer"
+              >
+                {availableYears.map((yr) => (
+                  <option key={yr} value={yr}>
+                    {yr}
+                  </option>
+                ))}
+              </select>
+              <ChevronDown className="w-3.5 h-3.5 text-slate-500 absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+            </div>
           </div>
         </div>
       </div>
@@ -349,7 +372,7 @@ export const MonthlyDashboardAuditMonitoring: React.FC<Props> = ({ audits, stati
                   {paginatedCompleted.length === 0 ? (
                     <tr>
                       <td colSpan={4} className="py-8 text-center text-slate-500 italic">
-                        No completed audits found for {formatMonthLabel(selectedMonthKey)}
+                        No completed audits found for {formatMonthLabel(selectedMonth, selectedYear)}
                       </td>
                     </tr>
                   ) : (
@@ -444,7 +467,7 @@ export const MonthlyDashboardAuditMonitoring: React.FC<Props> = ({ audits, stati
                   {paginatedNotCompleted.length === 0 ? (
                     <tr>
                       <td colSpan={3} className="py-8 text-center text-slate-500 italic">
-                        All registered stations completed their audit for {formatMonthLabel(selectedMonthKey)}
+                        All registered stations completed their audit for {formatMonthLabel(selectedMonth, selectedYear)}
                       </td>
                     </tr>
                   ) : (
