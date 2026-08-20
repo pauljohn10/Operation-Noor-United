@@ -608,7 +608,7 @@ function AppContent() {
       <footer className="py-3 text-center text-[7px] text-sky-100/80 font-medium drop-shadow-sm relative z-10 w-full">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <p>
-            © 2026 Al Noor United Fuel Est. (مؤسسة النور المتحدة للوقود) — Enterprise Station Audit Management System
+            © 2026 Al Noor United Fuel Est. All rights reserved. | Developed by Paul John Buenafe
           </p>
         </div>
       </footer>
