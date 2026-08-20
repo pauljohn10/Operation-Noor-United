@@ -25,18 +25,47 @@ export const AuditListView: React.FC<Props> = ({ audits, onOpenAudit }) => {
   const [selectedStatus, setSelectedStatus] = useState('ALL');
   const [selectedStation, setSelectedStation] = useState('ALL');
 
+  // Month and Year filter state (defaults to current month and year)
+  const [selectedMonth, setSelectedMonth] = useState<number>(() => new Date().getMonth() + 1); // 1-12
+  const [selectedYear, setSelectedYear] = useState<number>(() => new Date().getFullYear());
+
+  const monthOptions = [
+    { value: 1, label: 'January' },
+    { value: 2, label: 'February' },
+    { value: 3, label: 'March' },
+    { value: 4, label: 'April' },
+    { value: 5, label: 'May' },
+    { value: 6, label: 'June' },
+    { value: 7, label: 'July' },
+    { value: 8, label: 'August' },
+    { value: 9, label: 'September' },
+    { value: 10, label: 'October' },
+    { value: 11, label: 'November' },
+    { value: 12, label: 'December' },
+  ];
+
+  const yearOptions = [2026, 2027, 2028, 2029, 2030, 2031];
+
   // Pagination state (default 20 audits per page)
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(20);
 
-  // Reset to page 1 whenever search, status, station, or itemsPerPage changes
+  // Reset to page 1 whenever search, status, station, month, year, or itemsPerPage changes
   useEffect(() => {
     setCurrentPage(1);
-  }, [searchTerm, selectedStatus, selectedStation, itemsPerPage]);
+  }, [searchTerm, selectedStatus, selectedStation, selectedMonth, selectedYear, itemsPerPage]);
 
   const uniqueStations = Array.from(new Set(audits.map((a) => a.station_name)));
 
   const filtered = audits.filter((a) => {
+    // Official audit_date Month & Year check
+    if (!a.audit_date) return false;
+    const parts = a.audit_date.split('-'); // Format: YYYY-MM-DD
+    if (parts.length < 2) return false;
+    const auditYr = parseInt(parts[0], 10);
+    const auditMo = parseInt(parts[1], 10);
+    if (auditYr !== selectedYear || auditMo !== selectedMonth) return false;
+
     const matchesSearch =
       a.audit_number.toLowerCase().includes(searchTerm.toLowerCase()) ||
       a.station_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -167,7 +196,8 @@ export const AuditListView: React.FC<Props> = ({ audits, onOpenAudit }) => {
       </div>
 
       {/* SEARCH AND FILTER CONTROLS */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-3 bg-white border border-slate-200 p-4 rounded-2xl shadow-sm">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-3 bg-white border border-slate-200 p-4 rounded-2xl shadow-sm">
+        {/* Search */}
         <div className="relative">
           <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
           <input
@@ -179,6 +209,39 @@ export const AuditListView: React.FC<Props> = ({ audits, onOpenAudit }) => {
           />
         </div>
 
+        {/* Month Selector */}
+        <div className="flex items-center gap-1.5">
+          <label className="text-xs font-bold text-slate-700 whitespace-nowrap">Month:</label>
+          <select
+            value={selectedMonth}
+            onChange={(e) => setSelectedMonth(Number(e.target.value))}
+            className="w-full bg-white border border-slate-300 text-xs font-bold rounded-xl px-3 py-2 text-slate-900 focus:outline-none focus:border-sky-500 focus:ring-2 focus:ring-sky-500/20 transition-all shadow-xs cursor-pointer"
+          >
+            {monthOptions.map((m) => (
+              <option key={m.value} value={m.value}>
+                {m.label}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        {/* Year Selector */}
+        <div className="flex items-center gap-1.5">
+          <label className="text-xs font-bold text-slate-700 whitespace-nowrap">Year:</label>
+          <select
+            value={selectedYear}
+            onChange={(e) => setSelectedYear(Number(e.target.value))}
+            className="w-full bg-white border border-slate-300 text-xs font-bold rounded-xl px-3 py-2 text-slate-900 font-mono focus:outline-none focus:border-sky-500 focus:ring-2 focus:ring-sky-500/20 transition-all shadow-xs cursor-pointer"
+          >
+            {yearOptions.map((yr) => (
+              <option key={yr} value={yr}>
+                {yr}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        {/* Status Selector */}
         <div>
           <select
             value={selectedStatus}
@@ -195,6 +258,7 @@ export const AuditListView: React.FC<Props> = ({ audits, onOpenAudit }) => {
           </select>
         </div>
 
+        {/* Station Selector */}
         <div>
           <select
             value={selectedStation}
