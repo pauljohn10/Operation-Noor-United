@@ -11,6 +11,7 @@ import {
   LogOut,
   Menu,
   X,
+  Laptop,
 } from 'lucide-react';
 
 // DISTINCTIVE 3D / ISOMETRIC MULTI-LAYERED AUDIT ICON COMPONENT
@@ -102,6 +103,31 @@ export const Navbar: React.FC<Props> = ({
 
   const toggleLanguage = () => {
     setLanguage(language === 'en' ? 'ar' : 'en');
+  };
+
+  // PWA Desktop App BeforeInstallPrompt Handler
+  const [deferredPrompt, setDeferredPrompt] = React.useState<any>(null);
+
+  React.useEffect(() => {
+    const handleBeforeInstallPrompt = (e: any) => {
+      e.preventDefault();
+      setDeferredPrompt(e);
+    };
+
+    window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+
+    return () => {
+      window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+    };
+  }, []);
+
+  const handleInstallPWA = async () => {
+    if (!deferredPrompt) return;
+    deferredPrompt.prompt();
+    const { outcome } = await deferredPrompt.userChoice;
+    if (outcome === 'accepted') {
+      setDeferredPrompt(null);
+    }
   };
 
   const handleMobileNavClick = (tab: 'dashboard' | 'audits' | 'new-audit' | 'activity' | 'admin') => {
@@ -265,6 +291,18 @@ export const Navbar: React.FC<Props> = ({
 
             {/* USER PROFILE, LANGUAGE SWITCHER & MOBILE DRAWER TRIGGER */}
             <div className="flex items-center gap-2 sm:gap-3 relative">
+
+              {/* PWA INSTALL DESKTOP APP BUTTON */}
+              {deferredPrompt && (
+                <button
+                  onClick={handleInstallPWA}
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-amber-300/40 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-white font-extrabold text-xs transition-all shadow-md animate-pulse min-h-[40px]"
+                  title="Install Al Noor Audit as a Desktop App on Windows"
+                >
+                  <Laptop className="w-4 h-4 text-white" />
+                  <span className="hidden sm:inline">Install Desktop App</span>
+                </button>
+              )}
 
               {/* LANGUAGE SWITCHER TOGGLE BUTTON */}
               <button
