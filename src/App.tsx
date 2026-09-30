@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useMemo } from 'react';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { LanguageProvider } from './context/LanguageContext';
 import type { UserRole } from './types/audit';
@@ -19,6 +19,7 @@ import type { StationAudit, Station, AuditNotification, User, AuditLog, SystemSe
 import { ShieldAlert, ArrowLeft } from 'lucide-react';
 import {
   fetchAudits,
+  fetchAuditById,
   fetchStations,
   fetchNotifications,
   fetchAuditLogs,
@@ -203,36 +204,45 @@ function AppContent() {
   }
 
   // --- USER DATA ISOLATION FILTERING FOR OPERATION SUPERVISORS ---
-  const visibleAudits = audits.filter((audit) => {
+  const visibleAudits = useMemo(() => {
     if (currentUser.role === 'Operation Supervisor') {
-      return audit.created_by === currentUser.id;
+      return audits.filter((audit) => audit.created_by === currentUser.id);
     }
-    return true; // Super Admin & Approval Roles see system/pipeline audits
-  });
+    return audits; // Super Admin & Approval Roles see system/pipeline audits
+  }, [audits, currentUser.role, currentUser.id]);
 
   // Filter notifications so each user sees workflow alerts & activity notifications relevant to their role and owned audits
-  const visibleNotifications = notifications.filter((notif) => {
-    if (currentUser.role === 'Super Admin') return true;
+  const visibleNotifications = useMemo(() => {
+    if (currentUser.role === 'Super Admin') return notifications;
 
-    // Cross-reference parent audit to verify creator/ownership
-    const targetAudit = audits.find((a) => a.id === notif.audit_id || a.audit_number === notif.audit_number);
+    // Index audits by ID and audit_number for O(1) lookups
+    const auditMap = new Map<string, StationAudit>();
+    for (const audit of audits) {
+      if (audit.id) auditMap.set(audit.id, audit);
+      if (audit.audit_number) auditMap.set(audit.audit_number, audit);
+    }
 
-    if (currentUser.role === 'Operation Supervisor') {
-      // Operation Supervisors ONLY see notifications for audits THEY created
-      // (e.g. when their audit is approved, returned, or commented on)
-      if (targetAudit && targetAudit.created_by === currentUser.id) {
-        return notif.recipient_role === 'Operation Supervisor' || notif.recipient_role === 'ALL';
+    return notifications.filter((notif) => {
+      // Cross-reference parent audit to verify creator/ownership
+      const targetAudit = auditMap.get(notif.audit_id) || auditMap.get(notif.audit_number);
+
+      if (currentUser.role === 'Operation Supervisor') {
+        // Operation Supervisors ONLY see notifications for audits THEY created
+        // (e.g. when their audit is approved, returned, or commented on)
+        if (targetAudit && targetAudit.created_by === currentUser.id) {
+          return notif.recipient_role === 'Operation Supervisor' || notif.recipient_role === 'ALL';
+        }
+        return false;
       }
+
+      // For approval roles (Accountant, Account Manager, Management Executive):
+      if (notif.recipient_role === 'ALL' || notif.recipient_role === currentUser.role) {
+        return true;
+      }
+
       return false;
-    }
-
-    // For approval roles (Accountant, Account Manager, Management Executive):
-    if (notif.recipient_role === 'ALL' || notif.recipient_role === currentUser.role) {
-      return true;
-    }
-
-    return false;
-  });
+    });
+  }, [notifications, audits, currentUser.role, currentUser.id]);
 
   const handleSaveStation = async (station: Station) => {
     await saveStationToStorage(station);
@@ -399,10 +409,19 @@ function AppContent() {
     }
   };
 
-  const handleOpenAudit = (auditId: string) => {
+  const handleOpenAudit = async (auditId: string) => {
     setSelectedAuditId(auditId);
     setPreselectedStationId(null);
     navigateTo('new-audit');
+
+    try {
+      const fullAudit = await fetchAuditById(auditId);
+      if (fullAudit) {
+        setAudits((prev) => prev.map((a) => (a.id === auditId ? fullAudit : a)));
+      }
+    } catch (e) {
+      console.warn('Error fetching audit details on demand:', e);
+    }
   };
 
   const handleCreateNewAudit = () => {

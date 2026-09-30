@@ -676,7 +676,6 @@ export async function fetchAudits(userId?: string, userRole?: string): Promise<S
         .from('station_audits')
         .select(`
           *,
-          items:station_audit_items(*),
           approvals:station_audit_approvals(*),
           comments:station_audit_comments(*)
         `)
@@ -691,6 +690,7 @@ export async function fetchAudits(userId?: string, userRole?: string): Promise<S
       if (!error && data) {
         const formatted = data.map((aud: any) => ({
           ...aud,
+          items: aud.items || [],
           approvals: (aud.approvals || []).map((app: any) => ({
             ...app,
             status:
@@ -698,6 +698,7 @@ export async function fetchAudits(userId?: string, userRole?: string): Promise<S
                 ? 'skipped'
                 : app.status,
           })),
+          comments: aud.comments || [],
         }));
         setLocalCache(CACHE_KEYS.AUDITS, formatted);
         return formatted as StationAudit[];
@@ -707,6 +708,43 @@ export async function fetchAudits(userId?: string, userRole?: string): Promise<S
     }
   }
   return cached;
+}
+
+export async function fetchAuditById(id: string): Promise<StationAudit | null> {
+  if (!isSupabaseConfigured || !supabase || !isValidUuid(id)) {
+    return null;
+  }
+  try {
+    const { data, error } = await supabase
+      .from('station_audits')
+      .select(`
+        *,
+        items:station_audit_items(*),
+        approvals:station_audit_approvals(*),
+        comments:station_audit_comments(*)
+      `)
+      .eq('id', id)
+      .maybeSingle();
+
+    if (!error && data) {
+      const formatted: StationAudit = {
+        ...data,
+        items: data.items || [],
+        approvals: (data.approvals || []).map((app: any) => ({
+          ...app,
+          status:
+            app.comments?.includes('Bypassed') || app.comments?.includes('skipped')
+              ? 'skipped'
+              : app.status,
+        })),
+        comments: data.comments || [],
+      };
+      return formatted;
+    }
+  } catch (e) {
+    console.warn('Supabase fetchAuditById error:', e);
+  }
+  return null;
 }
 
 export async function saveAudit(audit: StationAudit): Promise<StationAudit> {

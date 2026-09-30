@@ -253,6 +253,7 @@ export const StationAuditForm: React.FC<Props> = ({
   }, [
     initialAudit?.id,
     initialAudit?.audit_number,
+    initialAudit?.items,
     initialAudit?.p91_price,
     initialAudit?.p95_price,
     initialAudit?.diesel_price,
