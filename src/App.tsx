@@ -260,20 +260,18 @@ function AppContent() {
   }, [isAuthenticated, currentUser?.id, currentUser?.role]);
 
 
-  if (!isAuthenticated || !currentUser) {
-    return <LoginPage />;
-  }
-
   // --- USER DATA ISOLATION FILTERING FOR OPERATION SUPERVISORS ---
   const visibleAudits = useMemo(() => {
+    if (!currentUser?.role) return [];
     if (currentUser.role === 'Operation Supervisor') {
       return audits.filter((audit) => audit.created_by === currentUser.id);
     }
     return audits; // Super Admin & Approval Roles see system/pipeline audits
-  }, [audits, currentUser.role, currentUser.id]);
+  }, [audits, currentUser?.role, currentUser?.id]);
 
   // Filter notifications so each user sees workflow alerts & activity notifications relevant to their role and owned audits
   const visibleNotifications = useMemo(() => {
+    if (!currentUser?.role) return [];
     if (currentUser.role === 'Super Admin') return notifications;
 
     // Index audits by ID and audit_number for O(1) lookups
@@ -303,7 +301,11 @@ function AppContent() {
 
       return false;
     });
-  }, [notifications, audits, currentUser.role, currentUser.id]);
+  }, [notifications, audits, currentUser?.role, currentUser?.id]);
+
+  if (!isAuthenticated || !currentUser) {
+    return <LoginPage />;
+  }
 
   const handleSaveStation = async (station: Station) => {
     const saved = await saveStationToStorage(station);
@@ -518,8 +520,8 @@ function AppContent() {
 
   const isUnauthorizedAuditAccess =
     Boolean(selectedAudit) &&
-    currentUser.role === 'Operation Supervisor' &&
-    selectedAudit?.created_by !== currentUser.id;
+    currentUser?.role === 'Operation Supervisor' &&
+    selectedAudit?.created_by !== currentUser?.id;
 
   return (
     <div className="min-h-screen min-h-[100dvh] w-full text-slate-900 flex flex-col font-sans selection:bg-sky-500 selection:text-white relative overflow-x-hidden">
