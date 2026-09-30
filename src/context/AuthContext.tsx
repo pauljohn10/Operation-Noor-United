@@ -7,6 +7,7 @@ import {
   saveUser,
   logActivity,
   fetchUsers,
+  supabase,
 } from '../lib/supabaseClient';
 
 interface AuthContextType {
@@ -56,8 +57,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         sessionStorage.removeItem('last_visited_tab');
         localStorage.removeItem('last_visited_tab');
       }
-      setCurrentUser(res.user);
       saveSession(res.user, rememberMe);
+      setCurrentUser(res.user);
       reloadUsers().catch(console.warn);
       return { success: true };
     }
@@ -65,17 +66,26 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const logout = async () => {
-    if (currentUser) {
-      await logActivity(currentUser.id, currentUser.full_name, 'USER_LOGOUT', 'User logged out');
-    }
+    const userToLog = currentUser;
+
+    // 1. Immediately clear authentication session & React state synchronously
+    saveSession(null);
+    setCurrentUser(null);
+
     if (typeof window !== 'undefined') {
-      window.location.hash = '';
+      window.location.hash = '#dashboard';
       history.replaceState({ tab: 'dashboard' }, '', '#dashboard');
       sessionStorage.removeItem('last_visited_tab');
       localStorage.removeItem('last_visited_tab');
     }
-    setCurrentUser(null);
-    saveSession(null);
+
+    // 2. Non-blocking background cleanup
+    if (supabase) {
+      supabase.auth.signOut().catch(console.warn);
+    }
+    if (userToLog) {
+      logActivity(userToLog.id, userToLog.full_name, 'USER_LOGOUT', 'User logged out').catch(console.warn);
+    }
   };
 
   const updateProfile = async (updatedData: Partial<User>): Promise<User | null> => {
