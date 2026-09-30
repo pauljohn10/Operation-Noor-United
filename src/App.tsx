@@ -40,6 +40,8 @@ import {
   generateUUID,
   CACHE_KEYS,
   getLocalCache,
+  isSupabaseConfigured,
+  supabase,
 } from './lib/supabaseClient';
 import { INITIAL_STATIONS } from './lib/mockData';
 
@@ -198,6 +200,41 @@ function AppContent() {
     }
   }, [isAuthenticated, currentUser?.id, currentUser?.role]);
 
+  // Realtime Supabase Database Subscription for Instant Multi-User Data Refresh
+  useEffect(() => {
+    if (!isAuthenticated || !isSupabaseConfigured || !supabase) return;
+
+    const client = supabase;
+    const channel = client
+      .channel('realtime-db-changes')
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'station_audits' },
+        () => {
+          fetchAudits(currentUser?.id, currentUser?.role).then(setAudits);
+        }
+      )
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'station_audit_notifications' },
+        () => {
+          fetchNotifications().then(setNotifications);
+        }
+      )
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'stations' },
+        () => {
+          fetchStations().then(setStations);
+        }
+      )
+      .subscribe();
+
+    return () => {
+      client.removeChannel(channel);
+    };
+  }, [isAuthenticated, currentUser?.id, currentUser?.role]);
+
 
   if (!isAuthenticated || !currentUser) {
     return <LoginPage />;
@@ -245,17 +282,20 @@ function AppContent() {
   }, [notifications, audits, currentUser.role, currentUser.id]);
 
   const handleSaveStation = async (station: Station) => {
-    await saveStationToStorage(station);
-    const updatedStations = await fetchStations();
-    setStations(updatedStations);
-    await logActivity(currentUser.id, currentUser.full_name, 'STATION_SAVE', `Saved station ${station.station_no} - ${station.name}`);
+    const saved = await saveStationToStorage(station);
+    setStations((prev) => {
+      const exists = prev.some((s) => s.id === saved.id);
+      return exists ? prev.map((s) => (s.id === saved.id ? saved : s)) : [...prev, saved];
+    });
+    fetchStations().then(setStations);
+    logActivity(currentUser.id, currentUser.full_name, 'STATION_SAVE', `Saved station ${station.station_no} - ${station.name}`).catch(console.warn);
   };
 
   const handleDeleteStation = async (stationId: string) => {
+    setStations((prev) => prev.filter((s) => s.id !== stationId));
     await deleteStationFromStorage(stationId);
-    const updatedStations = await fetchStations();
-    setStations(updatedStations);
-    await logActivity(currentUser.id, currentUser.full_name, 'STATION_DELETE', `Deleted station ID ${stationId}`);
+    fetchStations().then(setStations);
+    logActivity(currentUser.id, currentUser.full_name, 'STATION_DELETE', `Deleted station ID ${stationId}`).catch(console.warn);
   };
 
   const handleSaveUser = async (user: User) => {
@@ -306,54 +346,44 @@ function AppContent() {
 
 
   const handleSaveSettings = async (newSettings: SystemSettings) => {
-    await saveSettingsToStorage(newSettings);
     setSettings(newSettings);
-    await logActivity(currentUser.id, currentUser.full_name, 'SETTINGS_UPDATE', 'Updated system configuration & fuel prices');
+    await saveSettingsToStorage(newSettings);
+    logActivity(currentUser.id, currentUser.full_name, 'SETTINGS_UPDATE', 'Updated system configuration & fuel prices').catch(console.warn);
   };
 
   const handleSaveAudit = async (audit: StationAudit) => {
     try {
       const savedAudit = await saveAuditToStorage(audit);
-      const updatedAudits = await fetchAudits();
-      setAudits(updatedAudits);
+
+      // 1. Optimistically update local audits state immediately with saved audit
+      setAudits((prev) => {
+        const exists = prev.some((a) => a.id === savedAudit.id);
+        return exists ? prev.map((a) => (a.id === savedAudit.id ? savedAudit : a)) : [savedAudit, ...prev];
+      });
 
       const isManagementOverride = audit.comments?.some((c) => c.comment_text?.includes('override authority'));
 
       const notificationsToCreate: Array<{ role: UserRole | 'ALL'; action: AuditNotification['action_type']; msg: string }> = [];
 
       if (savedAudit.current_status === 'pending_accountant') {
-        // Step 1: Operation Supervisor submits -> notify Accountant, Account Manager, AND Management Executive
-        notificationsToCreate.push({
-          role: 'Accountant',
-          action: 'submitted',
-          msg: `New Audit #${savedAudit.audit_number} for ${savedAudit.station_name} (${savedAudit.audit_date}) submitted by ${currentUser.full_name} for Accountant review.`,
-        });
-        notificationsToCreate.push({
-          role: 'Account Manager',
-          action: 'submitted',
-          msg: `New Audit #${savedAudit.audit_number} for ${savedAudit.station_name} (${savedAudit.audit_date}) submitted by ${currentUser.full_name} — pending Accountant review.`,
-        });
-        notificationsToCreate.push({
-          role: 'Management',
-          action: 'submitted',
-          msg: `New Audit #${savedAudit.audit_number} for ${savedAudit.station_name} (${savedAudit.audit_date}) submitted by ${currentUser.full_name} — pending Accountant review.`,
-        });
+        notificationsToCreate.push(
+          { role: 'Accountant', action: 'submitted', msg: `New Audit #${savedAudit.audit_number} for ${savedAudit.station_name} (${savedAudit.audit_date}) submitted by ${currentUser.full_name} for Accountant review.` },
+          { role: 'Account Manager', action: 'submitted', msg: `New Audit #${savedAudit.audit_number} for ${savedAudit.station_name} (${savedAudit.audit_date}) submitted by ${currentUser.full_name} — pending Accountant review.` },
+          { role: 'Management', action: 'submitted', msg: `New Audit #${savedAudit.audit_number} for ${savedAudit.station_name} (${savedAudit.audit_date}) submitted by ${currentUser.full_name} — pending Accountant review.` }
+        );
       } else if (savedAudit.current_status === 'pending_account_manager') {
-        // Step 2: Accountant approves -> notify Account Manager
         notificationsToCreate.push({
           role: 'Account Manager',
           action: 'approved',
           msg: `Audit #${savedAudit.audit_number} for ${savedAudit.station_name} (${savedAudit.audit_date}) approved by Accountant ${currentUser.full_name} — awaiting Account Manager approval.`,
         });
       } else if (savedAudit.current_status === 'pending_management') {
-        // Step 3: Account Manager approves -> notify Management Executive
         notificationsToCreate.push({
           role: 'Management',
           action: 'approved',
           msg: `Audit #${savedAudit.audit_number} for ${savedAudit.station_name} (${savedAudit.audit_date}) approved by Account Manager ${currentUser.full_name} — awaiting final Management Executive approval.`,
         });
       } else if (savedAudit.current_status === 'approved') {
-        // Step 4: Management Executive approves -> notify Operation Supervisor
         notificationsToCreate.push({
           role: 'Operation Supervisor',
           action: 'approved',
@@ -375,34 +405,33 @@ function AppContent() {
         });
       }
 
-      for (const item of notificationsToCreate) {
-        const newNotif: AuditNotification = {
-          id: generateUUID(),
-          audit_id: savedAudit.id,
-          audit_number: savedAudit.audit_number,
-          station_name: savedAudit.station_name,
-          audit_date: savedAudit.audit_date,
-          recipient_role: item.role,
-          sender_name: currentUser.full_name,
-          action_type: item.action,
-          message: item.msg,
-          is_read: false,
-          created_at: new Date().toISOString(),
-        };
-        await saveNotifToStorage(newNotif);
+      // 2. Save notifications concurrently in parallel
+      const createdNotifs: AuditNotification[] = notificationsToCreate.map((item) => ({
+        id: generateUUID(),
+        audit_id: savedAudit.id,
+        audit_number: savedAudit.audit_number,
+        station_name: savedAudit.station_name,
+        audit_date: savedAudit.audit_date,
+        recipient_role: item.role,
+        sender_name: currentUser.full_name,
+        action_type: item.action,
+        message: item.msg,
+        is_read: false,
+        created_at: new Date().toISOString(),
+      }));
+
+      if (createdNotifs.length > 0) {
+        setNotifications((prev) => [...createdNotifs, ...prev]);
+        Promise.all(createdNotifs.map((n) => saveNotifToStorage(n))).catch(console.warn);
       }
 
-      const updatedNotifs = await fetchNotifications();
-      setNotifications(updatedNotifs);
-
-      await logActivity(
-        currentUser.id,
-        currentUser.full_name,
-        'AUDIT_SAVE',
-        `Saved audit ${savedAudit.audit_number} with status ${savedAudit.current_status}`
-      );
-
+      // 3. Immediately transition screen view
       navigateTo('audits');
+
+      // 4. Background synchronization with Supabase DB
+      fetchAudits(currentUser?.id, currentUser?.role).then(setAudits);
+      fetchNotifications().then(setNotifications);
+      logActivity(currentUser.id, currentUser.full_name, 'AUDIT_SAVE', `Saved audit ${savedAudit.audit_number} with status ${savedAudit.current_status}`).catch(console.warn);
 
     } catch (err: any) {
       alert(err.message || 'Error saving station audit.');

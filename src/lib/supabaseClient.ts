@@ -865,98 +865,103 @@ export async function saveAudit(audit: StationAudit): Promise<StationAudit> {
 
   console.log(`[SAVE AUDIT STEP 1 SUCCESS] Parent station_audits record saved successfully.`);
 
+  // Execute sub-table persistence (items, approvals, comments) in parallel
+  const subTableTasks: Promise<void>[] = [];
+
   // STEP 2: Upsert pump reading items (Filter non-blank rows, resolve conflicts)
   if (audit.items && audit.items.length > 0) {
-    const nonBlankItems = audit.items
-      .filter((i) => {
-        const hasStart = i.start_reading != null && i.start_reading !== 0;
-        const hasEnd = i.end_reading != null && i.end_reading !== 0;
-        const hasQty = i.quantity_sold != null && i.quantity_sold !== 0;
-        const hasAmt = i.amount != null && i.amount !== 0;
-        return hasStart || hasEnd || hasQty || hasAmt;
-      })
-      .map((i) => ({
-        id: isValidUuid(i.id) ? i.id : generateUUID(),
-        audit_id: auditId,
-        fuel_type: i.fuel_type,
-        pump_no: Number(i.pump_no),
-        start_reading: i.start_reading != null ? Number(i.start_reading) : 0,
-        end_reading: i.end_reading != null ? Number(i.end_reading) : 0,
-        quantity_sold: i.quantity_sold != null ? Number(i.quantity_sold) : 0,
-        price: Number(i.price || 0),
-        amount: i.amount != null ? Number(i.amount) : 0,
-      }));
+    subTableTasks.push((async () => {
+      const nonBlankItems = audit.items
+        .filter((i) => {
+          const hasStart = i.start_reading != null && i.start_reading !== 0;
+          const hasEnd = i.end_reading != null && i.end_reading !== 0;
+          const hasQty = i.quantity_sold != null && i.quantity_sold !== 0;
+          const hasAmt = i.amount != null && i.amount !== 0;
+          return hasStart || hasEnd || hasQty || hasAmt;
+        })
+        .map((i) => ({
+          id: isValidUuid(i.id) ? i.id : generateUUID(),
+          audit_id: auditId,
+          fuel_type: i.fuel_type,
+          pump_no: Number(i.pump_no),
+          start_reading: i.start_reading != null ? Number(i.start_reading) : 0,
+          end_reading: i.end_reading != null ? Number(i.end_reading) : 0,
+          quantity_sold: i.quantity_sold != null ? Number(i.quantity_sold) : 0,
+          price: Number(i.price || 0),
+          amount: i.amount != null ? Number(i.amount) : 0,
+        }));
 
-    const { error: delErr } = await supabase.from('station_audit_items').delete().eq('audit_id', auditId);
-    if (delErr) {
-      console.warn(`[SAVE AUDIT ITEMS DELETE WARN] Code: ${delErr.code} | Message: ${delErr.message}`);
-    }
-
-    if (nonBlankItems.length > 0) {
-      console.log(`[SAVE AUDIT STEP 2] Inserting ${nonBlankItems.length} non-blank pump items...`);
-      const { error: itemsErr } = await supabase
-        .from('station_audit_items')
-        .upsert(nonBlankItems, { onConflict: 'audit_id,fuel_type,pump_no' });
-
-      if (itemsErr) {
-        console.error(`[SAVE AUDIT FAILURE] Table: station_audit_items | Code: ${itemsErr.code} | Message: ${itemsErr.message} | Details: ${itemsErr.details}`);
-        throw new Error(`[Database Error: station_audit_items] ${itemsErr.message} (Code: ${itemsErr.code})`);
+      const { error: delErr } = await supabase.from('station_audit_items').delete().eq('audit_id', auditId);
+      if (delErr) {
+        console.warn(`[SAVE AUDIT ITEMS DELETE WARN] Code: ${delErr.code} | Message: ${delErr.message}`);
       }
-      console.log(`[SAVE AUDIT STEP 2 SUCCESS] Audit items inserted successfully.`);
-    }
+
+      if (nonBlankItems.length > 0) {
+        const { error: itemsErr } = await supabase
+          .from('station_audit_items')
+          .upsert(nonBlankItems, { onConflict: 'audit_id,fuel_type,pump_no' });
+
+        if (itemsErr) {
+          console.error(`[SAVE AUDIT FAILURE] Table: station_audit_items | Code: ${itemsErr.code} | Message: ${itemsErr.message}`);
+          throw new Error(`[Database Error: station_audit_items] ${itemsErr.message} (Code: ${itemsErr.code})`);
+        }
+      }
+    })());
   }
 
   // STEP 3: Upsert approvals chain (Unique constraint: audit_id, role)
   if (audit.approvals && audit.approvals.length > 0) {
-    console.log(`[SAVE AUDIT STEP 3] Creating ${audit.approvals.length} approval workflow records...`);
-    const approvalsToSave = audit.approvals.map((a) => ({
-      id: isValidUuid(a.id) ? a.id : generateUUID(),
-      audit_id: auditId,
-      role: a.role,
-      role_display_name: a.role_display_name,
-      approver_id: isValidUuid(a.approver_id) ? a.approver_id : null,
-      approver_name: a.approver_name || null,
-      approver_position: a.approver_position || null,
-      status: (a.status === 'skipped' || a.status === 'bypassed') ? 'pending' : (a.status || 'pending'),
-      comments: a.comments || null,
-      action_timestamp: a.action_timestamp || null,
-      digital_signature_code: a.digital_signature_code || null,
-      signature_url: a.signature_url || null,
-      created_at: a.created_at || new Date().toISOString(),
-    }));
+    subTableTasks.push((async () => {
+      const approvalsToSave = audit.approvals.map((a) => ({
+        id: isValidUuid(a.id) ? a.id : generateUUID(),
+        audit_id: auditId,
+        role: a.role,
+        role_display_name: a.role_display_name,
+        approver_id: isValidUuid(a.approver_id) ? a.approver_id : null,
+        approver_name: a.approver_name || null,
+        approver_position: a.approver_position || null,
+        status: (a.status === 'skipped' || a.status === 'bypassed') ? 'pending' : (a.status || 'pending'),
+        comments: a.comments || null,
+        action_timestamp: a.action_timestamp || null,
+        digital_signature_code: a.digital_signature_code || null,
+        signature_url: a.signature_url || null,
+        created_at: a.created_at || new Date().toISOString(),
+      }));
 
-    const { error: appErr } = await supabase.from('station_audit_approvals').upsert(approvalsToSave, { onConflict: 'audit_id,role' });
-    if (appErr) {
-      console.error(`[SAVE AUDIT FAILURE] Table: station_audit_approvals | Code: ${appErr.code} | Message: ${appErr.message} | Details: ${appErr.details}`);
-      throw new Error(`[Database Error: station_audit_approvals] ${appErr.message} (Code: ${appErr.code})`);
-    }
-    console.log(`[SAVE AUDIT STEP 3 SUCCESS] Approval records created successfully.`);
+      const { error: appErr } = await supabase.from('station_audit_approvals').upsert(approvalsToSave, { onConflict: 'audit_id,role' });
+      if (appErr) {
+        console.error(`[SAVE AUDIT FAILURE] Table: station_audit_approvals | Code: ${appErr.code} | Message: ${appErr.message}`);
+        throw new Error(`[Database Error: station_audit_approvals] ${appErr.message} (Code: ${appErr.code})`);
+      }
+    })());
   }
 
   // STEP 4: Upsert non-empty comments
   if (audit.comments && audit.comments.length > 0) {
-    const validComments = audit.comments
-      .filter((c) => c.comment_text && c.comment_text.trim())
-      .map((c) => ({
-        id: isValidUuid(c.id) ? c.id : generateUUID(),
-        audit_id: auditId,
-        user_id: isValidUuid(c.user_id) ? c.user_id : null,
-        user_name: c.user_name || 'System User',
-        user_role: c.user_role || 'Operation Supervisor',
-        comment_text: c.comment_text.trim(),
-        created_at: c.created_at || new Date().toISOString(),
-      }));
+    subTableTasks.push((async () => {
+      const validComments = audit.comments
+        .filter((c) => c.comment_text && c.comment_text.trim())
+        .map((c) => ({
+          id: isValidUuid(c.id) ? c.id : generateUUID(),
+          audit_id: auditId,
+          user_id: isValidUuid(c.user_id) ? c.user_id : null,
+          user_name: c.user_name || 'System User',
+          user_role: c.user_role || 'Operation Supervisor',
+          comment_text: c.comment_text.trim(),
+          created_at: c.created_at || new Date().toISOString(),
+        }));
 
-    if (validComments.length > 0) {
-      console.log(`[SAVE AUDIT STEP 4] Creating ${validComments.length} audit comments...`);
-      const { error: commErr } = await supabase.from('station_audit_comments').upsert(validComments, { onConflict: 'id' });
-      if (commErr) {
-        console.error(`[SAVE AUDIT FAILURE] Table: station_audit_comments | Code: ${commErr.code} | Message: ${commErr.message} | Details: ${commErr.details}`);
-        throw new Error(`[Database Error: station_audit_comments] ${commErr.message} (Code: ${commErr.code})`);
+      if (validComments.length > 0) {
+        const { error: commErr } = await supabase.from('station_audit_comments').upsert(validComments, { onConflict: 'id' });
+        if (commErr) {
+          console.error(`[SAVE AUDIT FAILURE] Table: station_audit_comments | Code: ${commErr.code} | Message: ${commErr.message}`);
+          throw new Error(`[Database Error: station_audit_comments] ${commErr.message} (Code: ${commErr.code})`);
+        }
       }
-      console.log(`[SAVE AUDIT STEP 4 SUCCESS] Audit comments created successfully.`);
-    }
+    })());
   }
+
+  await Promise.all(subTableTasks);
 
   console.log(`[SAVE AUDIT COMPLETE] Audit #${audit.audit_number} successfully committed to database!`);
   return audit;
