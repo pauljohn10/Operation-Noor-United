@@ -169,14 +169,26 @@ function AppContent() {
 
   useEffect(() => {
     if (isAuthenticated) {
-      // Synchronously mark auth as initialized IMMEDIATELY on login transition
-      if (!wasAuthenticated.current) {
-        wasAuthenticated.current = true;
+      // Always reset selection state & enforce fresh dashboard tab on login transition
+      setSelectedAuditId(null);
+      setPreselectedStationId(null);
 
-        // Every new login session starts fresh on the Dashboard
-        history.replaceState({ tab: 'dashboard' }, '', '#dashboard');
+      if (isStationOpeningUser) {
+        setActiveModule('station-openings');
+        if (typeof window !== 'undefined' && !window.location.hash.startsWith('#station-opening')) {
+          window.location.hash = '#station-opening';
+          history.replaceState({ module: 'station-openings' }, '', '#station-opening');
+        }
+      } else {
         setActiveTab('dashboard');
+        setActiveModule('audits');
+        if (typeof window !== 'undefined') {
+          window.location.hash = '#dashboard';
+          history.replaceState({ tab: 'dashboard' }, '', '#dashboard');
+        }
       }
+
+      wasAuthenticated.current = true;
 
       // Progressive background data loading - parallelized and instant
       async function loadData() {
@@ -202,7 +214,11 @@ function AppContent() {
       }
       loadData();
     } else {
-      // User logged out — reset the tracker so the next login performs single initial redirect
+      // User logged out — reset tab, selection, and tracking flags
+      setSelectedAuditId(null);
+      setPreselectedStationId(null);
+      setActiveTab('dashboard');
+      setActiveModule('audits');
       wasAuthenticated.current = false;
     }
   }, [isAuthenticated, currentUser?.id, currentUser?.role]);
