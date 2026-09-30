@@ -178,13 +178,20 @@ function AppContent() {
         setActiveTab('dashboard');
       }
 
-      // Progressive background data loading - decoupled and instant
+      // Progressive background data loading - parallelized and instant
       async function loadData() {
         try {
-          fetchSettings().then(setSettings);
-          fetchStations().then(setStations);
-          fetchAudits(currentUser?.id, currentUser?.role).then(setAudits);
-          fetchNotifications().then(setNotifications);
+          const [settingsRes, stationsRes, auditsRes, notifsRes] = await Promise.all([
+            fetchSettings(),
+            fetchStations(),
+            fetchAudits(currentUser?.id, currentUser?.role),
+            fetchNotifications(),
+          ]);
+
+          setSettings(settingsRes);
+          setStations(stationsRes);
+          setAudits(auditsRes);
+          setNotifications(notifsRes);
 
           if (currentUser?.role === 'Super Admin') {
             fetchAuditLogs().then(setAuditLogs);

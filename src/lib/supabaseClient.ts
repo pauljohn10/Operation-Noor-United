@@ -672,36 +672,55 @@ export async function fetchAudits(userId?: string, userRole?: string): Promise<S
   const cached = getLocalCache<StationAudit[]>(CACHE_KEYS.AUDITS, []);
   if (isSupabaseConfigured && supabase) {
     try {
-      let query = supabase
+      const auditCols = 'id,audit_number,station_id,station_no,station_name,location,audit_date,created_by,created_by_name,created_by_role,station_supervisor_name,current_status,noor_khoy_amount,atm_amount,cash_amount,cash_received_amount,total_sales,total_quantity,discrepancy_amount,notes,shortage_amount,person_responsible_for_shortage,created_at,updated_at';
+      const approvalCols = 'id,audit_id,role,role_display_name,approver_id,approver_name,approver_position,status,comments,action_timestamp,created_at';
+
+      let auditsQuery = supabase
         .from('station_audits')
-        .select(`
-          *,
-          approvals:station_audit_approvals(*),
-          comments:station_audit_comments(*)
-        `)
+        .select(auditCols)
         .order('created_at', { ascending: false });
 
       if (userRole === 'Operation Supervisor' && userId) {
-        query = query.eq('created_by', userId);
+        auditsQuery = auditsQuery.eq('created_by', userId);
       }
 
-      const { data, error } = await query;
+      const [auditsRes, approvalsRes, commentsRes] = await Promise.all([
+        auditsQuery,
+        supabase.from('station_audit_approvals').select(approvalCols),
+        supabase.from('station_audit_comments').select('*'),
+      ]);
 
-      if (!error && data) {
-        const formatted = data.map((aud: any) => ({
-          ...aud,
-          items: aud.items || [],
-          approvals: (aud.approvals || []).map((app: any) => ({
+      if (!auditsRes.error && auditsRes.data) {
+        const rawAudits = auditsRes.data;
+        const rawApprovals = approvalsRes.data || [];
+        const rawComments = commentsRes.data || [];
+
+        const approvalMap = new Map<string, any[]>();
+        rawApprovals.forEach((app: any) => {
+          const list = approvalMap.get(app.audit_id) || [];
+          list.push({
             ...app,
-            status:
-              app.comments?.includes('Bypassed') || app.comments?.includes('skipped')
-                ? 'skipped'
-                : app.status,
-          })),
-          comments: aud.comments || [],
+            status: app.comments?.includes('Bypassed') || app.comments?.includes('skipped') ? 'skipped' : app.status,
+          });
+          approvalMap.set(app.audit_id, list);
+        });
+
+        const commentMap = new Map<string, any[]>();
+        rawComments.forEach((c: any) => {
+          const list = commentMap.get(c.audit_id) || [];
+          list.push(c);
+          commentMap.set(c.audit_id, list);
+        });
+
+        const formatted: StationAudit[] = rawAudits.map((aud: any) => ({
+          ...aud,
+          items: [],
+          approvals: approvalMap.get(aud.id) || [],
+          comments: commentMap.get(aud.id) || [],
         }));
+
         setLocalCache(CACHE_KEYS.AUDITS, formatted);
-        return formatted as StationAudit[];
+        return formatted;
       }
     } catch (e) {
       console.warn('Supabase fetchAudits error:', e);
@@ -715,29 +734,26 @@ export async function fetchAuditById(id: string): Promise<StationAudit | null> {
     return null;
   }
   try {
-    const { data, error } = await supabase
-      .from('station_audits')
-      .select(`
-        *,
-        items:station_audit_items(*),
-        approvals:station_audit_approvals(*),
-        comments:station_audit_comments(*)
-      `)
-      .eq('id', id)
-      .maybeSingle();
+    const [auditRes, itemsRes, approvalsRes, commentsRes] = await Promise.all([
+      supabase.from('station_audits').select('*').eq('id', id).maybeSingle(),
+      supabase.from('station_audit_items').select('*').eq('audit_id', id),
+      supabase.from('station_audit_approvals').select('*').eq('audit_id', id),
+      supabase.from('station_audit_comments').select('*').eq('audit_id', id),
+    ]);
 
-    if (!error && data) {
+    if (!auditRes.error && auditRes.data) {
+      const data = auditRes.data;
       const formatted: StationAudit = {
         ...data,
-        items: data.items || [],
-        approvals: (data.approvals || []).map((app: any) => ({
+        items: itemsRes.data || [],
+        approvals: (approvalsRes.data || []).map((app: any) => ({
           ...app,
           status:
             app.comments?.includes('Bypassed') || app.comments?.includes('skipped')
               ? 'skipped'
               : app.status,
         })),
-        comments: data.comments || [],
+        comments: commentsRes.data || [],
       };
       return formatted;
     }
