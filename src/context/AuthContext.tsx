@@ -58,7 +58,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }
       setCurrentUser(res.user);
       saveSession(res.user, rememberMe);
-      await reloadUsers();
+      reloadUsers().catch(console.warn);
       return { success: true };
     }
     return { success: false, error: res.error || 'Invalid login credentials' };

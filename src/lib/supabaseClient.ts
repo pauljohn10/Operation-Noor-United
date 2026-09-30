@@ -454,7 +454,8 @@ export async function authenticateUser(
 
   if (cleanedId === 'admin@alnoor.sa' || cleanedId === 'admin') {
     emailToAuth = 'admin.user@alnoor.sa';
-  } else {
+  } else if (!cleanedId.includes('@')) {
+    // If username typed without domain, resolve email via fast lookup or append domain
     try {
       const { data: matched } = await supabase
         .from('users')
@@ -465,28 +466,20 @@ export async function authenticateUser(
       if (matched?.email) {
         emailToAuth = matched.email;
       } else {
-        try {
-          const { data: matchedSo } = await supabase
-            .from('station_opening_users')
-            .select('email')
-            .or(`username.ilike.${cleanedId},email.ilike.${cleanedId}`)
-            .maybeSingle();
+        const { data: matchedSo } = await supabase
+          .from('station_opening_users')
+          .select('email')
+          .or(`username.ilike.${cleanedId},email.ilike.${cleanedId}`)
+          .maybeSingle();
 
-          if (matchedSo?.email) {
-            emailToAuth = matchedSo.email;
-          } else if (!cleanedId.includes('@')) {
-            emailToAuth = `${cleanedId}@alnoor.sa`;
-          }
-        } catch (e) {
-          if (!cleanedId.includes('@')) {
-            emailToAuth = `${cleanedId}@alnoor.sa`;
-          }
+        if (matchedSo?.email) {
+          emailToAuth = matchedSo.email;
+        } else {
+          emailToAuth = `${cleanedId}@alnoor.sa`;
         }
       }
     } catch (e) {
-      if (!cleanedId.includes('@')) {
-        emailToAuth = `${cleanedId}@alnoor.sa`;
-      }
+      emailToAuth = `${cleanedId}@alnoor.sa`;
     }
   }
 
@@ -557,8 +550,13 @@ export async function authenticateUser(
           last_login_at: new Date().toISOString(),
         };
 
-    await saveUser(userToReturn);
-    await logActivity(userToReturn.id, userToReturn.full_name, 'USER_LOGIN', 'Authenticated with Supabase Auth');
+    // Only upsert profile if missing in database
+    if (!userProfile) {
+      await saveUser(userToReturn);
+    }
+
+    // Async non-blocking log
+    logActivity(userToReturn.id, userToReturn.full_name, 'USER_LOGIN', 'Authenticated with Supabase Auth').catch(console.warn);
 
     return { user: userToReturn };
   } catch (e: any) {
