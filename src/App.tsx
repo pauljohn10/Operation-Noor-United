@@ -169,26 +169,26 @@ function AppContent() {
 
   useEffect(() => {
     if (isAuthenticated) {
-      // Always reset selection state & enforce fresh dashboard tab on login transition
-      setSelectedAuditId(null);
-      setPreselectedStationId(null);
+      if (!wasAuthenticated.current) {
+        wasAuthenticated.current = true;
+        setSelectedAuditId(null);
+        setPreselectedStationId(null);
 
-      if (isStationOpeningUser) {
-        setActiveModule('station-openings');
-        if (typeof window !== 'undefined' && !window.location.hash.startsWith('#station-opening')) {
-          window.location.hash = '#station-opening';
-          history.replaceState({ module: 'station-openings' }, '', '#station-opening');
-        }
-      } else {
-        setActiveTab('dashboard');
-        setActiveModule('audits');
-        if (typeof window !== 'undefined') {
-          window.location.hash = '#dashboard';
-          history.replaceState({ tab: 'dashboard' }, '', '#dashboard');
+        if (isStationOpeningUser) {
+          setActiveModule('station-openings');
+          if (typeof window !== 'undefined' && !window.location.hash.startsWith('#station-opening')) {
+            window.location.hash = '#station-opening';
+            history.replaceState({ module: 'station-openings' }, '', '#station-opening');
+          }
+        } else {
+          setActiveTab('dashboard');
+          setActiveModule('audits');
+          if (typeof window !== 'undefined' && window.location.hash !== '#dashboard') {
+            window.location.hash = '#dashboard';
+            history.replaceState({ tab: 'dashboard' }, '', '#dashboard');
+          }
         }
       }
-
-      wasAuthenticated.current = true;
 
       // Progressive background data loading - parallelized and instant
       async function loadData() {
@@ -214,14 +214,15 @@ function AppContent() {
       }
       loadData();
     } else {
-      // User logged out — reset tab, selection, and tracking flags
-      setSelectedAuditId(null);
-      setPreselectedStationId(null);
-      setActiveTab('dashboard');
-      setActiveModule('audits');
-      wasAuthenticated.current = false;
+      if (wasAuthenticated.current) {
+        wasAuthenticated.current = false;
+        setSelectedAuditId(null);
+        setPreselectedStationId(null);
+        setActiveTab('dashboard');
+        setActiveModule('audits');
+      }
     }
-  }, [isAuthenticated, currentUser?.id, currentUser?.role]);
+  }, [isAuthenticated, currentUser?.id]);
 
   // Realtime Supabase Database Subscription for Instant Multi-User Data Refresh
   useEffect(() => {
