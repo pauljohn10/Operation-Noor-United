@@ -15,6 +15,32 @@ export const supabase = isSupabaseConfigured
 const SESSION_KEY = 'alnoor_station_audits_session_v2';
 const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
+export const CACHE_KEYS = {
+  STATIONS: 'alnoor_cached_stations_v2',
+  AUDITS: 'alnoor_cached_audits_v2',
+  NOTIFS: 'alnoor_cached_notifications_v2',
+  SETTINGS: 'alnoor_cached_settings_v2',
+  USERS: 'alnoor_cached_users_v2',
+  LOGS: 'alnoor_cached_logs_v2',
+};
+
+export function getLocalCache<T>(key: string, defaultValue: T): T {
+  try {
+    const raw = localStorage.getItem(key);
+    return raw ? JSON.parse(raw) : defaultValue;
+  } catch (e) {
+    return defaultValue;
+  }
+}
+
+export function setLocalCache<T>(key: string, data: T): void {
+  try {
+    localStorage.setItem(key, JSON.stringify(data));
+  } catch (e) {
+    console.warn('[Cache] LocalStorage set item error:', e);
+  }
+}
+
 export function generateUUID(): string {
   if (typeof window !== 'undefined' && window.crypto && typeof window.crypto.randomUUID === 'function') {
     try {
@@ -39,18 +65,20 @@ export async function syncAuthUsers(): Promise<void> {
 }
 
 export async function fetchUsers(): Promise<User[]> {
+  const cached = getLocalCache<User[]>(CACHE_KEYS.USERS, []);
   if (isSupabaseConfigured && supabase) {
     try {
-      await syncAuthUsers();
       const { data, error } = await supabase.from('users').select('*').order('full_name');
       if (!error && data) {
-        return data.map((u: any) => ({ ...u, password_hash: '' })) as User[];
+        const users = data.map((u: any) => ({ ...u, password_hash: '' })) as User[];
+        setLocalCache(CACHE_KEYS.USERS, users);
+        return users;
       }
     } catch (e) {
       console.warn('Supabase fetchUsers error:', e);
     }
   }
-  return [];
+  return cached;
 }
 
 // Direct Supabase Admin REST API — no Edge Function required
@@ -568,6 +596,7 @@ export async function normalizeStationCodes(stationList: Station[]): Promise<Sta
 }
 
 export async function fetchStations(): Promise<Station[]> {
+  const cached = getLocalCache<Station[]>(CACHE_KEYS.STATIONS, []);
   if (isSupabaseConfigured && supabase) {
     try {
       const { data, error } = await supabase
@@ -575,13 +604,14 @@ export async function fetchStations(): Promise<Station[]> {
         .select('*')
         .order('created_at', { ascending: true });
       if (!error && data && data.length > 0) {
+        setLocalCache(CACHE_KEYS.STATIONS, data);
         return data as Station[];
       }
     } catch (e) {
       console.warn('Supabase fetchStations error:', e);
     }
   }
-  return INITIAL_STATIONS;
+  return cached.length > 0 ? cached : INITIAL_STATIONS;
 }
 
 export async function saveStation(station: Station): Promise<Station> {
@@ -640,10 +670,11 @@ export async function deleteStation(stationId: string): Promise<void> {
 
 // --- AUDIT MANAGEMENT ---
 
-export async function fetchAudits(): Promise<StationAudit[]> {
+export async function fetchAudits(userId?: string, userRole?: string): Promise<StationAudit[]> {
+  const cached = getLocalCache<StationAudit[]>(CACHE_KEYS.AUDITS, []);
   if (isSupabaseConfigured && supabase) {
     try {
-      const { data, error } = await supabase
+      let query = supabase
         .from('station_audits')
         .select(`
           *,
@@ -652,6 +683,12 @@ export async function fetchAudits(): Promise<StationAudit[]> {
           comments:station_audit_comments(*)
         `)
         .order('created_at', { ascending: false });
+
+      if (userRole === 'Operation Supervisor' && userId) {
+        query = query.eq('created_by', userId);
+      }
+
+      const { data, error } = await query;
 
       if (!error && data) {
         const formatted = data.map((aud: any) => ({
@@ -664,13 +701,14 @@ export async function fetchAudits(): Promise<StationAudit[]> {
                 : app.status,
           })),
         }));
+        setLocalCache(CACHE_KEYS.AUDITS, formatted);
         return formatted as StationAudit[];
       }
     } catch (e) {
       console.warn('Supabase fetchAudits error:', e);
     }
   }
-  return [];
+  return cached;
 }
 
 export async function saveAudit(audit: StationAudit): Promise<StationAudit> {
@@ -899,7 +937,8 @@ export async function fetchNotifications(): Promise<AuditNotification[]> {
       const { data, error } = await supabase
         .from('station_audit_notifications')
         .select('*')
-        .order('created_at', { ascending: false });
+        .order('created_at', { ascending: false })
+        .limit(100);
 
       if (!error && data) {
         dbNotifs = data as AuditNotification[];
@@ -919,6 +958,7 @@ export async function fetchNotifications(): Promise<AuditNotification[]> {
     const combined = Array.from(map.values()).sort(
       (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
     );
+    setLocalCache(CACHE_KEYS.NOTIFS, combined);
     return combined;
   } catch (e) {
     return dbNotifs;
@@ -1047,19 +1087,24 @@ export async function deleteNotificationFromStorage(id: string): Promise<void> {
 // --- AUDIT LOGS ---
 
 export async function fetchAuditLogs(): Promise<AuditLog[]> {
+  const cached = getLocalCache<AuditLog[]>(CACHE_KEYS.LOGS, []);
   if (isSupabaseConfigured && supabase) {
     try {
       const { data, error } = await supabase
         .from('audit_logs')
         .select('*')
-        .order('created_at', { ascending: false });
+        .order('created_at', { ascending: false })
+        .limit(100);
 
-      if (!error && data) return data as AuditLog[];
+      if (!error && data) {
+        setLocalCache(CACHE_KEYS.LOGS, data);
+        return data as AuditLog[];
+      }
     } catch (e) {
       console.warn('Supabase fetchAuditLogs error:', e);
     }
   }
-  return [];
+  return cached;
 }
 
 export async function logActivity(
@@ -1100,6 +1145,7 @@ export async function fetchSettings(): Promise<SystemSettings> {
     p95_price: 2.33,
     diesel_price: 1.15,
   };
+  const cached = getLocalCache<SystemSettings>(CACHE_KEYS.SETTINGS, defaults);
 
   if (isSupabaseConfigured && supabase) {
     try {
@@ -1114,6 +1160,7 @@ export async function fetchSettings(): Promise<SystemSettings> {
           if (row.key === 'p95_price') merged.p95_price = parseFloat(row.value) || 2.33;
           if (row.key === 'diesel_price') merged.diesel_price = parseFloat(row.value) || 1.15;
         });
+        setLocalCache(CACHE_KEYS.SETTINGS, merged);
         return merged;
       }
     } catch (e) {
@@ -1121,7 +1168,7 @@ export async function fetchSettings(): Promise<SystemSettings> {
     }
   }
 
-  return defaults;
+  return cached;
 }
 
 export async function saveSettings(settings: SystemSettings): Promise<SystemSettings> {

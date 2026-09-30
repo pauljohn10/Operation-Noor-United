@@ -37,7 +37,10 @@ import {
   createUserAccount,
   syncAuthProfile,
   generateUUID,
+  CACHE_KEYS,
+  getLocalCache,
 } from './lib/supabaseClient';
+import { INITIAL_STATIONS } from './lib/mockData';
 
 const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const isValidUuid = (id?: string): boolean => Boolean(id && UUID_REGEX.test(id));
@@ -141,18 +144,18 @@ function AppContent() {
     return () => window.removeEventListener('popstate', onPopState);
   }, []);
 
-  const [stations, setStations] = useState<Station[]>([]);
-  const [audits, setAudits] = useState<StationAudit[]>([]);
-  const [notifications, setNotifications] = useState<AuditNotification[]>([]);
-  const [auditLogs, setAuditLogs] = useState<AuditLog[]>([]);
-  const [settings, setSettings] = useState<SystemSettings>({
+  const [stations, setStations] = useState<Station[]>(() => getLocalCache(CACHE_KEYS.STATIONS, INITIAL_STATIONS));
+  const [audits, setAudits] = useState<StationAudit[]>(() => getLocalCache(CACHE_KEYS.AUDITS, []));
+  const [notifications, setNotifications] = useState<AuditNotification[]>(() => getLocalCache(CACHE_KEYS.NOTIFS, []));
+  const [auditLogs, setAuditLogs] = useState<AuditLog[]>(() => getLocalCache(CACHE_KEYS.LOGS, []));
+  const [settings, setSettings] = useState<SystemSettings>(() => getLocalCache(CACHE_KEYS.SETTINGS, {
     company_name: 'Al Noor United Fuel Est.',
     company_name_ar: 'مؤسسة النور المتحدة للوقود',
     session_timeout_minutes: 30,
     p91_price: 2.18,
     p95_price: 2.33,
     diesel_price: 1.15,
-  });
+  }));
 
   const [selectedAuditId, setSelectedAuditId] = useState<string | null>(null);
   const [isStationSelectionOpen, setIsStationSelectionOpen] = useState(false);
@@ -172,22 +175,17 @@ function AppContent() {
         setActiveTab('dashboard');
       }
 
-      // Background data loading - completely decoupled from navigation and routing
+      // Progressive background data loading - decoupled and instant
       async function loadData() {
         try {
-          const [stData, audData, notifData, logData, settsData] = await Promise.all([
-            fetchStations(),
-            fetchAudits(),
-            fetchNotifications(),
-            fetchAuditLogs(),
-            fetchSettings(),
-          ]);
+          fetchSettings().then(setSettings);
+          fetchStations().then(setStations);
+          fetchAudits(currentUser?.id, currentUser?.role).then(setAudits);
+          fetchNotifications().then(setNotifications);
 
-          setStations(stData);
-          setAudits(audData);
-          setNotifications(notifData);
-          setAuditLogs(logData);
-          setSettings(settsData);
+          if (currentUser?.role === 'Super Admin') {
+            fetchAuditLogs().then(setAuditLogs);
+          }
         } catch (e) {
           console.error('Background data load error:', e);
         }
@@ -197,7 +195,7 @@ function AppContent() {
       // User logged out — reset the tracker so the next login performs single initial redirect
       wasAuthenticated.current = false;
     }
-  }, [isAuthenticated]);
+  }, [isAuthenticated, currentUser?.id, currentUser?.role]);
 
 
   if (!isAuthenticated || !currentUser) {
